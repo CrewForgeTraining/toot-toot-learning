@@ -253,7 +253,11 @@ const CONFIG = {
   }
 };
 /* ===== end of config ===== */
-document.querySelectorAll('[data-link]').forEach(a => { a.href = CONFIG.links[a.dataset.link] || '#'; });
+document.querySelectorAll('[data-link]').forEach(a => {
+  const link = CONFIG.links[a.dataset.link] || '';
+  if (!link || /REPLACE-ME/.test(link)) { a.href = '#'; a.textContent = 'Store opening soon'; a.classList.add('ghost'); a.classList.remove('mint'); a.setAttribute('aria-disabled','true'); a.addEventListener('click', e => { e.preventDefault(); alert('The store opens in a few days. Six games are free right now, and the code FIRSTPACK unlocks any one pack.'); }); }
+  else a.href = link;
+});
 document.querySelectorAll('[data-price]').forEach(el => { const p = CONFIG.prices[el.dataset.price]; if(p){ const small = el.querySelector('small'); el.textContent = p + ' '; if(small) el.appendChild(small); } });
 document.querySelectorAll('a[href^="mailto:"]').forEach(a => { a.href = a.href.replace('hello@example.com', CONFIG.email); if(a.textContent.includes('hello@example.com')) a.textContent = CONFIG.email; });
 document.getElementById('year').textContent = new Date().getFullYear();
