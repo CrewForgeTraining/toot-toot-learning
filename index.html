@@ -170,6 +170,15 @@ footer .links{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
     <div class="eyebrow">One subject at a time</div>
     <h2>Just want the math games? Buy a pack.</h2>
     <p class="note">Each pack is a download of every game in that subject plus its worksheets and certificates. The Everything Pack is the better deal if you want more than two packs, and it is the only one with the family link and future games.</p>
+    <div class="card" id="promo" style="margin-top:20px;flex-direction:row;align-items:center;flex-wrap:wrap;gap:14px">
+      <div class="icon">🎟️</div>
+      <div style="flex:1 1 260px"><h3>Got a code from a friend or our social pages?</h3><p>Type it here and pick any one pack to download free. No sign-up, no email.</p></div>
+      <form id="promo-form" style="display:flex;gap:8px;flex-wrap:wrap;flex:1 1 260px" autocomplete="off">
+        <input id="promo-code" placeholder="FIRSTPACK" aria-label="Free pack code" spellcheck="false" style="flex:1 1 140px;font-family:var(--display);font-weight:700;font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;border-radius:14px;border:3px solid rgba(59,42,31,.15);min-width:0">
+        <button class="btn small mint" type="submit">Unlock a free pack</button>
+      </form>
+      <p class="note" id="promo-msg" style="flex-basis:100%;margin:0;min-height:1.4em"></p>
+    </div>
 <!-- PACKS:site -->
 <div class="grid" style="margin-top:20px">
       <div class="card"><span class="tag">6 games</span><div class="icon">🍔🕒🧱🔢🍕🍋</div><h3>Math Pack</h3><p>Toot Toot Diner (free) · Train Station Clock · Block Tower (free) · Number Machine · Pizza Slice Shop · Lemonade Stand. Worksheets and certificates included. Download only.</p><div class="foot"><span class="price" data-price="pack-math">$8</span><a class="btn small mint" data-link="pack-math" href="#">Buy this pack</a></div></div>
@@ -236,13 +245,37 @@ const CONFIG = {
     'pack-science-and-thinking': 'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
     'pack-life-and-feelings':    'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME'
   },
-  email: 'hello@example.com'
+  email: 'hello@example.com',
+  /* Free-pack codes to share on social media. Add or remove codes here. Optional "until": "2026-12-31" makes a code expire. */
+  promoCodes: {
+    FIRSTPACK: { note: 'Launch code: pick any one pack free.' },
+    TOOTTOOT:  { note: 'Friends and family code.' }
+  }
 };
 /* ===== end of config ===== */
 document.querySelectorAll('[data-link]').forEach(a => { a.href = CONFIG.links[a.dataset.link] || '#'; });
 document.querySelectorAll('[data-price]').forEach(el => { const p = CONFIG.prices[el.dataset.price]; if(p){ const small = el.querySelector('small'); el.textContent = p + ' '; if(small) el.appendChild(small); } });
 document.querySelectorAll('a[href^="mailto:"]').forEach(a => { a.href = a.href.replace('hello@example.com', CONFIG.email); if(a.textContent.includes('hello@example.com')) a.textContent = CONFIG.email; });
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---- free-pack code ---- */
+(function(){
+  const form = document.getElementById('promo-form'), input = document.getElementById('promo-code'), msg = document.getElementById('promo-msg');
+  const norm = v => v.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  function valid(code){ const c = CONFIG.promoCodes[code]; if(!c) return false; if(c.until && new Date(c.until + 'T23:59:59') < new Date()) return false; return true; }
+  function unlock(code){
+    document.querySelectorAll('a[data-link^="pack-"]').forEach(a => {
+      const key = a.dataset.link.replace('pack-',''); a.href = 'downloads/toot-toot-' + key + '-pack.zip'; a.textContent = 'Download free'; a.classList.remove('mint'); a.removeAttribute('data-link');
+      const price = a.closest('.card').querySelector('.price'); if(price) price.textContent = 'Free with code';
+    });
+    msg.textContent = 'Code accepted! Pick any one pack below and tap Download free. If your child loves it, the Everything Pack has all of them.';
+    msg.style.color = 'var(--mint-dark)';
+    try { localStorage.setItem('tootPromo', code); } catch(e) {}
+  }
+  try { const saved = localStorage.getItem('tootPromo'); if(saved && valid(saved)) unlock(saved); } catch(e) {}
+  form.addEventListener('submit', e => { e.preventDefault(); const code = norm(input.value); if(valid(code)) unlock(code); else { msg.textContent = 'That code isn’t working. Check the spelling, or it may have expired.'; msg.style.color = 'var(--ketchup-dark)'; } });
+  const fromUrl = new URLSearchParams(location.search).get('code'); if(fromUrl && valid(norm(fromUrl))) { input.value = norm(fromUrl); unlock(norm(fromUrl)); document.getElementById('packs').scrollIntoView(); }
+})();
 </script>
 </body>
 </html>
