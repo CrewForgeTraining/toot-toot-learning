@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Zookeeper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --floor-a:#FBE3BF; --floor-b:#F3C89A; --white:#FFFDF8;
+  --sun:#FFC83D; --heat-cool:#5CC8FF; --heat-warm:#FFB703; --heat-hot:#FF3B3B; --grass:#8BD36F;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+  --ar:16/9; --arn:1.7778; --maxh:68vh;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#app,#overlay{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{max-width:1280px;margin:0 auto;padding-block:10px 16px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block}
+.logo .brand{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--cocoa-soft);line-height:1;font-weight:700}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+#zoowrap{flex:1 1 160px;min-width:120px;display:flex;align-items:center;gap:8px}
+#zoowrap label{font-family:var(--display);font-weight:700;white-space:nowrap;font-size:.95rem}
+#zoobar{flex:1;height:22px;background:#fff;border-radius:999px;box-shadow:inset 0 0 0 3px rgba(59,42,31,.15);overflow:hidden;position:relative}
+#zoofill{height:100%;width:0%;background:linear-gradient(90deg,var(--grass),var(--mint));border-radius:999px;transition:width .6s cubic-bezier(.2,.9,.3,1.3)}
+#zoopct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa);font-variant-numeric:tabular-nums}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+@media (max-width:900px){#stage{grid-template-columns:1fr}}
+#scene{position:relative;width:min(100%,calc(var(--maxh) * var(--arn)));margin-inline:auto;aspect-ratio:var(--ar);container-type:inline-size;overflow:hidden;border-radius:24px;background:#F9E7C8;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none}
+.sky{position:absolute;left:0;right:0;top:0;height:17cqw;background:linear-gradient(#9FDBFF,#DFF3FF)}
+.sky .sun{position:absolute;right:20%;top:1.2cqw;width:4.5cqw;height:4.5cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 2cqw rgba(255,200,61,.8)}
+.sky .cloud{position:absolute;top:1cqw;font-size:3cqw;line-height:1;opacity:.9}
+.sky .zoosign{position:absolute;left:2cqw;top:1.2cqw;background:#fff;border-radius:1cqw;padding:.2cqw 1.2cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.2cqw,16px);color:var(--ketchup);box-shadow:0 .4cqw 0 rgba(59,42,31,.12);white-space:nowrap}
+.sky .zoosign::after{content:"";position:absolute;left:50%;top:100%;width:.6cqw;height:2.4cqw;background:var(--wood-dark);transform:translateX(-50%)}
+.path{position:absolute;left:0;right:0;top:11cqw;height:6cqw;background:repeating-linear-gradient(90deg,#E6C48F 0 4cqw,#DDB77C 4cqw 8cqw);border-top:.5cqw solid #CFA76A}
+.path::after{content:"";position:absolute;left:0;right:0;top:45%;height:.5cqw;background:repeating-linear-gradient(90deg,#fff 0 3cqw,transparent 3cqw 6cqw);opacity:.6}
+
+.zones{position:absolute;left:1.5cqw;right:1.5cqw;top:18cqw;bottom:1.5cqw;display:grid;gap:1.4cqw}
+.zones.n2{grid-template-columns:1fr 1fr}
+.zones.n3{grid-template-columns:repeat(3,1fr)}
+.zones.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.zones.n5,.zones.n6{grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr}
+.zone{position:relative;border-radius:2.4cqw;overflow:hidden;box-shadow:inset 0 0 0 .5cqw rgba(255,255,255,.55),0 .5cqw 0 rgba(59,42,31,.12);transition:transform .2s,box-shadow .2s;cursor:pointer;touch-action:manipulation}
+.zone[data-h=savanna]{background:linear-gradient(#FFE9A8,#E9C76A 60%,#D9A94E)}
+.zone[data-h=ice]{background:linear-gradient(#F4FBFF,#BDE8FF 60%,#9BD4F5)}
+.zone[data-h=desert]{background:linear-gradient(#FFE3B0,#F6C77A 60%,#E7A85A)}
+.zone[data-h=jungle]{background:linear-gradient(#B9E88A,#6DBE57 60%,#4E9E44)}
+.zone[data-h=ocean]{background:linear-gradient(#9FDBFF,#4FB3E8 55%,#2B86C5)}
+.zone[data-h=pond]{background:linear-gradient(#D6F2DE,#8FD3C1 55%,#5FB8B0)}
+.zone[data-h=forest]{background:linear-gradient(#CDEBB6,#8FCB7A 60%,#5E9E5A)}
+.zone[data-h=cave]{background:linear-gradient(#6B5C8A,#4A4064 60%,#2E2842)}
+.zone .deco{position:absolute;font-size:5cqw;line-height:1;opacity:.85;pointer-events:none}
+.zone .deco.a{left:4%;top:6%}
+.zone .deco.b{right:4%;top:6%;font-size:4cqw}
+.zone .zlabel{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);background:rgba(255,255,255,.88);color:var(--cocoa);border-radius:999px;padding:.3cqw 1.4cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.3cqw,17px);white-space:nowrap;pointer-events:none;box-shadow:0 .3cqw 0 rgba(59,42,31,.12)}
+.zone .residents{position:absolute;left:5%;bottom:22%;display:flex;gap:.2cqw;font-size:4.2cqw;line-height:1;pointer-events:none}
+.zone .residents span{display:inline-block;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both;filter:drop-shadow(0 .3cqw 0 rgba(59,42,31,.18))}
+.zone.hot{transform:scale(1.03);box-shadow:inset 0 0 0 .8cqw #fff,0 0 0 .8cqw rgba(47,191,166,.7)}
+.zone.glow{animation:glow 1.2s infinite alternate}
+@keyframes glow{from{box-shadow:inset 0 0 0 .5cqw rgba(255,255,255,.55),0 0 0 .4cqw rgba(47,191,166,.4)}to{box-shadow:inset 0 0 0 .8cqw #fff,0 0 0 1.2cqw rgba(47,191,166,.85),0 0 3cqw rgba(47,191,166,.9)}}
+.zone.landed{animation:landed .5s}
+@keyframes landed{0%,100%{transform:scale(1)}40%{transform:scale(1.05)}}
+.zone .arrow{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-size:7cqw;line-height:1;display:none;pointer-events:none;z-index:7;filter:drop-shadow(0 .4cqw 0 rgba(59,42,31,.25))}
+.zone.arrow .arrow{display:block;animation:tap 1s infinite}
+@keyframes tap{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,1.6cqw)}}
+
+.crate{position:absolute;left:-22%;top:2.4cqw;width:16cqw;height:13cqw;transition:left 1.6s cubic-bezier(.4,.1,.5,1);z-index:4}
+.crate .box{position:absolute;inset:0 0 2.2cqw 0;background:repeating-linear-gradient(0deg,#C98A46 0 2.3cqw,#E0A96D 2.3cqw 3.2cqw);border:.5cqw solid #8E5A24;border-radius:1.2cqw;box-shadow:inset 0 0 0 .3cqw rgba(255,255,255,.2)}
+.crate .box::before{content:"ZOO";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-6deg);font-family:var(--display);font-weight:700;font-size:2.6cqw;color:#5A3A1A;background:#fff8;padding:0 .8cqw;border-radius:.6cqw;letter-spacing:.1em}
+.crate .wheels{position:absolute;left:1.5cqw;right:1.5cqw;bottom:0;height:2.4cqw;display:flex;justify-content:space-between;font-size:2.2cqw;line-height:1}
+.crate.rolling .wheels{animation:spin .3s linear infinite}
+.crate.leaving{transition:left 1.4s ease-in}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.animal{position:absolute;left:42%;top:3cqw;width:14cqw;font-size:11cqw;line-height:1;text-align:center;z-index:10;touch-action:none;cursor:grab;transition:left .55s cubic-bezier(.3,1.3,.5,1),top .55s cubic-bezier(.3,1.3,.5,1),opacity .3s;opacity:0;pointer-events:none}
+.animal.on{opacity:1;pointer-events:auto}
+.animal.static{cursor:default}
+.animal .body{display:inline-block;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.animal.dragging{transition:none;cursor:grabbing;z-index:20}
+.animal.dragging .body{transform:scale(1.15) rotate(-4deg)}
+.animal.selected .body{transform:scale(1.1);filter:drop-shadow(0 0 1cqw rgba(47,191,166,.9)) drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.animal.popin .body{animation:popin .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes popin{0%{transform:translateY(4cqw) scale(.3)}100%{transform:translateY(0) scale(1)}}
+.animal.bob .body{animation:bob 1s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1cqw)}}
+.animal.shiver .body{animation:shiver .12s infinite alternate;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18)) hue-rotate(160deg) brightness(1.1)}
+@keyframes shiver{from{transform:translateX(-.5cqw) rotate(-3deg)}to{transform:translateX(.5cqw) rotate(3deg)}}
+.animal.sweat .body{animation:sweat .4s infinite alternate;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18)) sepia(.5) saturate(2)}
+@keyframes sweat{from{transform:scale(1,1) translateY(0)}to{transform:scale(1.05,.93) translateY(.6cqw)}}
+.animal.chomp .body{animation:chomp .22s infinite alternate}
+@keyframes chomp{from{transform:scale(1,1)}to{transform:scale(1.08,.92) translateY(.6cqw)}}
+.animal.happy .body{animation:happy .5s 2}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1.2cqw)}75%{transform:rotate(8deg) translateY(-1.2cqw)}}
+.animal.yuck .body{animation:yuck .6s;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18)) hue-rotate(70deg)}
+@keyframes yuck{0%,100%{transform:rotate(0)}30%{transform:rotate(-14deg) scale(.92,1.1)}60%{transform:rotate(10deg) scale(1.08,.9)}}
+.animal .mood{position:absolute;right:-8%;top:-14%;font-size:.42em;line-height:1;opacity:0;transform:scale(.4);transition:opacity .2s,transform .25s cubic-bezier(.2,1.6,.4,1);pointer-events:none}
+.animal .mood.show{opacity:1;transform:scale(1)}
+.animal .hand{position:absolute;left:50%;top:70%;font-size:.5em;line-height:1;transform:translateX(-50%);animation:tap 1s infinite;pointer-events:none;display:none}
+.animal.hint .hand{display:block}
+
+.bubble{position:absolute;left:104%;top:-2%;width:max-content;min-width:14cqw;max-width:31cqw;background:#fff;border-radius:2cqw;padding:1.1cqw 1.5cqw;font-family:var(--body);font-size:clamp(10px,2.2cqw,19px);font-weight:800;line-height:1.25;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:0 0;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:left;pointer-events:none;z-index:26}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:-1.2cqw;top:1.6cqw;border:1.4cqw solid transparent;border-right-color:#fff;border-left:0}
+.bubble.flip{left:auto;right:104%;transform-origin:100% 0}
+.bubble.flip::after{left:auto;right:-1.2cqw;border-right:0;border-left:1.4cqw solid #fff}
+.bubble .big{font-size:1.5em;line-height:1.15;display:block;margin-top:.2em}
+
+.robot{position:absolute;left:84%;top:5.5cqw;width:9cqw;font-size:8cqw;line-height:1;text-align:center;z-index:9;transition:left 1.1s ease-in-out,top 1.1s ease-in-out}
+.robot .bot{display:inline-block;position:relative;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
+.robot .wheels{font-size:.32em;letter-spacing:-.4em;display:block;margin-top:-.3em;opacity:.8}
+.robot.driving .bot{animation:drive .18s infinite alternate}
+.robot.driving .wheels{animation:spin .3s linear infinite}
+@keyframes drive{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-.5cqw) rotate(2deg)}}
+.robot .scoop{position:absolute;right:-32%;bottom:0;font-size:.6em;opacity:0;transform-origin:bottom;transition:opacity .2s}
+.robot.driving .scoop{opacity:1;animation:sweep .25s infinite alternate}
+@keyframes sweep{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+.robot .steam{position:absolute;left:50%;top:-20%;font-size:.5em;opacity:0;pointer-events:none}
+.robot .steam.go{animation:steam .9s forwards}
+@keyframes steam{0%{opacity:.9;transform:translate(-50%,0) scale(.7)}100%{opacity:0;transform:translate(-30%,-2.5em) scale(1.4)}}
+.robot .rbubble{position:absolute;left:100%;bottom:90%;width:max-content;max-width:24cqw;background:#fff;border-radius:1.6cqw;padding:.7cqw 1.2cqw;font-family:var(--body);font-size:clamp(9px,1.9cqw,15px);font-weight:800;line-height:1.2;box-shadow:0 .4cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:0 100%;transition:opacity .25s,transform .25s;white-space:normal;text-align:left;pointer-events:none}
+.robot .rbubble.show{opacity:1;transform:scale(1)}
+.robot .rbubble.flip{left:auto;right:100%;transform-origin:100% 100%}
+
+.poop{position:absolute;font-size:4.5cqw;line-height:1;z-index:7;transition:transform .35s,opacity .35s;animation:popin .5s cubic-bezier(.2,1.6,.4,1) both;filter:drop-shadow(0 .3cqw 0 rgba(59,42,31,.2))}
+.poop.gone{transform:scale(0) rotate(180deg);opacity:0}
+.puff{position:absolute;width:7cqw;height:7cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(190,235,110,.95),rgba(140,200,70,.65) 55%,rgba(120,180,50,0) 75%);animation:puff 1.3s forwards;z-index:12;pointer-events:none;display:grid;place-items:center;font-size:2.4cqw}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(3cqw,-7cqw) scale(1.7)}}
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+.flyfood{position:absolute;font-size:6cqw;line-height:1;z-index:25;pointer-events:none;transition:left .55s cubic-bezier(.3,.8,.4,1),top .55s cubic-bezier(.3,.8,.4,1),transform .3s,opacity .3s}
+.flyfood.bounce{animation:bounceaway .7s forwards}
+@keyframes bounceaway{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(540deg);opacity:0}}
+.toast{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:240px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.view{display:none;flex-direction:column;gap:10px}
+.view.on{display:flex}
+
+.animalcard{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 0 0 2px rgba(59,42,31,.08)}
+.animalcard .em{font-size:3rem;line-height:1}
+.animalcard .nm{font-family:var(--display);font-weight:700;font-size:1.3rem;line-height:1.1}
+.animalcard .snd{font-weight:800;color:var(--ketchup);font-size:.95rem}
+.zonebtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.zonebtns .subbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.bowls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.bowl{width:60px;height:60px;border-radius:18px;border:3px dashed rgba(59,42,31,.3);display:grid;place-items:center;font-size:2rem;position:relative;background:rgba(255,226,154,.35);line-height:1}
+.bowl .ghost{opacity:.35}
+.bowl.filled{border-style:solid;border-color:var(--mint);background:#E4FBF5;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:8px}
+.mitem{background:#fff;border-radius:18px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:84px;transition:transform .15s;min-width:44px}
+.mitem:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.mitem .em{font-size:2rem;line-height:1}
+.mitem .nm{font-size:.75rem;font-weight:800;color:var(--cocoa-soft);text-align:center}
+.mitem.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.mitem.wiggle{animation:wiggle .7s infinite;box-shadow:0 4px 0 var(--mint-dark),0 0 0 3px var(--mint)}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg) scale(1.05)}75%{transform:rotate(5deg) scale(1.05)}}
+.mitem.done{opacity:.4;pointer-events:none}
+.mitem.correct{box-shadow:0 4px 0 var(--mint-dark),0 0 0 3px var(--mint)}
+.factcard{background:#fff;border-radius:16px;padding:12px 14px;font-weight:800;font-size:1.05rem;line-height:1.35;display:flex;gap:10px;align-items:center;box-shadow:0 0 0 2px rgba(59,42,31,.08)}
+.factcard .em{font-size:2.6rem;line-height:1;flex:none}
+.factcard b{color:var(--ketchup)}
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.subbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wait{text-align:center;font-weight:800;color:var(--cocoa-soft);padding:10px 0;font-size:1.05rem}
+.wait .em{display:block;font-size:2.4rem;margin-bottom:6px;animation:bob 1.2s infinite ease-in-out}
+.quizq{background:#F3FBFF;border-radius:14px;padding:10px 12px;font-weight:800;font-size:1rem;line-height:1.4}
+.quizq b{color:var(--ketchup)}
+.quiz .mitem{min-height:90px}.quiz .mitem .em{font-size:2.6rem}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
+.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 8px;font-size:.9rem;white-space:nowrap}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+.card .zoo{font-size:clamp(1.6rem,6vw,2.6rem);line-height:1.2;letter-spacing:.02em}
+
+.nudge{animation:nudge 2s ease-in-out!important;outline:4px solid var(--mint);outline-offset:3px;border-radius:18px}
+@keyframes nudge{0%,100%{transform:scale(1)}15%,45%,75%{transform:scale(1.08)}30%,60%{transform:scale(.97)}}
+.pulse{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.bubble,.robot .rbubble{pointer-events:auto;cursor:pointer}
+@media (max-width:600px){
+  :root{--ar:4/3;--arn:1.3333;--maxh:42vh}
+  .logo .sign{font-size:1rem;padding:3px 10px}.logo .brand{display:none}.chip{padding:4px 10px;font-size:.85rem}#zoowrap label{font-size:.85rem}.iconbtn{width:40px;height:40px}
+  #app{gap:8px;padding-block:8px 12px}
+  #topbar{gap:8px}#zoowrap{min-width:96px;flex-basis:110px}
+  #panel{padding:10px;gap:8px;min-height:0}
+  .coach{padding:8px 10px}.coach p{font-size:.95rem}.coach .face{font-size:1.5rem}
+  .mitem{min-height:68px;padding:6px 4px 6px}.mitem .em{font-size:1.7rem}.mitem .nm{font-size:.7rem}
+  .bowl{width:48px;height:48px;font-size:1.6rem}
+  .animalcard .em{font-size:2.4rem}
+  .bigbtn{padding:12px 16px;font-size:1.15rem}
+}
+/* landscape phone: two columns, nothing scrolls */
+@media (max-height:520px) and (orientation:landscape){
+  :root{--ar:16/9;--arn:1.7778;--maxh:calc(100vh - 92px)}
+  #stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}
+  #app{padding-block:6px 8px;gap:6px}
+  #topbar{gap:6px}
+  .logo .sign{font-size:.95rem;padding:2px 8px}.logo .brand{display:none}
+  .chip{padding:3px 8px;font-size:.8rem}.chip small{font-size:.6rem}
+  #zoowrap label{font-size:.8rem}#zoobar{height:18px}
+  .iconbtn{width:36px;height:36px;font-size:1.05rem;border-radius:10px}
+  #panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 66px);overflow:auto}
+  .coach{padding:6px 8px}.coach p{font-size:.85rem}.coach .face{font-size:1.3rem}.coach .say{width:32px;height:32px}
+  .menu{grid-template-columns:repeat(auto-fit,minmax(50px,1fr));gap:6px}.quiz .menu{grid-template-columns:repeat(3,1fr)}
+  .mitem{min-height:56px;padding:4px 2px}.mitem .em{font-size:1.4rem}.mitem .nm{font-size:.6rem;overflow-wrap:anywhere}
+  .bowl{width:44px;height:44px;font-size:1.4rem}
+  .animalcard{padding:6px 8px}.animalcard .em{font-size:2rem}
+  .bigbtn{padding:10px 14px;font-size:1.05rem}
+  .factcard{padding:8px 10px;font-size:.9rem}
+  .zonebtns .subbtn{padding:6px 10px;font-size:.9rem}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Zookeeper</span><span class="brand">Toot Toot Learning</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Animals</small><span id="animal-chip">0/0</span></div>
+    <div id="zoowrap"><label for="zoobar">🐾 Zoo</label><div id="zoobar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="zoofill"></div><div id="zoopct">0%</div></div></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Zoo scene">
+      <div class="sky"><span class="zoosign">🐾 TOOT TOOT ZOO</span><span class="sun"></span><span class="cloud" style="left:38%">☁️</span><span class="cloud" style="left:62%;top:2.4cqw;font-size:2.2cqw">☁️</span></div>
+      <div class="path"></div>
+      <div class="zones n2" id="zones"></div>
+      <div class="crate" id="crate"><div class="box"></div><div class="wheels"><span>⚫</span><span>⚫</span></div></div>
+      <div class="animal" id="animal"><span class="body" id="animal-body">🦁</span><span class="mood" id="mood">🥶</span><span class="hand">👆</span><div class="bubble" id="bubble"></div></div>
+      <div class="robot" id="robot"><span class="bot">🤖<span class="scoop">🧹</span><span class="steam" id="steam">💨</span></span><span class="wheels">⚫⚫</span><div class="rbubble" id="rbubble"></div></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">👩‍🌾</span><p id="coach-text">Welcome to the zoo!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+
+      <div class="view" id="v-wait"><div class="wait"><span class="em" id="wait-em">📦</span><span id="wait-text">A new animal is arriving…</span></div></div>
+
+      <div class="view" id="v-habitat">
+        <div class="animalcard"><span class="em" id="hab-em">🦁</span><div><div class="nm" id="hab-name">Lion</div><div class="snd" id="hab-sound">Roar!</div></div></div>
+        <div class="zonebtns" id="zonebtns"></div>
+      </div>
+
+      <div class="view" id="v-feed">
+        <div class="bowls" id="bowls"></div>
+        <div class="menu" id="menu"></div>
+      </div>
+
+      <div class="view" id="v-fact">
+        <div class="factcard"><span class="em" id="fact-em">🦁</span><span id="fact-text"></span></div>
+        <button class="bigbtn mint" id="btn-cool">Cool! 😎</button>
+      </div>
+
+      <div class="view" id="v-clean"><div class="wait"><span class="em">🤖</span><span id="clean-text">Robo is scooping the poop!</span></div></div>
+
+      <div class="view quiz" id="v-quiz">
+        <div class="quizq" id="quiz-q"></div>
+        <div class="menu" id="quiz-menu"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+
+/* ---------- data ---------- */
+const HABITATS = {
+  savanna:{name:'Grassland', icon:'🌴', deco:['🌴','🌾'], msg:'Too hot and dry!', mood:'🥵', anim:'sweat', hot:true},
+  ice:{name:'Ice', icon:'❄️', deco:['🧊','❄️'], msg:'Brr, too cold!', mood:'🥶', anim:'shiver', cold:true},
+  desert:{name:'Desert', icon:'🌵', deco:['🌵','☀️'], msg:'Phew, too hot!', mood:'🥵', anim:'sweat', hot:true},
+  jungle:{name:'Jungle', icon:'🌺', deco:['🌴','🌺'], msg:'Too hot and wet!', mood:'😅', anim:'sweat'},
+  ocean:{name:'Ocean', icon:'🌊', deco:['🌊','🐚'], msg:'Glub, I can’t swim!', mood:'😵', anim:'shiver', water:true},
+  pond:{name:'Pond', icon:'🪷', deco:['🪷','🌾'], msg:'Splash! Too wet for me!', mood:'😖', anim:'shiver', water:true},
+  forest:{name:'Forest', icon:'🌲', deco:['🌲','🍄'], msg:'This is not my home!', mood:'🤔', anim:'sweat'},
+  cave:{name:'Cave', icon:'🌙', deco:['🌙','🕸️'], msg:'Eek, too dark!', mood:'😨', anim:'shiver', dark:true}
+};
+const FOODS = {
+  meat:{name:'Meat', em:'🍖', kind:'animal'}, fish:{name:'Fish', em:'🐟', kind:'animal'}, mouse:{name:'Mice', em:'🐁', kind:'animal'},
+  eggs:{name:'Eggs', em:'🥚', kind:'animal'}, squid:{name:'Squid', em:'🦑', kind:'animal'}, shrimp:{name:'Shrimp', em:'🦐', kind:'animal'},
+  plankton:{name:'Plankton', em:'🦠', kind:'animal'}, worms:{name:'Worms', em:'🪱', kind:'animal'}, bugs:{name:'Bugs', em:'🐛', kind:'animal'},
+  grass:{name:'Grass', em:'🌾', kind:'plant'}, leaves:{name:'Leaves', em:'🍃', kind:'plant'}, bamboo:{name:'Bamboo', em:'🎋', kind:'plant'},
+  banana:{name:'Bananas', em:'🍌', kind:'plant'}, fruit:{name:'Fruit', em:'🍎', kind:'plant'}, nuts:{name:'Nuts', em:'🥜', kind:'plant'},
+  seeds:{name:'Seeds', em:'🌻', kind:'plant'}, flowers:{name:'Flowers', em:'🌸', kind:'plant'}, honey:{name:'Honey', em:'🍯', kind:'plant'},
+  seaweed:{name:'Seaweed', em:'🌿', kind:'plant'}
+};
+const ANIMALS = [
+  // tier 1: most familiar, obvious foods
+  {id:'lion', em:'🦁', name:'Lion', habitat:'savanna', diet:['meat'], sound:'Roar!', tier:1, fact:'A lion’s roar is so loud you can hear it from far, far away!'},
+  {id:'penguin', em:'🐧', name:'Penguin', habitat:'ice', diet:['fish','squid'], sound:'Squawk!', tier:1, fact:'Penguins can’t fly, but they zoom through the water like little rockets!'},
+  {id:'monkey', em:'🐵', name:'Monkey', habitat:'jungle', diet:['banana','fruit','bugs'], sound:'Ooh ooh ah ah!', tier:1, fact:'A monkey can hang from a tree by its tail, like an extra hand!'},
+  {id:'elephant', em:'🐘', name:'Elephant', habitat:'savanna', diet:['grass','leaves','fruit'], sound:'Toot!', tier:1, fact:'An elephant drinks water with its trunk, like a giant bendy straw!'},
+  {id:'frog', em:'🐸', name:'Frog', habitat:'pond', diet:['bugs','worms'], sound:'Ribbit!', tier:1, fact:'A frog catches bugs with its long sticky tongue, faster than you can blink!'},
+  {id:'panda', em:'🐼', name:'Panda', habitat:'forest', diet:['bamboo'], sound:'Squeak!', tier:1, fact:'A panda munches bamboo almost all day long. Crunch, crunch, crunch!'},
+  {id:'giraffe', em:'🦒', name:'Giraffe', habitat:'savanna', diet:['leaves'], sound:'Hum!', tier:1, fact:'A giraffe’s tongue is purple and as long as your whole arm!'},
+  {id:'polarbear', em:'🐻‍❄️', name:'Polar Bear', habitat:'ice', diet:['fish'], sound:'Grrr!', tier:1, fact:'A polar bear’s fur looks white, but its skin underneath is black!'},
+  {id:'camel', em:'🐪', name:'Camel', habitat:'desert', diet:['grass','leaves'], sound:'Grumble!', tier:1, fact:'A camel keeps food in its hump so it can walk for days without eating!'},
+  {id:'dolphin', em:'🐬', name:'Dolphin', habitat:'ocean', diet:['fish','squid'], sound:'Click click!', tier:1, fact:'Dolphins talk to each other with whistles and clicks!'},
+  {id:'shark', em:'🦈', name:'Shark', habitat:'ocean', diet:['fish','squid'], sound:'Chomp!', tier:1, fact:'When a shark loses a tooth, a brand new one pops in to take its place!'},
+  {id:'crocodile', em:'🐊', name:'Crocodile', habitat:'pond', diet:['meat','fish'], sound:'Snap!', tier:1, fact:'A crocodile can hold its breath under the water for a whole hour!'},
+  // tier 2: a bit less familiar
+  {id:'kangaroo', em:'🦘', name:'Kangaroo', habitat:'savanna', diet:['grass','leaves'], sound:'Boing!', tier:2, fact:'A baby kangaroo is called a joey, and it rides in its mum’s pouch!'},
+  {id:'koala', em:'🐨', name:'Koala', habitat:'forest', diet:['leaves'], sound:'Snore!', tier:2, fact:'Koalas sleep for up to twenty hours every day. So sleepy!'},
+  {id:'owl', em:'🦉', name:'Owl', habitat:'forest', diet:['mouse','bugs'], sound:'Hoot!', tier:2, fact:'An owl can turn its head almost all the way around to look behind it!'},
+  {id:'bat', em:'🦇', name:'Bat', habitat:'cave', diet:['bugs','fruit'], sound:'Squeak!', tier:2, fact:'A bat finds its way in the dark by squeaking and listening for the echo!'},
+  {id:'snake', em:'🐍', name:'Snake', habitat:'desert', diet:['mouse','eggs'], sound:'Hiss!', tier:2, fact:'A snake smells with its tongue by flicking it in and out!'},
+  {id:'fox', em:'🦊', name:'Fox', habitat:'forest', diet:['mouse','fruit','bugs'], sound:'Yip!', tier:2, fact:'A fox wraps its big bushy tail around itself like a blanket when it sleeps!'},
+  {id:'turtle', em:'🐢', name:'Turtle', habitat:'pond', diet:['seaweed','bugs','fish'], sound:'Slow and steady!', tier:2, fact:'A turtle’s shell is part of its body, so it can never crawl out of it!'},
+  {id:'parrot', em:'🦜', name:'Parrot', habitat:'jungle', diet:['fruit','seeds','nuts'], sound:'Hello!', tier:2, fact:'Parrots can copy the words people say. Some even say hello!'},
+  {id:'hippo', em:'🦛', name:'Hippo', habitat:'pond', diet:['grass'], sound:'Honk!', tier:2, fact:'A hippo can sleep under the water and float up to breathe without waking up!'},
+  {id:'wolf', em:'🐺', name:'Wolf', habitat:'forest', diet:['meat','mouse'], sound:'Awoooo!', tier:2, fact:'Wolves howl to talk to their family from far away!'},
+  {id:'zebra', em:'🦓', name:'Zebra', habitat:'savanna', diet:['grass'], sound:'Neigh!', tier:2, fact:'Every zebra has its own stripes, just like you have your own fingerprint!'},
+  {id:'tiger', em:'🐯', name:'Tiger', habitat:'jungle', diet:['meat','fish'], sound:'Roar!', tier:2, fact:'Tigers love to swim, even though most cats hate getting wet!'},
+  {id:'seal', em:'🦭', name:'Seal', habitat:'ice', diet:['fish','squid'], sound:'Arf arf!', tier:2, fact:'A seal’s whiskers can feel a fish swimming nearby, even in the dark!'},
+  {id:'gorilla', em:'🦍', name:'Gorilla', habitat:'jungle', diet:['leaves','fruit','bugs'], sound:'Hoo hoo!', tier:2, fact:'A gorilla is super strong, but it mostly eats plants like a giant vegetarian!'},
+  // tier 3: trickier foods (omnivores, insects, plankton)
+  {id:'whale', em:'🐳', name:'Whale', habitat:'ocean', diet:['plankton','shrimp'], sound:'Whoooo!', tier:3, fact:'A blue whale is bigger than a bus, but it eats tiny shrimp called krill!'},
+  {id:'flamingo', em:'🦩', name:'Flamingo', habitat:'pond', diet:['shrimp','plankton'], sound:'Honk!', tier:3, fact:'Flamingos are pink because of the pink shrimp they eat!'},
+  {id:'bee', em:'🐝', name:'Bee', habitat:'forest', diet:['flowers','honey'], sound:'Buzz!', tier:3, fact:'A bee visits hundreds of flowers to make one tiny spoon of honey!'},
+  {id:'bear', em:'🐻', name:'Bear', habitat:'forest', diet:['fish','honey','fruit'], sound:'Grrr!', tier:3, fact:'Bears sleep all winter long in a cosy den. That is called hibernating!'},
+  {id:'raccoon', em:'🦝', name:'Raccoon', habitat:'forest', diet:['fruit','eggs','bugs'], sound:'Chitter!', tier:3, fact:'Raccoons dip their food in water before they eat it, like washing hands!'},
+  {id:'hedgehog', em:'🦔', name:'Hedgehog', habitat:'forest', diet:['bugs','worms'], sound:'Snuffle!', tier:3, fact:'A hedgehog rolls into a spiky ball when it feels scared!'},
+  {id:'lizard', em:'🦎', name:'Lizard', habitat:'desert', diet:['bugs'], sound:'Skitter!', tier:3, fact:'Some lizards can drop their tail to escape, then grow a brand new one!'},
+  {id:'scorpion', em:'🦂', name:'Scorpion', habitat:'desert', diet:['bugs'], sound:'Click click!', tier:3, fact:'A scorpion glows bright blue under a special dark light!'},
+  {id:'sloth', em:'🦥', name:'Sloth', habitat:'jungle', diet:['leaves'], sound:'Zzz…', tier:3, fact:'A sloth moves so slowly that tiny green plants grow on its fur!'},
+  {id:'octopus', em:'🐙', name:'Octopus', habitat:'ocean', diet:['shrimp','fish'], sound:'Blub!', tier:3, fact:'An octopus has eight arms and three hearts!'},
+  {id:'crab', em:'🦀', name:'Crab', habitat:'ocean', diet:['seaweed','worms'], sound:'Click clack!', tier:3, fact:'Crabs walk sideways, and some crabs can even climb trees!'},
+  {id:'duck', em:'🦆', name:'Duck', habitat:'pond', diet:['seeds','bugs','seaweed'], sound:'Quack!', tier:3, fact:'A duck’s feathers are waterproof, so water just rolls right off!'},
+  {id:'spider', em:'🕷️', name:'Spider', habitat:'cave', diet:['bugs'], sound:'Skitter!', tier:3, fact:'Spider silk is stronger than steel, but as light as a feather!'},
+  {id:'rhino', em:'🦏', name:'Rhino', habitat:'savanna', diet:['grass','leaves'], sound:'Snort!', tier:3, fact:'A rhino’s horn is made of the same stuff as your fingernails!'},
+  {id:'deer', em:'🦌', name:'Deer', habitat:'forest', diet:['grass','leaves','nuts'], sound:'Snort!', tier:3, fact:'Baby deer have white spots that help them hide in the sunny forest!'}
+];
+const LEVELS = [
+  {title:'First Friends',   animals:3, zones:2, tiers:[1],     foods:4, maxCorrect:1, easyFoods:true},
+  {title:'Two Homes',       animals:3, zones:2, tiers:[1],     foods:4, maxCorrect:2, easyFoods:true},
+  {title:'Three Homes',     animals:4, zones:3, tiers:[1],     foods:4, maxCorrect:2, easyFoods:true},
+  {title:'Who Am I?',       animals:4, zones:3, tiers:[1,2],   foods:5, maxCorrect:2, quiz:1},
+  {title:'Busy Zoo',        animals:5, zones:3, tiers:[2],     foods:5, maxCorrect:3, quiz:1},
+  {title:'Tricky Tummies',  animals:5, zones:4, tiers:[2,3],   foods:5, maxCorrect:3, quiz:2},
+  {title:'Expert Keeper',   animals:6, zones:4, tiers:[3],     foods:5, maxCorrect:3, quiz:2},
+  {title:'Master Zookeeper',animals:6, zones:4, tiers:[1,2,3], foods:5, maxCorrect:3, quiz:3}
+];
+const PRAISE = ['Home sweet home!','Super job!','Wow, animal expert! ⭐','Perfect!','You did it!','High five! 🙌','Brilliant!','Amazing!'];
+const YUM = ['Yum yum!','So tasty!','Nom nom nom!','Delicious!','My favourite!'];
+const ROBO_LINES = ['Beep boop! Poop patrol!','Whirr… scoop scoop!','Blip! All clean!','Beep! Stinky job, but somebody has to do it!','Whirr! Poop, be gone!'];
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    chomp(){ noise(0.09,{gain:0.1,from:1200,to:300}); tone(160+Math.random()*60,0.08,{type:'square',gain:0.04}); },
+    shiver(){ [440,415,440,415].forEach((f,i)=>tone(f,0.07,{type:'triangle',gain:0.08,delay:i*0.08})); },
+    splash(){ noise(0.35,{gain:0.15,from:2500,to:500}); },
+    plop(){ tone(220,0.15,{type:'sine',gain:0.15,slide:90}); },
+    scoop(){ noise(0.18,{gain:0.12,from:3500,to:800}); tone(880,0.1,{type:'triangle',gain:0.06,delay:0.1,slide:1400}); },
+    steam(){ noise(0.4,{gain:0.06,from:5000,to:1500}); },
+    boom(){ noise(1.5,{gain:0.6,from:4000,to:60}); tone(70,1,{type:'sine',gain:0.5,slide:30}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    whirr(dur){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type='square'; o.frequency.setValueAtTime(95,t);
+      const lfo = c.createOscillator(); lfo.frequency.value = 11; const lg = c.createGain(); lg.gain.value = 18; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 650;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05,t+0.1); g.gain.setValueAtTime(0.05,t+Math.max(0.2,dur-0.2)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur); lfo.stop(t+dur);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  let last = '';
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    get last(){ return last; }, get rate(){ return 0.9; }, clean,
+    say(text, onEnd){
+      if(!enabled || !has){ if(onEnd) setTimeout(onEnd, 0); return; }
+      try{
+        speechSynthesis.cancel(); const t = clean(text); last = t;
+        const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice;
+        let done = false; const fin = ()=>{ if(!done){ done = true; if(onEnd) onEnd(); } };
+        u.onend = fin; u.onerror = fin; setTimeout(fin, Math.min(12000, 1500 + t.length*70)); // fallback if the engine never fires onend
+        speechSynthesis.speak(u);
+      }catch(e){ if(onEnd) setTimeout(onEnd, 0); }
+    },
+    force(text, onEnd){ const was = enabled; enabled = true; this.say(text, onEnd); enabled = was; }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootZookeeper')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootZookeeper', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), zones:$('#zones'), crate:$('#crate'), animal:$('#animal'), animalBody:$('#animal-body'), mood:$('#mood'), bubble:$('#bubble'),
+  robot:$('#robot'), rbubble:$('#rbubble'), steam:$('#steam'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), zonebtns:$('#zonebtns'), bowls:$('#bowls'), menu:$('#menu'),
+  habEm:$('#hab-em'), habName:$('#hab-name'), habSound:$('#hab-sound'), factEm:$('#fact-em'), factText:$('#fact-text'), btnCool:$('#btn-cool'),
+  quizQ:$('#quiz-q'), quizMenu:$('#quiz-menu'), cleanText:$('#clean-text'), waitText:$('#wait-text'), waitEm:$('#wait-em'),
+  lvlChip:$('#lvl-chip'), animalChip:$('#animal-chip'), zoofill:$('#zoofill'), zoopct:$('#zoopct'), zoobar:$('#zoobar'),
+  overlay:$('#overlay'), card:$('#card')
+};
+
+/* ---------- game state ---------- */
+let G = null;        // current level run
+let run = 0;         // token so abandoned runs stop
+let coachLine = '';
+let sittingLevels = 0; // levels finished this sitting (memory only, never saved)
+const CRATE_LEFT = 40, ANIMAL_HOME = {left:41, top:'3cqw'};
+
+function levelConfig(n){
+  if(n <= LEVELS.length) return Object.assign({n}, LEVELS[n-1]);
+  const k = n - LEVELS.length;
+  return Object.assign({}, LEVELS[LEVELS.length-1], {n, title:'Super Keeper '+k, quiz:3});
+}
+function pickAnimals(cfg){
+  const pool = ANIMALS.filter(a=>cfg.tiers.includes(a.tier));
+  const habIds = Object.keys(HABITATS);
+  // choose the habitat zones first, so the animals drawn always fit on screen
+  let zones = null;
+  for(let t=0;t<60 && !zones;t++){
+    const cand = shuffle(habIds).slice(0, cfg.zones);
+    if(pool.filter(a=>cand.includes(a.habitat)).length >= cfg.animals) zones = cand;
+  }
+  if(!zones){ // fallback: the most populated habitats for this tier
+    const counts = {}; pool.forEach(a=>{ counts[a.habitat]=(counts[a.habitat]||0)+1; });
+    zones = habIds.slice().sort((a,b)=>(counts[b]||0)-(counts[a]||0)).slice(0, cfg.zones);
+  }
+  const chosen = shuffle(pool.filter(a=>zones.includes(a.habitat))).slice(0, cfg.animals);
+  return {animals:chosen, zones:shuffle(zones)};
+}
+function makeFoods(cfg, animal){
+  const correct = shuffle(animal.diet).slice(0, Math.min(cfg.maxCorrect, animal.diet.length));
+  let pool = Object.keys(FOODS).filter(f=>!animal.diet.includes(f));
+  if(cfg.easyFoods){
+    const kind = FOODS[animal.diet[0]].kind;
+    const far = pool.filter(f=>FOODS[f].kind!==kind);
+    if(far.length >= cfg.foods - correct.length) pool = far;
+  }
+  const distract = shuffle(pool).slice(0, cfg.foods - correct.length);
+  return {correct, foods:shuffle(correct.concat(distract))};
+}
+function wrongMsg(animal, zoneId){
+  const z = HABITATS[zoneId], home = HABITATS[animal.habitat];
+  if(z.water && home.water) return zoneId==='ocean' ? 'Glub, too salty!' : 'Too small! I need the big sea!';
+  if(home.water && !z.water) return 'I need water! Splish splash!';
+  if(home.dark && (z.hot || zoneId==='savanna')) return 'Too bright! My eyes!';
+  if(home.cold && z.hot) return 'Phew, too hot! I’m melting!';
+  if(home.hot && z.cold) return 'Brr, too cold! Achoo!';
+  return z.msg;
+}
+
+/* ---------- helpers: UI ---------- */
+function show(viewId){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===viewId)); }
+function coach(text, face, speak=true){
+  coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
+  if(speak) Voice.say(text);
+}
+function toast(text){
+  const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600);
+}
+function bubble(html, speakText, sayText){
+  el.bubble.innerHTML = html; el.bubble.classList.add('show'); el.bubble.dataset.say = sayText || speakText || el.bubble.textContent;
+  el.bubble.classList.toggle('flip', parseFloat(el.animal.style.left||'41') > 55);
+  if(speakText) Voice.say(speakText);
+}
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function roboSay(text){
+  el.rbubble.textContent = text; el.rbubble.dataset.say = text; el.rbubble.classList.add('show');
+  el.rbubble.classList.toggle('flip', parseFloat(el.robot.style.left||'84') > 60);
+  setTimeout(()=>el.rbubble.classList.remove('show'), 1800);
+}
+function setMood(em){ if(!em){ el.mood.classList.remove('show'); return; } el.mood.textContent = em; el.mood.classList.add('show'); }
+function setZooBar(){
+  const total = G.animals.length, done = G.settled, p = Math.round(done/total*100);
+  el.zoofill.style.width = p+'%'; el.zoopct.textContent = p+'%'; el.zoobar.setAttribute('aria-valuenow', p);
+  el.animalChip.textContent = `${done}/${total}`;
+}
+function pct(x){ return x+'%'; }
+function art(name){ return (/^[aeiou]/i.test(name) ? 'an ' : 'a ') + name; }
+function puff(xPct, yPct){
+  const p = document.createElement('div'); p.className='puff'; p.style.left=pct(xPct); p.style.top=pct(yPct); p.textContent = Math.random()<0.5?'💨':'';
+  el.fx.appendChild(p); setTimeout(()=>p.remove(), 1400);
+}
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=pct(xPct); s.style.top=pct(yPct);
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1500);
+}
+function animalCenter(){
+  const a = el.animal.getBoundingClientRect(), s = el.scene.getBoundingClientRect();
+  return {x:(a.left+a.width/2-s.left)/s.width*100, y:(a.top+a.height/2-s.top)/s.height*100};
+}
+function zoneEl(id){ return el.zones.querySelector(`.zone[data-h="${id}"]`); }
+function zoneTarget(id){
+  // top-left (in %) that centres the animal inside the zone
+  const z = zoneEl(id).getBoundingClientRect(), s = el.scene.getBoundingClientRect(), a = el.animal.getBoundingClientRect();
+  const cx = z.left + z.width/2, cy = z.top + z.height*0.45;
+  return {left:(cx - a.width/2 - s.left)/s.width*100, top:(cy - a.height/2 - s.top)/s.height*100};
+}
+function moveAnimal(left, top){ el.animal.style.left = typeof left==='number' ? pct(left) : left; el.animal.style.top = typeof top==='number' ? pct(top) : top; }
+function homeAnimal(){ moveAnimal(ANIMAL_HOME.left, ANIMAL_HOME.top); }
+function renderZones(zones){
+  el.zones.className = 'zones n'+zones.length;
+  el.zones.innerHTML = zones.map(id => { const h = HABITATS[id]; return `<div class="zone" data-h="${id}" role="button" tabindex="0" aria-label="${h.name}"><span class="deco a">${h.deco[0]}</span><span class="deco b">${h.deco[1]}</span><span class="arrow">👇</span><div class="residents"></div><span class="zlabel">${h.icon} ${h.name}</span></div>`; }).join('');
+  el.zonebtns.innerHTML = zones.map(id => `<button class="subbtn" data-zone="${id}">${HABITATS[id].icon} ${HABITATS[id].name}</button>`).join('');
+}
+function clearHints(){ el.zones.querySelectorAll('.zone').forEach(z=>z.classList.remove('glow','arrow','hot')); el.animal.classList.remove('hint'); }
+
+/* ---------- habitat placing ---------- */
+async function placeIn(zoneId){
+  if(!G || G.step!=='habitat' || G.busy || !HABITATS[zoneId] || !G.zones.includes(zoneId)) return false;
+  const a = G.animal, zone = zoneEl(zoneId);
+  G.busy = true; el.animal.classList.remove('selected','dragging','bob','hint'); clearHints();
+  const t = zoneTarget(zoneId); moveAnimal(t.left, t.top);
+  if(zoneId === a.habitat){
+    await wait(450);
+    zone.classList.add('landed'); setTimeout(()=>zone.classList.remove('landed'),600);
+    Sound.yay(); toast(pick(PRAISE));
+    const firstTry = G.wrongHabitat===0; G.stats.questions++; if(firstTry) G.stats.firstTry++;
+    el.animal.classList.add('happy'); setTimeout(()=>el.animal.classList.remove('happy'),1100);
+    bubble(`${HABITATS[zoneId].name}! ${pick(['Home sweet home!','I love it here!','Yay, my home!'])}`, `${HABITATS[zoneId].name}! Home sweet home!`);
+    setMood('😊');
+    const r = G.habitatResolve; G.habitatResolve = null; if(r) r(); // G.busy stays true until feeding starts
+    return true;
+  }
+  // wrong zone: shiver / sweat, complain, hop back
+  G.wrongHabitat++; G.stats.wrong++;
+  const h = HABITATS[zoneId], msg = wrongMsg(a, zoneId);
+  await wait(450);
+  Sound.oops(); if(h.cold) Sound.shiver(); else if(h.water) Sound.splash();
+  el.animal.classList.add(h.anim); setMood(h.mood);
+  bubble(msg, msg);
+  if(h.water) for(let i=0;i<3;i++) spark(t.left+5+i*3, t.top+8, '💧', 6);
+  if(h.hot) for(let i=0;i<3;i++) spark(t.left+4+i*3, t.top+4, '💦', 5);
+  await wait(1300);
+  el.animal.classList.remove(h.anim); setMood(null); hideBubble();
+  homeAnimal(); Sound.pop();
+  await wait(500);
+  if(G.wrongHabitat === 1){ zoneEl(a.habitat).classList.add('glow'); coach(`Not there. See the glowing home? Try that one.`, '🤗'); }
+  else { zoneEl(a.habitat).classList.add('glow','arrow'); coach(`The ${a.name.toLowerCase()} lives in the ${HABITATS[a.habitat].name.toLowerCase()}. Follow the arrow.`, '💛'); }
+  el.animal.classList.add('bob');
+  G.busy = false;
+  return false;
+}
+
+/* ---------- drag & drop / tap fallback ---------- */
+(function initDrag(){
+  let drag = null;
+  function zoneAt(x,y){
+    for(const z of el.zones.querySelectorAll('.zone')){ const r = z.getBoundingClientRect(); if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return z; }
+    return null;
+  }
+  el.animal.addEventListener('pointerdown', e => {
+    if(!G || G.step !== 'habitat' || G.busy) return;
+    e.preventDefault();
+    const r = el.scene.getBoundingClientRect(), ar = el.animal.getBoundingClientRect();
+    drag = {id:e.pointerId, ox:e.clientX-ar.left, oy:e.clientY-ar.top, sx:e.clientX, sy:e.clientY, moved:false, r};
+    try{ el.animal.setPointerCapture(e.pointerId); }catch(err){}
+    el.animal.classList.add('dragging'); el.animal.classList.remove('bob','hint');
+  });
+  el.animal.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId!==drag.id) return;
+    if(Math.hypot(e.clientX-drag.sx, e.clientY-drag.sy) > 6) drag.moved = true;
+    const x = (e.clientX - drag.ox - drag.r.left)/drag.r.width*100, y = (e.clientY - drag.oy - drag.r.top)/drag.r.height*100;
+    moveAnimal(Math.max(-6, Math.min(92, x)), Math.max(-6, Math.min(90, y)));
+    const over = zoneAt(e.clientX, e.clientY);
+    el.zones.querySelectorAll('.zone').forEach(z=>z.classList.toggle('hot', z===over));
+  });
+  function end(e){
+    if(!drag || e.pointerId!==drag.id) return;
+    const moved = drag.moved, d = drag; drag = null; el.animal.classList.remove('dragging');
+    el.zones.querySelectorAll('.zone').forEach(z=>z.classList.remove('hot'));
+    if(moved){
+      const over = e.type==='pointercancel' ? null : zoneAt(e.clientX, e.clientY);
+      if(over) placeIn(over.dataset.h);
+      else { homeAnimal(); el.animal.classList.add('bob'); coach('Almost! Drop it inside a home.', '🙂', false); }
+    } else {
+      el.animal.classList.toggle('selected');
+      if(el.animal.classList.contains('selected')) coach('Now tap its home.', '👉', false);
+    }
+    void d;
+  }
+  el.animal.addEventListener('pointerup', end); el.animal.addEventListener('pointercancel', end);
+  el.zones.addEventListener('pointerdown', e => {
+    const z = e.target.closest('.zone'); if(!z || !G || G.step!=='habitat' || G.busy) return;
+    if(el.animal.classList.contains('selected')) placeIn(z.dataset.h);
+    else { el.animal.classList.add('selected'); coach(`Tap the ${G.animal.name.toLowerCase()} first. Then tap its home.`, '👉', false); }
+  });
+  el.zones.addEventListener('keydown', e => { const z = e.target.closest('.zone'); if(z && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); placeIn(z.dataset.h); } });
+  el.zonebtns.addEventListener('click', e => { const b = e.target.closest('button[data-zone]'); if(b) placeIn(b.dataset.zone); });
+})();
+
+/* ---------- feeding ---------- */
+function feed(foodId){
+  if(!G || G.step!=='feed' || G.busy || !G.foods.includes(foodId)) return false;
+  const btn = el.menu.querySelector(`.mitem[data-id="${foodId}"]`), f = FOODS[foodId];
+  const c = animalCenter();
+  if(G.correct.includes(foodId) && !G.fed.includes(foodId)){
+    G.fed.push(foodId);
+    if(btn){ btn.classList.add('done','correct'); btn.classList.remove('wiggle'); }
+    const bowl = el.bowls.children[G.fed.length-1]; if(bowl){ bowl.classList.add('filled'); bowl.innerHTML = `<span>${f.em}</span>`; }
+    flyFood(f.em, c, true);
+    Sound.pop();
+    setTimeout(()=>{ Sound.chomp(); el.animal.classList.add('chomp'); setMood('😋'); setTimeout(()=>{ el.animal.classList.remove('chomp'); Sound.chomp(); }, 500); }, reduced?50:500);
+    if(G.fed.length >= G.need){
+      G.stats.questions++; if(G.wrongFood===0) G.stats.firstTry++;
+      el.menu.querySelectorAll('.mitem').forEach(b=>b.classList.remove('wiggle'));
+      setTimeout(()=>{ el.animal.classList.add('happy'); setMood('😊'); const y = pick(YUM); bubble(y+' 😋', y); Sound.yay(); toast(y); setTimeout(()=>el.animal.classList.remove('happy'),1100); const r = G.feedResolve; G.feedResolve=null; if(r) r(); }, reduced?100:1100);
+    } else {
+      coach(G.need - G.fed.length === 1 ? 'Yum! Tap one more food.' : `Yum! Tap ${G.need - G.fed.length} more foods.`, '👩‍🌾', false);
+    }
+    return true;
+  }
+  if(G.fed.includes(foodId)) return false;
+  // wrong food: face, fart, green puff, food bounces away
+  G.wrongFood++; G.stats.wrong++;
+  if(btn){ btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); }
+  flyFood(f.em, c, false);
+  setTimeout(()=>{
+    el.animal.classList.remove('yuck'); void el.animal.offsetWidth; el.animal.classList.add('yuck'); setMood('🤢');
+    Sound.fart(); Sound.oops();
+    for(let i=0;i<3;i++) setTimeout(()=>puff(c.x + 4 + i*2, c.y + 4 + i*3), i*120);
+    const line = pick([`Bleugh! ${G.animal.name}s don’t eat ${f.name.toLowerCase()}!`, `Yuck! Not ${f.name.toLowerCase()}!`, `Pfft! No thanks!`]);
+    bubble(line+' 💨', line);
+    coach(G.wrongFood>=2 ? `Look! The right food is wiggling. Tap it.` : `Oops! That made a stinky toot. Try another food.`, '🙈', false);
+    if(G.wrongFood >= 2) G.correct.forEach(id=>{ const b = el.menu.querySelector(`.mitem[data-id="${id}"]`); if(b && !G.fed.includes(id)) b.classList.add('wiggle'); });
+    setTimeout(()=>{ el.animal.classList.remove('yuck'); setMood(null); hideBubble(); }, 1500);
+  }, reduced?50:450);
+  return false;
+}
+function flyFood(em, c, eaten){
+  const d = document.createElement('div'); d.className='flyfood'; d.textContent=em;
+  d.style.left = '48%'; d.style.top = '96%'; el.fx.appendChild(d);
+  requestAnimationFrame(()=>{ d.style.left = pct(c.x - 3); d.style.top = pct(c.y - 2); });
+  setTimeout(()=>{
+    if(eaten){ d.style.transform='scale(0)'; d.style.opacity='0'; setTimeout(()=>d.remove(), 400); }
+    else { d.style.setProperty('--dx', (Math.random()<.5?-1:1)*(18+Math.random()*10)+'cqw'); d.style.setProperty('--dy', (-(Math.random()*10)-8)+'cqw'); d.classList.add('bounce'); setTimeout(()=>d.remove(), 800); }
+  }, reduced?60:560);
+}
+el.menu.addEventListener('click', e => { const b = e.target.closest('.mitem'); if(b) feed(b.dataset.id); });
+
+/* ---------- Robo ---------- */
+function moveRobot(left, top, ms){
+  el.robot.style.left = pct(left); el.robot.style.top = typeof top==='number' ? pct(top) : top;
+  return wait(ms);
+}
+function robotSteam(){ el.steam.classList.remove('go'); void el.steam.offsetWidth; el.steam.classList.add('go'); Sound.steam(); }
+async function roboScoop(myRun, poop){
+  const alive = () => run === myRun;
+  const pr = poop.getBoundingClientRect(), sr = el.scene.getBoundingClientRect();
+  const px = (pr.left - sr.left)/sr.width*100, py = (pr.top - sr.top)/sr.height*100;
+  el.robot.classList.add('driving'); Sound.whirr(2.6);
+  roboSay(pick(ROBO_LINES));
+  await moveRobot(Math.max(0, px - 9), Math.max(0, py - 6), 1150); if(!alive()) return;
+  Sound.scoop(); poop.classList.add('gone');
+  for(let i=0;i<5;i++) spark(px+2, py+2, pick(['✨','💨','⭐']), 10);
+  await wait(500); if(!alive()) return;
+  setTimeout(()=>poop.remove(), 400);
+  // a little victory wiggle around
+  await moveRobot(Math.min(88, px + 6), Math.max(0, py - 6), 500); if(!alive()) return;
+  robotSteam();
+  await moveRobot(84, '5.5cqw', 1150); if(!alive()) return;
+  el.robot.classList.remove('driving');
+}
+
+/* ---------- main level flow ---------- */
+function startLevel(n){
+  run++; const myRun = run;
+  const cfg = levelConfig(n);
+  const {animals, zones} = pickAnimals(cfg);
+  G = {cfg, n, animals, zones, round:0, settled:0, step:'idle', animal:null, foods:[], correct:[], need:0, fed:[], wrongHabitat:0, wrongFood:0, busy:false,
+       stats:{questions:0,firstTry:0,wrong:0}, habitatResolve:null, feedResolve:null, factResolve:null, quiz:null, complete:false};
+  el.lvlChip.textContent = n; setZooBar();
+  renderZones(zones);
+  el.fx.innerHTML=''; el.scene.querySelectorAll('.poop').forEach(p=>p.remove());
+  el.crate.classList.remove('rolling','leaving'); el.crate.style.left='-22%';
+  el.animal.className='animal'; homeAnimal(); hideBubble(); setMood(null);
+  el.robot.style.left='84%'; el.robot.style.top='5.5cqw'; el.robot.classList.remove('driving');
+  hideOverlay();
+  coach(`Level ${n}. ${animals.length} animals are coming!`, '👩‍🌾');
+  loop(myRun);
+}
+async function loop(myRun){
+  for(const a of G.animals){
+    if(run !== myRun) return;
+    await animalRound(a, myRun);
+  }
+  if(run !== myRun) return;
+  if(G.cfg.quiz){ await quizRound(myRun); if(run !== myRun) return; }
+  finishLevel();
+}
+async function animalRound(a, myRun){
+  const alive = () => run === myRun;
+  const cfg = G.cfg;
+  G.animal = a; G.round++; G.wrongHabitat = 0; G.wrongFood = 0; G.fed = []; G.busy = false;
+
+  // ---- ARRIVE ----
+  G.step='arrive'; show('v-wait'); el.waitEm.textContent='📦'; el.waitText.textContent='A new animal is arriving…';
+  coach('A crate is coming! Who is inside?', '👩‍🌾', G.round===1 ? false : true);
+  el.animalBody.textContent = a.em; el.habEm.textContent = a.em; el.habName.textContent = a.name; el.habSound.textContent = a.sound;
+  el.animal.className='animal'; homeAnimal(); hideBubble(); setMood(null);
+  el.crate.classList.remove('leaving'); el.crate.style.transition='none'; el.crate.style.left='-22%'; void el.crate.offsetWidth; el.crate.style.transition='';
+  await wait(60); if(!alive()) return;
+  el.crate.classList.add('rolling'); el.crate.style.left = pct(CRATE_LEFT); Sound.whirr(1.6);
+  await wait(1650); if(!alive()) return;
+  el.crate.classList.remove('rolling');
+  Sound.pop(); el.animal.classList.add('on','popin');
+  await wait(300); if(!alive()) return;
+  bubble(`${a.sound}<span class="big">I’m ${art(a.name)}!</span>`, `${a.sound} I am ${art(a.name)}. Where do I live?`);
+
+  // ---- HABITAT ----
+  G.step='habitat'; show('v-habitat');
+  el.animal.classList.remove('popin'); el.animal.classList.add('bob','hint');
+  coach(`Where does the ${a.name.toLowerCase()} live? Drag it there.`, '👩‍🌾', false);
+  await new Promise(res => { G.habitatResolve = res; }); if(!alive()) return;
+  el.animal.classList.remove('bob','hint','selected'); clearHints();
+  el.crate.classList.add('leaving'); el.crate.style.left='110%';
+  await wait(900); if(!alive()) return;
+  hideBubble();
+
+  // ---- FEED ----
+  const {correct, foods} = makeFoods(cfg, a);
+  G.correct = correct; G.foods = foods; G.need = correct.length; G.fed = [];
+  el.bowls.innerHTML = correct.map(()=>`<div class="bowl"><span class="ghost">🥣</span></div>`).join('');
+  el.menu.innerHTML = foods.map(id=>`<button class="mitem" data-id="${id}" aria-label="${FOODS[id].name}"><span class="em">${FOODS[id].em}</span><span class="nm">${FOODS[id].name}</span></button>`).join('');
+  G.step='feed'; G.busy = false; show('v-feed'); setMood(null);
+  const line = G.need===1 ? `What does the ${a.name.toLowerCase()} eat? Tap the food.` : `What does the ${a.name.toLowerCase()} eat? Tap the food. Fill ${G.need} bowls.`;
+  coach(line, '🥣'); bubble(`I’m hungry! ${'🥣'.repeat(G.need)}`, null, 'I am hungry!');
+  await new Promise(res => { G.feedResolve = res; }); if(!alive()) return;
+  await wait(900); if(!alive()) return;
+  hideBubble(); setMood(null);
+
+  // ---- FACT ----
+  G.step='fact'; show('v-fact'); el.btnCool.classList.remove('pulse');
+  el.factEm.textContent = a.em; el.factText.textContent = a.fact;
+  bubble(`Did you know?<span class="big" style="font-size:1em">${a.fact}</span>`, null, `Did you know? ${a.fact}`);
+  coach(`Fun fact! ${a.fact}`, '💡', false); Voice.say(`Fun fact! ${a.fact}`, ()=>{ if(G && G.step==='fact') el.btnCool.classList.add('pulse'); });
+  await new Promise(res => { G.factResolve = res; }); if(!alive()) return;
+  Sound.pop(); hideBubble(); el.btnCool.classList.remove('pulse');
+
+  // ---- POOP + ROBO ----
+  G.step='clean'; show('v-clean'); el.cleanText.textContent = `Uh oh! The ${a.name.toLowerCase()} did a poop. Robo to the rescue!`;
+  coach('…toot… 💨', '🙈', false);
+  el.animal.classList.add('yuck'); setTimeout(()=>el.animal.classList.remove('yuck'), 700);
+  const c = animalCenter(); Sound.fart(); puff(c.x+4, c.y+2); Sound.plop();
+  const poop = document.createElement('div'); poop.className='poop'; poop.textContent='💩'; poop.style.left = pct(c.x + 4); poop.style.top = pct(c.y + 6); el.scene.appendChild(poop);
+  // animal settles into the zone as a resident
+  await wait(500); if(!alive()) return;
+  const res = zoneEl(a.habitat).querySelector('.residents'); const s = document.createElement('span'); s.textContent = a.em; res.appendChild(s);
+  el.animal.classList.remove('on'); G.settled++; setZooBar(); Sound.ding();
+  coach(`Robo is scooping the poop! ${G.settled} of ${G.animals.length} animals are home.`, '🤖', false);
+  await roboScoop(myRun, poop); if(!alive()) return;
+  await wait(300);
+}
+async function quizRound(myRun){
+  const alive = () => run === myRun;
+  const count = Math.min(G.cfg.quiz, G.animals.length);
+  const asked = shuffle(G.animals).slice(0, count);
+  for(let i=0;i<asked.length;i++){
+    const ans = asked[i];
+    const options = shuffle([ans].concat(shuffle(G.animals.filter(x=>x!==ans)).slice(0,2)));
+    G.step='quiz'; G.animal = ans; G.busy = false; G.quiz = {answer:ans.id, options:options.map(o=>o.id), attempts:0, answered:false};
+    show('v-quiz');
+    el.quizQ.innerHTML = `<b>Quiz ${i+1} of ${asked.length}.</b> Which animal is this? “${ans.fact}” Tap the animal.`;
+    el.quizMenu.innerHTML = options.map(o=>`<button class="mitem" data-id="${o.id}" aria-label="${o.name}"><span class="em">${o.em}</span><span class="nm">${o.name}</span></button>`).join('');
+    coach(`Which animal is this? Listen. ${ans.fact} Tap the animal.`, '🧠');
+    bubble('', null); hideBubble();
+    await new Promise(res => { G.quizResolve = res; }); if(!alive()) return;
+    G.quiz = null;
+    await wait(900); if(!alive()) return;
+  }
+  G.busy = false;
+}
+function answer(animalId){
+  if(!G || G.step!=='quiz' || !G.quiz || G.quiz.answered || G.busy || !G.quiz.options.includes(animalId)) return false;
+  const btn = el.quizMenu.querySelector(`.mitem[data-id="${animalId}"]`);
+  if(animalId === G.quiz.answer){
+    G.stats.questions++; if(G.quiz.attempts===0) G.stats.firstTry++;
+    if(btn) btn.classList.add('correct');
+    el.quizMenu.querySelectorAll('.mitem').forEach(b=>{ if(b!==btn) b.classList.add('done'); });
+    Sound.yay(); toast(pick(PRAISE)); coach(`Yes! It is the ${G.animal.name.toLowerCase()}!`, '🎉');
+    G.quiz.answered = true; G.busy = true; setTimeout(()=>{ const r = G.quizResolve; G.quizResolve=null; if(r) r(); }, reduced?50:400);
+    return true;
+  }
+  G.quiz.attempts++; G.stats.wrong++;
+  if(btn){ btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); }
+  Sound.oops();
+  coach(G.quiz.attempts>=2 ? `It is the ${G.animal.name.toLowerCase()}. Tap the ${G.animal.name.toLowerCase()}.` : `Not that one. Listen again. ${G.animal.fact}`, '🤗');
+  if(G.quiz.attempts>=2){ const right = el.quizMenu.querySelector(`.mitem[data-id="${G.quiz.answer}"]`); if(right) right.classList.add('wiggle'); }
+  return false;
+}
+el.quizMenu.addEventListener('click', e => { const b = e.target.closest('.mitem'); if(b) answer(b.dataset.id); });
+function next(){
+  if(!G) return false;
+  if(G.step==='fact' && G.factResolve){ const r = G.factResolve; G.factResolve=null; r(); return true; }
+  return false;
+}
+el.btnCool.addEventListener('click', next);
+
+/* ---------- level complete ---------- */
+function finishLevel(){
+  G.step='done'; G.complete = true;
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  progress.unlocked = Math.max(progress.unlocked, G.n+1);
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'You found every home and every food on the first try. Wow!' : stars===2 ? 'Great job! You know lots about animals.' : 'You looked after every animal! Play again to learn more.';
+  Sound.fanfare();
+  sittingLevels++;
+  const breakTime = sittingLevels >= 3;
+  const stats = `<div class="fact">Settled <b>${G.animals.length}</b> animals · <b>${s.firstTry}</b> of <b>${s.questions}</b> right first time</div>`;
+  const starsHTML = `<div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>`;
+  if(breakTime){
+    showOverlay(`<div class="hero">🐾🧘</div><h1>You’ve done ${sittingLevels} levels!</h1><h2>Time for a break?</h2>
+      <div class="zoo">${G.animals.map(a=>a.em).join(' ')}</div>${starsHTML}<p>${msg}</p>${stats}
+      <button class="bigbtn mint" id="btn-done">All done for today 👋</button>
+      <div class="rowbtns"><button class="subbtn" id="btn-next">Next level ▶</button><button class="subbtn" id="btn-replay">Play it again</button></div>`);
+    Voice.say(`You have done ${sittingLevels} levels! Time for a break? ${msg}`);
+  } else {
+    showOverlay(`<div class="hero">🏆🐾</div><h1>Zoo full!</h1><h2>Level ${G.n} done!</h2>
+      <div class="zoo">${G.animals.map(a=>a.em).join(' ')}</div>${starsHTML}<p>${msg}</p>${stats}
+      <button class="bigbtn" id="btn-next">Next level ▶</button>
+      <div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`);
+    Voice.say(`Zoo full! Level ${G.n} done! ${msg}`, ()=>{ const b = $('#btn-next'); if(b) b.classList.add('pulse'); });
+  }
+  $('#btn-next').addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null;
+  showOverlay(`<div class="hero">👋🌳</div><h1>Great work today!</h1>
+    <p>Stretch, drink some water, go look for a real animal outside. See you next time.</p>
+    <div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say('Great work today! Stretch, drink some water, go look for a real animal outside. See you next time.');
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null;
+  showOverlay(`<div class="hero">🦁🐧🤖</div><h1>Zookeeper</h1>
+    <p>Animals are coming in crates! Find each one a home. Feed it. Learn a fun fact. Then Robo scoops the poop!</p>
+    <div class="fact">Learn <b>🏠</b> habitats · <b>🥣</b> what animals eat · <b>💡</b> fun facts</div>
+    <button class="bigbtn" id="btn-play">Play! 🐾</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups 👋</button></div>
+    <p style="font-size:.85rem">Tip: tap any speech bubble to hear it again.</p>`);
+  $('#btn-grownups').addEventListener('click', showGrownups);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(progress.unlocked > LEVELS.length ? LEVELS.length : progress.unlocked); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+}
+function showGrownups(){
+  run++; G = null;
+  const rows = LEVELS.map((l,i)=>`<li><b>Level ${i+1} – ${l.title}:</b> ${l.animals} animals, ${l.zones} homes, ${l.maxCorrect===1?'one food each':'up to '+l.maxCorrect+' foods each'}${l.easyFoods?' (easy, obvious foods)':''}${l.tiers.includes(3)?' (tricky eaters: insects, plankton, omnivores)':''}${l.quiz?`, plus ${l.quiz} “which animal?” quiz question${l.quiz>1?'s':''} at the end`:''}.</li>`).join('');
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" style="text-align:left;font-weight:700"><p style="max-width:none;margin-bottom:8px"><b>What it teaches.</b> Each animal has three steps: <b>habitat</b> (drag or tap it into its home), <b>diet</b> (tap the foods it eats; empty bowls show how many) and a <b>fun fact</b> read aloud. Later levels finish with a listening quiz.</p>
+    <ul style="margin:0;padding-left:20px;line-height:1.45">${rows}</ul></div>
+    <div class="fact" style="text-align:left;font-weight:700"><b>How hints work.</b> There is no losing. After one wrong home the right home glows; after two, an arrow points to it. After two wrong foods the right food wiggles. If nothing happens for a while, the instruction is repeated and the thing to tap wiggles. Tap any speech bubble to hear it again. Stars: 3 for 80% first-try, 2 for 50%, else 1.</div>
+    <div class="fact" style="text-align:left;font-weight:700"><b>Wholesome, not addictive.</b> There are no streaks, timers, countdowns, daily rewards or notifications. Stars come only from accuracy – no random prizes or collectibles. The game never moves to the next level by itself; every finished level offers “All done for today”, and after three levels in one sitting it suggests a break first. Celebrations are short and silly, and the jokes are never at the child’s expense.</div>
+    <div class="fact" style="text-align:left;font-weight:700"><b>Privacy.</b> Nothing leaves the device. Progress, stars and the sound settings are saved only in this browser. No accounts, no ads, no internet needed.</div>
+    <div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null;
+  const count = Math.max(LEVELS.length, Math.min(progress.unlocked, LEVELS.length+3));
+  let cards=''; for(let n=1;n<=count;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops"><span>${c.animals} 🐾</span><span>${c.zones} 🏠</span>${c.quiz?'<span>🧠</span>':''}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level has more animals and more homes. Finish one to open the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar ---------- */
+function applyToggles(){
+  Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false;
+  const sb = $('#btn-sound'), vb = $('#btn-voice');
+  sb.classList.toggle('off', !Sound.enabled); sb.textContent = Sound.enabled?'🔊':'🔇'; vb.classList.toggle('off', !Voice.enabled);
+}
+applyToggles();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !Sound.enabled; Save.save(progress); applyToggles(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !Voice.enabled; Save.save(progress); applyToggles(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>Voice.force(coachLine));
+$('#coach-text').addEventListener('click', ()=>Voice.force(coachLine));
+[el.bubble, el.rbubble].forEach(b=>{ b.addEventListener('pointerdown', e=>e.stopPropagation()); b.addEventListener('click', e=>{ e.stopPropagation(); if(b.dataset.say) Voice.force(b.dataset.say); }); });
+(function initFullscreen(){
+  const b = $('#btn-full'), root = document.documentElement;
+  const req = root.requestFullscreen || root.webkitRequestFullscreen, can = !!req && (document.fullscreenEnabled !== false);
+  if(!can){ b.hidden = true; return; }
+  b.addEventListener('click', ()=>{
+    try{
+      if(document.fullscreenElement || document.webkitFullscreenElement){ (document.exitFullscreen || document.webkitExitFullscreen).call(document)?.catch?.(()=>{}); }
+      else { req.call(root)?.catch?.(()=>{}); }
+    }catch(e){}
+  });
+  document.addEventListener('fullscreenchange', ()=>{ b.textContent = document.fullscreenElement ? '⤡' : '⛶'; b.setAttribute('aria-label', document.fullscreenElement ? 'Leave full screen' : 'Full screen'); });
+})();
+
+/* ---------- idle nudge ---------- */
+let idleMs = 14000, idleTimer = null;
+function nudgeTarget(){
+  if(!G || el.overlay.classList.contains('on') || G.busy) return null;
+  if(G.step==='habitat') return [el.animal];
+  if(G.step==='feed') return [...el.menu.querySelectorAll('.mitem:not(.done)')];
+  if(G.step==='fact') return [el.btnCool];
+  if(G.step==='quiz') return [...el.quizMenu.querySelectorAll('.mitem:not(.done)')];
+  return null;
+}
+function nudge(){
+  const targets = nudgeTarget(); if(!targets) return false;
+  if(coachLine) Voice.say(coachLine);
+  targets.forEach(t=>{ t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2100); });
+  return true;
+}
+function armIdle(){ clearTimeout(idleTimer); idleTimer = setTimeout(()=>{ nudge(); armIdle(); }, idleMs); }
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev, armIdle, {passive:true}));
+armIdle();
+
+/* ---------- boot ---------- */
+function boot(data){
+  if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle();
+}
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+// debug / automation hooks
+window.__game = {
+  startLevel, placeIn, feed, next, answer, showLevels, showTitle, showGrownups, showGoodbye, nudge, get sittingLevels(){ return sittingLevels; },
+  clean:Voice.clean, get lastSpoken(){ return Voice.last; }, get voiceRate(){ return Voice.rate; }, get voiceEnabled(){ return Voice.enabled; }, get soundEnabled(){ return Sound.enabled; },
+  get idleMs(){ return idleMs; }, set idleMs(v){ idleMs = Math.max(200, +v||14000); armIdle(); },
+  data:{ANIMALS, HABITATS, FOODS, LEVELS},
+  get state(){
+    if(!G) return {step:'idle', level:null, animal:null};
+    return {level:G.n, title:G.cfg.title, step:G.step, round:G.round, total:G.animals.length, settled:G.settled, animal:G.animal, animals:G.animals.map(a=>a.id), zones:G.zones.slice(),
+      foods:G.foods.slice(), correctFoods:G.correct.slice(), needed:G.need, fed:G.fed.slice(), wrongHabitat:G.wrongHabitat, wrongFood:G.wrongFood, busy:G.busy,
+      stats:Object.assign({}, G.stats), quiz:G.quiz ? {answer:G.quiz.answer, options:G.quiz.options.slice(), attempts:G.quiz.attempts, answered:G.quiz.answered} : null, complete:G.complete};
+  }
+};
+})();
+</script>
+
+</body>
+</html>

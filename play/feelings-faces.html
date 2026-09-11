@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Feelings Faces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D; --lav:#E9E1FF; --rose:#FFD6E0;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+#app{max-width:1280px;margin:0 auto;padding-block:10px 16px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.3rem;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--mint);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--mint-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.brand{font-size:.72rem;font-weight:800;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.chip .rdots{display:inline-flex;gap:3px}.chip .rdots i{width:10px;height:10px;border-radius:50%;background:rgba(59,42,31,.15);display:inline-block}.chip .rdots i.done{background:var(--mint)}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#scene{position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:linear-gradient(#DDF3FF 0 55%,#FBE9CC 55%);box-shadow:var(--shadow)}
+.wall{position:absolute;inset:0 0 45% 0;background:repeating-linear-gradient(90deg,#E4F4FF 0 6cqw,#F2FAFF 6cqw 12cqw)}
+.trim{position:absolute;left:0;right:0;top:54%;height:2%;background:var(--wood-dark)}
+.floor{position:absolute;left:0;right:0;top:56%;bottom:0;background:repeating-conic-gradient(#FBE3BF 0 25%,#F3C89A 0 50%) 0 0/10cqw 10cqw}
+.window{position:absolute;left:6%;top:8%;width:20%;height:30%;background:linear-gradient(#9FDBFF,#DFF3FF);border:.8cqw solid #fff;border-radius:2cqw;box-shadow:0 .4cqw 0 rgba(59,42,31,.12)}
+.window::before{content:"";position:absolute;right:10%;top:12%;width:4.5cqw;height:4.5cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 2cqw rgba(255,200,61,.8)}
+.window::after{content:"☁️";position:absolute;left:8%;bottom:8%;font-size:3cqw}
+.plant{position:absolute;right:5%;top:22%;font-size:9cqw;line-height:1}
+.diner-sign{position:absolute;left:50%;top:5%;transform:translateX(-50%);background:#fff;border-radius:1.2cqw;padding:.4cqw 2cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.2cqw,16px);white-space:nowrap;color:var(--ketchup);box-shadow:0 .4cqw 0 rgba(59,42,31,.12)}
+.layer{position:absolute;inset:0;display:none}
+.layer.on{display:block}
+
+/* character: emoji face on a CSS body with body cues */
+.chars{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:6cqw;padding-bottom:6%}
+.char{position:relative;width:24cqw;display:flex;flex-direction:column;align-items:center;--skin:#E0A96D;transition:transform .3s}
+.char .face{font-size:13cqw;line-height:1;position:relative;z-index:2;filter:drop-shadow(0 .6cqw 0 rgba(59,42,31,.15));transition:transform .4s}
+.char .torso{width:12cqw;height:9cqw;background:var(--skin);border-radius:3cqw 3cqw 2cqw 2cqw;margin-top:-1.4cqw;position:relative;transition:transform .4s}
+.char .arm{position:absolute;top:1cqw;width:2.2cqw;height:7cqw;border-radius:1.2cqw;background:var(--skin);transform-origin:top center;transition:transform .4s}
+.char .arm.l{left:-2cqw;transform:rotate(18deg)}.char .arm.r{right:-2cqw;transform:rotate(-18deg)}
+.char .legs{display:flex;gap:2.4cqw;margin-top:-.6cqw}.char .legs i{width:2.6cqw;height:4cqw;background:var(--skin);border-radius:0 0 1.2cqw 1.2cqw;filter:brightness(.85);display:block;transition:transform .3s}
+.char .cue{position:absolute;inset:0;pointer-events:none;font-size:4cqw;line-height:1}
+.char .tag{margin-top:1.2cqw;background:#fff;border-radius:999px;padding:.3cqw 1.6cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.3cqw,16px);white-space:nowrap;box-shadow:0 .4cqw 0 rgba(59,42,31,.12);z-index:3}
+.char.big{width:34cqw}.char.big .face{font-size:19cqw}.char.big .torso{width:17cqw;height:12cqw}.char.big .arm{width:3cqw;height:9.5cqw;top:1.5cqw}.char.big .arm.l{left:-2.8cqw}.char.big .arm.r{right:-2.8cqw}.char.big .legs i{width:3.6cqw;height:5.5cqw}.char.big .legs{gap:3.4cqw}.char.big .cue{font-size:5cqw}
+.char.pick{cursor:pointer}
+.char.pick:active{transform:translateY(1cqw)}
+.char.chosen .face{transform:scale(1.15)}
+.char.fade{opacity:.35}
+.char.reveal{animation:nudge .55s 4}
+/* cues */
+.char[data-cue=slump] .torso{transform:rotate(4deg) translateY(.6cqw)}.char[data-cue=slump] .arm.l{transform:rotate(6deg) translateY(.5cqw)}.char[data-cue=slump] .arm.r{transform:rotate(-6deg) translateY(.5cqw)}.char[data-cue=slump] .face{transform:translateY(1cqw) rotate(-6deg)}
+.char[data-cue=slump] .cue::after{content:"💧";position:absolute;left:62%;top:28%;font-size:.7em;animation:drip 1.6s infinite}
+@keyframes drip{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(3cqw);opacity:0}}
+.char[data-cue=stomp] .legs i{animation:stomp .5s infinite alternate}.char[data-cue=stomp] .legs i:last-child{animation-delay:.25s}
+.char[data-cue=stomp] .arm.l{transform:rotate(40deg)}.char[data-cue=stomp] .arm.r{transform:rotate(-40deg)}
+.char[data-cue=stomp] .cue::before,.char[data-cue=stomp] .cue::after{content:"";position:absolute;bottom:1cqw;width:5cqw;height:2cqw;border-top:.5cqw solid var(--cocoa-soft);border-bottom:.5cqw solid var(--cocoa-soft);opacity:.7}
+.char[data-cue=stomp] .cue::before{left:-3cqw}.char[data-cue=stomp] .cue::after{right:-3cqw}
+@keyframes stomp{from{transform:translateY(0)}to{transform:translateY(-1.2cqw)}}
+.char[data-cue=shiver] .face,.char[data-cue=shiver] .torso{animation:shiver .12s infinite alternate}
+.char[data-cue=shiver] .arm.l{transform:rotate(-10deg)}.char[data-cue=shiver] .arm.r{transform:rotate(10deg)}
+.char[data-cue=shiver] .face{box-shadow:0 0 0 1.2cqw rgba(255,255,255,.7);border-radius:50%}
+@keyframes shiver{from{transform:translateX(-.4cqw)}to{transform:translateX(.4cqw)}}
+.char[data-cue=zzz] .cue::after{content:"z z z";position:absolute;right:-2cqw;top:6%;font-family:var(--display);font-weight:700;color:#6E8FB5;animation:zfloat 2s infinite}
+.char[data-cue=zzz] .face{transform:rotate(12deg) translateY(.8cqw)}.char[data-cue=zzz] .torso{transform:rotate(3deg)}
+@keyframes zfloat{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(-3cqw);opacity:0}}
+.char[data-cue=wide] .face{box-shadow:0 0 0 1.5cqw rgba(255,255,255,.85),0 0 0 2.5cqw rgba(255,200,61,.5);border-radius:50%;transform:scale(1.06)}
+.char[data-cue=wide] .arm.l{transform:rotate(60deg)}.char[data-cue=wide] .arm.r{transform:rotate(-60deg)}
+.char[data-cue=wide] .cue::after{content:"!";position:absolute;right:8%;top:2%;font-family:var(--display);font-weight:700;color:var(--ketchup);font-size:1.6em}
+.char[data-cue=still] .arm.l{transform:rotate(8deg)}.char[data-cue=still] .arm.r{transform:rotate(-8deg)}.char[data-cue=still] .face{animation:sway 3s infinite ease-in-out}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+.char[data-cue=wiggle] .face{animation:wig .35s infinite alternate}.char[data-cue=wiggle] .arm.l{transform:rotate(80deg)}.char[data-cue=wiggle] .arm.r{transform:rotate(-30deg)}
+@keyframes wig{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+.char[data-cue=armsup] .arm.l{transform:rotate(150deg)}.char[data-cue=armsup] .arm.r{transform:rotate(-150deg)}.char[data-cue=armsup] .face{transform:translateY(-.8cqw)}
+.char[data-cue=armsup] .cue::after{content:"✨";position:absolute;left:8%;top:4%;animation:twinkle 1.2s infinite alternate}
+@keyframes twinkle{from{opacity:.4;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+.char[data-cue=fidget] .arm.l{transform:rotate(-70deg);animation:fid .4s infinite alternate}.char[data-cue=fidget] .arm.r{transform:rotate(70deg);animation:fid .4s infinite alternate-reverse}
+@keyframes fid{from{transform:rotate(-70deg) translateX(0)}to{transform:rotate(-64deg) translateX(.4cqw)}}
+.char[data-cue=fidget] .cue::after{content:"💭";position:absolute;right:2%;top:0}
+.char[data-cue=hide] .face{transform:rotate(-14deg) translateX(-1cqw)}.char[data-cue=hide] .torso{transform:rotate(-6deg)}
+.char[data-cue=hide] .arm.l{transform:rotate(-120deg)}.char[data-cue=hide] .cue::after{content:"";position:absolute;left:28%;top:24%;width:14%;height:8%;border-radius:50%;background:rgba(255,120,150,.5)}
+.char[data-cue=jump]{animation:jump .6s infinite}.char[data-cue=jump] .arm.l{transform:rotate(150deg)}.char[data-cue=jump] .arm.r{transform:rotate(-150deg)}
+.char[data-cue=jump] .cue::after{content:"⭐";position:absolute;right:0;top:0;animation:twinkle 1s infinite alternate}
+@keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-2cqw)}}
+.char[data-cue=bounce] .face{animation:bob 1s infinite ease-in-out}.char[data-cue=bounce] .arm.l{transform:rotate(30deg)}.char[data-cue=bounce] .arm.r{transform:rotate(-30deg)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.8cqw)}}
+.char.wigglehappy .face{animation:happywig .45s 2}
+@keyframes happywig{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg) translateY(-.8cqw)}75%{transform:rotate(10deg) translateY(-.8cqw)}}
+.char .prop{position:absolute;font-size:6cqw;line-height:1;left:-6cqw;bottom:6cqw;z-index:3}
+.char.big .prop{font-size:8cqw;left:-8cqw}
+.storybox{position:absolute;left:4%;right:4%;top:8%;background:#fff;border-radius:2cqw;padding:1.2cqw 2cqw;font-weight:800;font-size:clamp(11px,2.6cqw,20px);text-align:center;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);line-height:1.25;cursor:pointer;z-index:5}
+.storybox .em{display:block;font-size:1.6em;margin-top:.1em;line-height:1.1}
+
+/* robo helper */
+.robo{position:absolute;right:3%;bottom:4%;width:12%;text-align:center;font-size:8cqw;line-height:1;z-index:4;cursor:pointer}
+.robo .bot{display:inline-block;position:relative;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
+.robo .ant{position:absolute;left:50%;top:-1.2cqw;width:.6cqw;height:2.4cqw;background:#8BA3B8;transform-origin:bottom center;margin-left:-.3cqw;border-radius:.3cqw}
+.robo .ant::after{content:"";position:absolute;left:50%;top:-1cqw;width:1.6cqw;height:1.6cqw;border-radius:50%;background:var(--ketchup);transform:translateX(-50%)}
+.robo.spin .ant{animation:antspin .35s linear 6}
+@keyframes antspin{to{transform:rotate(360deg)}}
+.robo.happy .bot{animation:happywig .45s 2}
+.robo .bubble{position:absolute;right:95%;bottom:80%;width:max-content;max-width:34cqw;background:#fff;border-radius:2cqw;padding:1cqw 1.4cqw;font-size:clamp(10px,2.1cqw,17px);font-weight:800;line-height:1.2;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:100% 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:left}
+.robo .bubble.show{opacity:1;transform:scale(1)}
+.robo .bubble::after{content:"";position:absolute;right:-1.2cqw;bottom:1.4cqw;border:1.4cqw solid transparent;border-left-color:#fff;border-right:0}
+
+/* body outline */
+.bodyout{position:absolute;left:50%;top:6%;transform:translateX(-50%);width:34cqw;height:88%;--skin:#E0A96D}
+.bodyout .part{position:absolute;border:0;padding:0;background:var(--skin);cursor:pointer;transition:box-shadow .3s,transform .2s;min-width:44px;min-height:44px}
+.bodyout .part:active{transform:scale(.96)}
+.bodyout .head{left:50%;top:0;width:14cqw;height:14cqw;margin-left:-7cqw;border-radius:50%;font-size:9cqw;line-height:1;display:grid;place-items:center}
+.bodyout .chest{left:50%;top:14cqw;width:14cqw;height:8cqw;margin-left:-7cqw;border-radius:3cqw 3cqw 0 0;background:#7FC8E8}
+.bodyout .tummy{left:50%;top:22cqw;width:14cqw;height:8cqw;margin-left:-7cqw;border-radius:0 0 3cqw 3cqw;background:#6BB6D9}
+.bodyout .hands{left:50%;top:15cqw;width:36cqw;height:12cqw;margin-left:-18cqw;background:none;pointer-events:none}
+.bodyout .hands::before,.bodyout .hands::after{content:"";position:absolute;top:0;width:4cqw;height:12cqw;border-radius:2cqw;background:var(--skin)}
+.bodyout .hands::before{left:6cqw;transform:rotate(20deg)}.bodyout .hands::after{right:6cqw;transform:rotate(-20deg)}
+.bodyout .hand{top:24cqw;width:12cqw;height:12cqw;border-radius:50%;background:var(--skin);font-size:4.5cqw;display:grid;place-items:center}
+.bodyout .hand.l{left:-3cqw}.bodyout .hand.r{right:-3cqw}
+.bodyout .feet{left:50%;top:30cqw;width:14cqw;height:12cqw;margin-left:-7cqw;background:none;display:flex;justify-content:space-between}
+.bodyout .feet::before,.bodyout .feet::after{content:"";width:5cqw;height:100%;background:var(--skin);border-radius:0 0 2.5cqw 2.5cqw;filter:brightness(.9)}
+.bodyout .part.glow{box-shadow:0 0 0 1cqw rgba(255,200,61,.55),0 0 3cqw 1cqw rgba(255,200,61,.9);animation:glowpulse 1.2s infinite alternate;z-index:2}
+.bodyout .feet.glow{box-shadow:none;filter:drop-shadow(0 0 1.5cqw rgba(255,200,61,1))}
+@keyframes glowpulse{from{transform:scale(1)}to{transform:scale(1.06)}}
+.bodyout .part.reveal::after{content:"👆";position:absolute;left:50%;top:100%;transform:translateX(-50%);font-size:5cqw;animation:tapb 1s infinite}
+@keyframes tapb{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,1.2cqw)}}
+.bodyout .who{position:absolute;left:50%;top:-1cqw;transform:translate(-50%,-100%);white-space:nowrap;background:#fff;border-radius:999px;padding:.3cqw 1.6cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.3cqw,16px);box-shadow:0 .4cqw 0 rgba(59,42,31,.12)}
+
+/* dragon breathing */
+.calmbg{position:absolute;inset:0;background:linear-gradient(#DCE9FF,#F5EEFF 60%,#FBE9CC)}
+.calmbg::before{content:"🌙";position:absolute;left:8%;top:8%;font-size:6cqw}
+.calmbg::after{content:"✨";position:absolute;right:12%;top:12%;font-size:4cqw;opacity:.7}
+.ring{position:absolute;left:38%;top:50%;width:40cqw;height:40cqw;margin:-20cqw 0 0 -20cqw;border-radius:50%;background:radial-gradient(circle,rgba(47,191,166,.28),rgba(47,191,166,.05) 65%,transparent 72%);transform:scale(.55);transition:transform 4s linear}
+.dragon{position:absolute;left:38%;top:50%;transform:translate(-50%,-50%) scale(1);font-size:22cqw;line-height:1;transition:transform 4s linear;filter:drop-shadow(0 1cqw 0 rgba(59,42,31,.15));transform-origin:center}
+.candle{position:absolute;left:72%;top:50%;transform:translate(-50%,-40%);font-size:14cqw;line-height:1}
+.flame{position:absolute;left:50%;top:-8%;width:5cqw;height:8cqw;margin-left:-2.5cqw;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 70%,#fff6c2,#FFC83D 45%,#F4552F 90%);box-shadow:0 0 3cqw 1cqw rgba(255,200,61,.6);transform-origin:50% 100%;transform:scale(1);transition:transform 6s linear;animation:flick .25s infinite alternate}
+@keyframes flick{from{filter:brightness(1)}to{filter:brightness(1.25)}}
+.flame.out{animation:none}
+.breathword{position:absolute;left:0;right:0;top:6%;text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(16px,5cqw,40px);color:var(--mint-dark);text-shadow:0 .4cqw 0 #fff}
+.breathdots{position:absolute;left:0;right:0;bottom:5%;text-align:center;font-size:4cqw;letter-spacing:.3em}
+.breathdots span{opacity:.3}.breathdots span.done{opacity:1}
+.puffs{position:absolute;left:52%;top:46%;font-size:5cqw;pointer-events:none}
+.puff{position:absolute;animation:puffgo 2.4s ease-out forwards;opacity:0}
+@keyframes puffgo{0%{transform:translate(0,0) scale(.5);opacity:0}20%{opacity:.9}100%{transform:translate(14cqw,-2cqw) scale(1.4);opacity:0}}
+
+/* odd one out / order */
+.orderslots{position:absolute;left:0;right:0;bottom:6%;display:flex;justify-content:center;gap:3cqw}
+.oslot{width:16cqw;height:16cqw;border-radius:3cqw;border:.6cqw dashed rgba(59,42,31,.3);background:rgba(255,255,255,.55);display:grid;place-items:center;font-size:9cqw;line-height:1;position:relative}
+.oslot .n{position:absolute;left:-.8cqw;top:-.8cqw;background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;border-radius:50%;width:4cqw;height:4cqw;font-size:2.4cqw;display:grid;place-items:center}
+.oslot.filled{border-style:solid;border-color:var(--mint);background:#E4FBF5;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.oarrow{align-self:center;font-size:5cqw;color:var(--cocoa-soft)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(18px,5cqw,44px);color:#fff;-webkit-text-stroke:.3cqw var(--mint-dark);paint-order:stroke fill;text-shadow:0 .5cqw 0 var(--mint-dark);opacity:0;animation:toast 1.4s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+.heart{position:absolute;font-size:4cqw;animation:heartgo 1.4s ease-out forwards;pointer-events:none;z-index:9}
+@keyframes heartgo{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px;cursor:pointer}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:8px 14px;min-height:60px;text-align:left;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1.25rem;font-weight:700;transition:transform .15s,opacity .3s}
+.choice .em{font-size:2rem;line-height:1;flex:none}
+.choice:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.choice.hmm{animation:hmm .5s}
+@keyframes hmm{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+.choice.fade{opacity:.4}
+.choice.reveal{box-shadow:0 4px 0 var(--mint-dark),0 0 0 4px rgba(47,191,166,.55);background:#E4FBF5;animation:nudge .55s 4}
+.choice.picked{background:#E4FBF5;box-shadow:0 4px 0 var(--mint-dark),0 0 0 3px var(--mint)}
+.choice.silly{background:#FFF6D6}
+.hintbox{display:none;background:#F3FBFF;border-radius:14px;padding:10px 12px;font-weight:800;font-size:.95rem;line-height:1.4}
+.hintbox.on{display:block}
+.hintbox .hf{font-size:2.2rem;line-height:1;display:block;margin-bottom:4px}
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark)}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.calmnote{text-align:center;font-weight:800;color:var(--cocoa-soft);font-size:.95rem}
+#btn-next[hidden],#btn-breathe[hidden]{display:none!important}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.2rem);color:var(--mint-dark);text-shadow:0 4px 0 #fff;font-weight:700}
+.card h2{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .hero .robohero{display:inline-block;cursor:pointer;position:relative}
+.card .hero .robohero.spin{animation:wig .3s 6 alternate}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .em{font-size:1.5rem;margin-top:auto}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.lv.calm{background:#EAF7FF}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}#grownups ul{margin:6px 0 0;padding-left:18px}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) and (orientation:portrait){#stage{grid-template-columns:1fr}#scene{width:min(100%,calc(34vh*16/9));margin-inline:auto}}
+@media (max-width:900px) and (orientation:landscape){#stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}}
+@media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.brand{display:none}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:44px;height:44px}}
+@media (max-width:600px) and (orientation:portrait){#app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}#scene{aspect-ratio:16/10;width:min(100%,calc(33vh*1.6));margin-inline:auto}#panel{padding:10px;gap:8px;min-height:0}.coach{padding:7px 10px}.coach p{font-size:.95rem}.coach .face{font-size:1.4rem}.coach .say{width:44px;height:44px}.choice{min-height:52px;padding:6px 12px;font-size:1.1rem}.choice .em{font-size:1.6rem}.bigbtn{padding:12px 14px;font-size:1.15rem}.hintbox{padding:6px 10px;font-size:.85rem}.hintbox .hf{font-size:1.6rem}}
+@media (orientation:landscape) and (max-height:560px){#app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.brand{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:44px;height:44px;font-size:1.1rem}#scene{width:min(100%,calc((100vh - 60px)*16/9));margin-inline:auto}#panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 60px);overflow:auto}.coach{padding:6px 10px}.coach p{font-size:.85rem}.coach .face{font-size:1.2rem}.coach .say{width:44px;height:44px}.choice{min-height:46px;padding:4px 10px;font-size:1rem;gap:8px}.choice .em{font-size:1.4rem}.bigbtn{padding:10px 12px;font-size:1.05rem}.hintbox{padding:5px 8px;font-size:.8rem}.hintbox .hf{font-size:1.4rem;margin-bottom:0}.calmnote{font-size:.8rem}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .dragon,.ring,.flame{transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Feelings Faces</span><span class="brand">Toot Toot Learning</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Round</small><span class="rdots" id="round-dots"></span></div>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Scene">
+      <div class="layer on" id="lay-diner">
+        <div class="wall"></div><div class="trim"></div><div class="floor"></div>
+        <div class="window"></div><span class="plant">🪴</span><span class="diner-sign">TOOT TOOT DINER</span>
+        <div class="storybox" id="story" hidden></div>
+        <div class="chars" id="chars"></div>
+        <div class="orderslots" id="oslots" hidden></div>
+      </div>
+      <div class="layer" id="lay-body">
+        <div class="wall"></div><div class="trim"></div><div class="floor"></div>
+        <div class="bodyout" id="bodyout">
+          <span class="who" id="body-who">🐰 Rosie</span>
+          <button class="part head" data-part="head" aria-label="Head"><span id="body-face">😟</span></button>
+          <div class="hands"></div>
+          <button class="part chest" data-part="chest" aria-label="Chest"></button>
+          <button class="part tummy" data-part="tummy" aria-label="Tummy"></button>
+          <button class="part hand l" data-part="hands" aria-label="Hands">✋</button>
+          <button class="part hand r" data-part="hands" aria-label="Hands">🤚</button>
+          <button class="part feet" data-part="feet" aria-label="Feet"></button>
+        </div>
+      </div>
+      <div class="layer" id="lay-calm">
+        <div class="calmbg"></div>
+        <div class="ring" id="ring"></div>
+        <div class="breathword" id="breathword">Tap to breathe with the dragon</div>
+        <div class="dragon" id="dragon">🐲</div>
+        <div class="puffs" id="puffs"></div>
+        <div class="candle" id="candle">🕯️<div class="flame" id="flame"></div></div>
+        <div class="breathdots" id="breathdots"></div>
+      </div>
+      <div class="robo" id="robo"><span class="bot">🤖<span class="ant"></span></span><div class="bubble" id="robo-bubble"></div></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach" id="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Hello! Let’s look at some feelings.</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="hintbox" id="hintbox"></div>
+      <div class="choices" id="choices"></div>
+      <button class="bigbtn mint" id="btn-breathe" hidden>Breathe in 🐲</button>
+      <button class="bigbtn mint" id="btn-next" hidden>Next ▶</button>
+      <div class="rowbtns" id="calmrow" hidden><button class="subbtn" id="btn-calm-done">I feel calm now</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+
+/* ---------- data ---------- */
+const CAST = [
+  {em:'🐻',name:'Benny Bear',he:'he',his:'his',him:'him',skin:'#C98B4B'},{em:'🐰',name:'Rosie Rabbit',he:'she',his:'her',him:'her',skin:'#F2D6E4'},
+  {em:'🦊',name:'Felix Fox',he:'he',his:'his',him:'him',skin:'#F0904B'},{em:'🐸',name:'Freddy Frog',he:'he',his:'his',him:'him',skin:'#8BD36F'},
+  {em:'🐷',name:'Penny Pig',he:'she',his:'her',him:'her',skin:'#F7B8C4'},{em:'🐵',name:'Momo Monkey',he:'he',his:'his',him:'him',skin:'#B98860'},
+  {em:'🐨',name:'Kiki Koala',he:'she',his:'her',him:'her',skin:'#B8B8C4'},{em:'🐯',name:'Toby Tiger',he:'he',his:'his',him:'him',skin:'#F5A542'},
+  {em:'🦁',name:'Leo Lion',he:'he',his:'his',him:'him',skin:'#E5B45A'},{em:'🐮',name:'Clara Cow',he:'she',his:'her',him:'her',skin:'#EDE3D2'},
+  {em:'🐼',name:'Pip Panda',he:'he',his:'his',him:'him',skin:'#DCDCDC'},{em:'🐶',name:'Daisy Dog',he:'she',his:'her',him:'her',skin:'#D9B382'}
+];
+const first = c => c.name.split(' ')[0];
+const FEEL = {
+  happy:    {word:'Happy',     face:'😀', faces:['😀','😄','😁','🙂'], cue:'bounce', tip:'Look at the mouth. Is it up or down? It is up, a big smile.'},
+  sad:      {word:'Sad',       face:'😢', faces:['😢','😞','🙁','😭'], cue:'slump',  tip:'Look at the mouth. Is it up or down? See the tear? The shoulders droop.'},
+  angry:    {word:'Angry',     face:'😠', faces:['😠','😡','😤'],      cue:'stomp',  tip:'Look at the eyebrows. They point down. The feet are stomping.'},
+  scared:   {word:'Scared',    face:'😨', faces:['😨','😱','😰'],      cue:'shiver', tip:'Look at the eyes. They are very wide. The body is shaking.'},
+  tired:    {word:'Tired',     face:'😴', faces:['😴','🥱','😪'],      cue:'zzz',    tip:'The eyes are closed. See the z z z? The head is leaning over.'},
+  surprised:{word:'Surprised', face:'😮', faces:['😮','😲','😯'],      cue:'wide',   tip:'The mouth is a big O. The eyes are wide. The arms fly up.'},
+  calm:     {word:'Calm',      face:'😊', faces:['😊','😌'],           cue:'still',  tip:'A soft little smile. The body is still and relaxed.'},
+  silly:    {word:'Silly',     face:'🤪', faces:['🤪','😜','😝'],      cue:'wiggle', tip:'The tongue is out and the face is wobbling. So silly!'},
+  proud:    {word:'Proud',     face:'😌', faces:['😌','🥳'],           cue:'armsup', tip:'The chin is up. The arms are up high. Sparkles!'},
+  worried:  {word:'Worried',   face:'😟', faces:['😟','😧'],           cue:'fidget', tip:'The eyebrows go up in the middle. The hands are fidgeting.'},
+  shy:      {word:'Shy',       face:'😳', faces:['😳','🫣'],           cue:'hide',   tip:'The cheeks are pink. The body is turning away, hiding a little.'},
+  excited:  {word:'Excited',   face:'🤩', faces:['🤩','😆'],           cue:'jump',   tip:'Star eyes! The body is jumping up and down.'}
+};
+const BASIC = ['happy','sad','angry','scared','tired','surprised','calm','silly'];
+const ALLF = Object.keys(FEEL);
+const ODD_GROUPS = [['happy','sad'],['sad','happy'],['angry','calm'],['scared','happy'],['tired','excited'],['surprised','tired'],['calm','angry'],['silly','sad'],['excited','sad'],['worried','happy']];
+const SCENES = [
+  {text:'{N}’s ice cream fell on the floor.', em:'🍦', feel:'sad', helps:['Give {him} a hug','Share your ice cream'], unkind:'Laugh at {N}'},
+  {text:'{N} got a big surprise party!', em:'🎉', feel:'surprised', helps:['Say “Happy birthday!”','Clap and cheer with {him}'], unkind:'Pop all the balloons'},
+  {text:'A loud crash came from the kitchen.', em:'💥', feel:'scared', helps:['Hold {his} hand','Say “It’s OK, it was just a pan.”'], unkind:'Shout BOO!'},
+  {text:'{N} waited a long, long time for pancakes.', em:'🥞', feel:'angry', helps:['Say “Waiting is hard.”','Bring the pancakes now'], unkind:'Eat {his} pancakes'},
+  {text:'{N} stayed up very late last night.', em:'🌙', feel:'tired', helps:['Find {him} a cosy chair','Talk in a quiet voice'], unkind:'Bang the pots and pans'},
+  {text:'{N} built a huge tower of cups!', em:'🥤', feel:'happy', helps:['Say “Wow, nice tower!”','Help build it taller'], unkind:'Knock the tower over'},
+  {text:'{N} is at the diner for the first time.', em:'🚪', feel:'shy', helps:['Say hello with a smile','Show {him} where to sit'], unkind:'Point and stare'},
+  {text:'{N} does not know where {his} mum is.', em:'❓', feel:'worried', helps:['Help {him} look','Say “Let’s ask a grown-up.”'], unkind:'Walk away'},
+  {text:'{N} is going on a train trip today!', em:'🚂', feel:'excited', helps:['Say “Have a great trip!”','Wave goodbye'], unkind:'Say “Trains are boring.”'},
+  {text:'{N} carried all the plates without dropping one.', em:'🍽️', feel:'proud', helps:['Say “Great job!”','Give {him} a high five'], unkind:'Say “So what?”'}
+];
+const BODY = [
+  {feel:'worried', part:'tummy', line:'{N} is nervous. {His} tummy feels fluttery.', face:'😟'},
+  {feel:'scared', part:'chest', line:'{N} is scared. {His} heart is beating fast.', face:'😨'},
+  {feel:'angry', part:'hands', line:'{N} is angry. {His} hands squeeze into fists.', face:'😠'},
+  {feel:'tired', part:'feet', line:'{N} is tired. {His} legs feel heavy.', face:'😴'},
+  {feel:'shy', part:'head', line:'{N} is shy. {His} face feels warm and pink.', face:'😳'},
+  {feel:'excited', part:'feet', line:'{N} is excited. {His} feet want to jump!', face:'🤩'},
+  {feel:'sad', part:'chest', line:'{N} is sad. {His} chest feels heavy.', face:'😢'},
+  {feel:'happy', part:'tummy', line:'{N} is happy. {His} tummy feels light and bubbly.', face:'😀'},
+  {feel:'surprised', part:'head', line:'{N} is surprised. {His} eyes go wide open.', face:'😮'}
+];
+const PART_NAME = {head:'head', chest:'chest', tummy:'tummy', hands:'hands', feet:'feet'};
+const PART_WHERE = {head:'is at the top', chest:'is up high, in the middle', tummy:'is in the middle', hands:'are at the ends of the arms', feet:'are at the very bottom'};
+const PART_ARE = {head:'is', chest:'is', tummy:'is', hands:'are', feet:'are'};
+const HELPS = [
+  {text:'Take a slow breath', em:'🌬️', does:'takes a slow, slow breath'},
+  {text:'Ask for a hug', em:'🤗', does:'asks for a hug'},
+  {text:'Say “I feel…”', em:'💬', does:'says “I feel {feelword}”'},
+  {text:'Get a drink of water', em:'💧', does:'gets a drink of water'},
+  {text:'Ask a grown-up', em:'🧑', does:'asks a grown-up for help'}
+];
+const BIG = [
+  {text:'{N}’s block tower fell down. {N} feels SO angry.', em:'🧱', feel:'angry', after:'😕', unkind:'Throw the blocks'},
+  {text:'{N}’s balloon floated away. {N} feels SO sad.', em:'🎈', feel:'sad', after:'🙁', unkind:'Hide under the table forever'},
+  {text:'The storm is loud. {N} feels SO scared.', em:'⛈️', feel:'scared', after:'😐', unkind:'Shout at the clouds'},
+  {text:'It is nearly {N}’s turn to sing. {N} feels SO worried.', em:'🎤', feel:'worried', after:'😐', unkind:'Run out the door'},
+  {text:'{N} wanted the red cup but got the blue one. {N} feels SO angry.', em:'🥤', feel:'angry', after:'😕', unkind:'Tip the cup on the floor'},
+  {text:'{N}’s friend went home early. {N} feels SO sad.', em:'👋', feel:'sad', after:'🙁', unkind:'Stomp on the sandwiches'}
+];
+const STORIES = [
+  {text:'{N} dropped {his} cup. Then {he} took a breath. Then Robo brought a new one.', seq:['sad','calm','happy']},
+  {text:'A dog barked at {N}. Then {he} held a hand. Then the dog wagged its tail.', seq:['scared','calm','happy']},
+  {text:'{N}’s tower fell. Then {he} took a big breath. Then {he} built it again, taller!', seq:['angry','calm','proud']},
+  {text:'{N} could not find {his} hat. Then {he} asked a grown-up. Then it was on {his} head all along!', seq:['worried','calm','silly']},
+  {text:'{N} was up late. Then {he} had a little rest. Then {he} was ready to play!', seq:['tired','calm','excited']}
+];
+const ROBO_LINES = ['I feel... buzzy?','My feeling is... beep?','I think I feel fizzy today.','Is “sparkly” a feeling?','I made a face! Was it a good one?','My antenna spins when I am happy.'];
+const PRAISE = ['Yes! Well done.','That’s it!','You read that face!','Good looking.','Nice one.','You got it.'];
+const LEVELS = [
+  {title:'Match the face',   em:'😀', types:['match'], feels:BASIC},
+  {title:'What happened?',   em:'🍦', types:['scene'], feels:BASIC},
+  {title:'Body clues',       em:'🫶', types:['body'],  feels:ALLF},
+  {title:'Dragon Breathing', em:'🐲', types:['breathe'], feels:ALLF, calm:true},
+  {title:'Same feeling, different faces', em:'🙂', types:['odd'], feels:ALLF},
+  {title:'Big feelings are OK', em:'🧱', types:['big'], feels:ALLF},
+  {title:'Feelings can change', em:'🌈', types:['order'], feels:ALLF},
+  {title:'Mixed',            em:'🎨', types:['match','scene','body','odd','big','order'], feels:ALLF}
+];
+const ROUNDS = 6, BREATHS = 3;
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0, attack=0.02} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+attack); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.1,slide:900}); },
+    tap(){ tone(440,0.06,{type:'triangle',gain:0.06,slide:520}); },
+    ding(){ tone(880,0.3,{gain:0.1}); tone(1318,0.45,{gain:0.07,delay:0.1}); },
+    yay(){ [523,659,784].forEach((f,i)=>tone(f,0.2,{type:'triangle',gain:0.1,delay:i*0.1})); },
+    hmm(){ tone(392,0.2,{type:'triangle',gain:0.07}); tone(349,0.28,{type:'triangle',gain:0.07,delay:0.18}); },
+    fanfare(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.28,{type:'triangle',gain:0.11,delay:i*0.14})); tone(1318,0.7,{type:'triangle',gain:0.1,delay:0.6}); },
+    chime(){ tone(659,0.5,{gain:0.06}); tone(988,0.7,{gain:0.05,delay:0.15}); },
+    beepToot(){ tone(880,0.12,{type:'square',gain:0.05}); tone(1320,0.12,{type:'square',gain:0.05,delay:0.15}); tone(220,0.35,{type:'sawtooth',gain:0.08,slide:150,delay:0.4}); },
+    breathIn(dur){ const c=ensure(); if(!c||!enabled) return; const t=c.currentTime; const o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(220,t); o.frequency.linearRampToValueAtTime(440,t+dur); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.07,t+dur*0.5); g.gain.linearRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+0.05); },
+    hold(dur){ tone(440,dur,{gain:0.03}); },
+    breathOut(dur){ noise(dur,{gain:0.05,from:1800,to:300,attack:dur*0.3}); }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootFeelingsFaces')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootFeelingsFaces', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), chars:$('#chars'), story:$('#story'), oslots:$('#oslots'), robo:$('#robo'), roboBubble:$('#robo-bubble'),
+  bodyout:$('#bodyout'), bodyWho:$('#body-who'), bodyFace:$('#body-face'),
+  ring:$('#ring'), dragon:$('#dragon'), flame:$('#flame'), breathword:$('#breathword'), breathdots:$('#breathdots'), puffs:$('#puffs'),
+  coach:$('#coach'), coachText:$('#coach-text'), coachFace:$('#coach-face'), hintbox:$('#hintbox'), choices:$('#choices'),
+  btnNext:$('#btn-next'), btnBreathe:$('#btn-breathe'), calmrow:$('#calmrow'),
+  lvlChip:$('#lvl-chip'), roundDots:$('#round-dots'), overlay:$('#overlay'), card:$('#card')
+};
+
+/* ---------- game state ---------- */
+let G = null;          // current level run
+let run = 0;           // token so abandoned runs stop
+let coachLine = '';
+let levelsThisSitting = 0; // in memory only, never saved: used to suggest a break, never to block
+let idleMs = 14000;
+let fast = false;      // test hook: shortens breathing timings
+const T = ms => fast ? Math.max(30, ms/25) : ms;
+
+/* ---------- idle nudge ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < idleMs) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- helpers ---------- */
+function layer(id){ document.querySelectorAll('.layer').forEach(l=>l.classList.toggle('on', l.id===id)); }
+function coach(text, face, speak=true){ coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face; if(speak) Voice.say(text); }
+function hint(html, speak){ el.hintbox.innerHTML = html; el.hintbox.classList.add('on'); if(speak) Voice.say(speak); }
+function clearHint(){ el.hintbox.classList.remove('on'); el.hintbox.innerHTML=''; }
+function toast(text){ const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1500); }
+function hearts(x, y, n=6){ for(let i=0;i<n;i++){ const h=document.createElement('span'); h.className='heart'; h.textContent=pick(['💛','💚','✨','💙']); h.style.left=x+'%'; h.style.top=y+'%'; h.style.setProperty('--dx',(rnd(-14,14))+'cqw'); h.style.setProperty('--dy',(rnd(-16,-6))+'cqw'); el.fx.appendChild(h); setTimeout(()=>h.remove(),1500); } }
+function fill(str, c, extra={}){ return str.replace(/\{N\}/g, first(c)).replace(/\{he\}/g, c.he).replace(/\{He\}/g, cap(c.he)).replace(/\{his\}/g, c.his).replace(/\{His\}/g, cap(c.his)).replace(/\{him\}/g, c.him).replace(/\{feelword\}/g, extra.feelword||''); }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function roboSay(text, spin){ el.roboBubble.textContent = text; el.roboBubble.classList.add('show'); if(spin){ el.robo.classList.remove('spin'); void el.robo.offsetWidth; el.robo.classList.add('spin'); setTimeout(()=>el.robo.classList.remove('spin'),2200); } setTimeout(()=>el.roboBubble.classList.remove('show'), 3500); }
+function roboHappy(){ el.robo.classList.remove('happy'); void el.robo.offsetWidth; el.robo.classList.add('happy'); }
+function updateChips(){ if(!G) return; el.lvlChip.textContent = G.calm ? '🐲' : G.n; el.roundDots.innerHTML = G.calm ? '<i class="done"></i>' : Array.from({length:G.total},(_,i)=>`<i class="${i<G.round?'done':''}"></i>`).join(''); }
+function charHTML(c, feelKey, opts={}){
+  const f = FEEL[feelKey]; const face = opts.face || f.face; const cue = opts.cue === undefined ? f.cue : opts.cue;
+  return `<div class="char ${opts.big?'big':''} ${opts.pick?'pick':''}" data-cue="${cue}" data-key="${opts.key||''}" style="--skin:${c.skin}" ${opts.pick?'role="button" tabindex="0" aria-label="'+first(c)+'"':''}>
+    ${opts.prop?`<span class="prop">${opts.prop}</span>`:''}
+    <div class="face">${face}</div><div class="torso"><span class="arm l"></span><span class="arm r"></span></div><div class="legs"><i></i><i></i></div><div class="cue"></div>
+    <div class="tag">${c.em} ${first(c)}</div></div>`;
+}
+function choiceHTML(items){ return items.map(it=>`<button class="choice ${it.silly?'silly':''}" data-text="${it.text.replace(/"/g,'&quot;')}" aria-label="${Voice.clean(it.text)}"><span class="em">${it.em}</span><span>${it.text}</span></button>`).join(''); }
+function setChoices(items, onPick){
+  el.choices.innerHTML = choiceHTML(items);
+  el.choices.onclick = e => { const b = e.target.closest('.choice'); if(!b || !G || !G.q) return; lastAction = performance.now(); onPick(b.dataset.text, b); };
+}
+function wiggleHappy(){ el.chars.querySelectorAll('.char').forEach(ch=>{ ch.classList.remove('wigglehappy'); void ch.offsetWidth; ch.classList.add('wigglehappy'); }); }
+function markFirstTry(){ G.stats.questions++; if(G.q.wrong===0) G.stats.firstTry++; }
+let showNext = function(text){ el.btnNext.textContent = text || 'Next ▶'; el.btnNext.hidden = false; setNudge(el.btnNext, 'Tap Next when you are ready.'); };
+
+/* ---------- level flow ---------- */
+function startLevel(n){
+  run++; Sound.ensure(); hideOverlay();
+  n = Math.max(1, Math.min(LEVELS.length, n));
+  const cfg = LEVELS[n-1];
+  G = {n, cfg, round:0, total: cfg.calm ? BREATHS : ROUNDS, stats:{questions:0,firstTry:0}, q:null, calm:false, breaths:0, breathing:false, done:false};
+  updateChips(); nextRound();
+}
+function startCalm(){
+  run++; Sound.ensure(); hideOverlay();
+  G = {n:4, cfg:LEVELS[3], round:1, total:BREATHS, stats:{questions:0,firstTry:0}, q:null, calm:true, breaths:0, breathing:false, done:false};
+  updateChips(); resetPanel(); roundBreathe();
+}
+function resetPanel(){
+  el.choices.innerHTML=''; el.choices.onclick=null; el.chars.onclick=null; clearHint(); el.btnNext.hidden=true; el.btnBreathe.hidden=true; el.calmrow.hidden=true;
+  el.story.hidden=true; el.oslots.hidden=true; el.chars.innerHTML=''; el.fx.innerHTML=''; el.robo.style.display=''; setNudge(null);
+  el.bodyout.querySelectorAll('.part').forEach(p=>p.classList.remove('glow','reveal'));
+}
+function nextRound(){
+  if(!G || G.calm) return;
+  if(G.round >= G.total){ finishLevel(); return; }
+  resetPanel(); G.round++; updateChips();
+  const types = G.cfg.types; const type = types.length===1 ? types[0] : pick(types.filter(t=>t!==G.lastType)); G.lastType = type;
+  ({match:roundMatch, scene:roundScene, body:roundBody, breathe:roundBreathe, odd:roundOdd, big:roundBig, order:roundOrder})[type]();
+  if(type!=='breathe' && G.round % 3 === 2){ const myRun = run; setTimeout(()=>{ if(G && run===myRun) roboSay(pick(ROBO_LINES), true); }, 1500); }
+}
+function distractors(key, n=2){
+  const pos = ['happy','excited','proud','surprised','calm','silly'];
+  const pool = ALLF.filter(k => k!==key && (pos.includes(key) ? !pos.includes(k) : pos.includes(k) || k==='calm'));
+  return shuffle(pool).slice(0, n);
+}
+/* a shared way to handle taps on choice cards: never "wrong", hint then reveal */
+function handleChoice(text, b, ok, onOk, onWrongText){
+  const q = G.q; if(q.solved) return;
+  const btns = [...el.choices.children];
+  const match = t => btns.find(x => x.dataset.text.toLowerCase() === String(t).toLowerCase());
+  b = b || match(text);
+  if(ok){ q.solved = true; markFirstTry(); Sound.ding(); if(b){ b.classList.add('picked'); btns.filter(x=>x!==b).forEach(x=>x.classList.add('fade')); } clearHint(); roboHappy(); onOk(); return; }
+  q.wrong++; Sound.hmm(); if(b){ b.classList.remove('hmm'); void b.offsetWidth; b.classList.add('hmm'); }
+  if(q.wrong === 1){ coach(onWrongText(text), '🤖'); if(q.hintFace) hint(`<span class="hf">${q.hintFace}</span>Look closely 👀`); setNudge(()=>btns, coachLine); return; }
+  const target = match(q.answer);
+  btns.forEach(x=>x.classList.toggle('fade', x!==target)); if(target) target.classList.add('reveal');
+  coach(q.revealText || `It’s ${q.answer}. Tap ${q.answer}.`, '🤖'); setNudge(()=>[target], coachLine);
+}
+
+/* ---------- 1. match the face ---------- */
+function roundMatch(){
+  const c = pick(CAST); const feels = G.cfg.feels; const key = pick(feels.filter(k=>k!==G.lastFeel)); G.lastFeel = key;
+  const opts = shuffle([key, ...distractors(key)]).map(k=>({text:FEEL[k].word, em:FEEL[k].face}));
+  layer('lay-diner'); el.chars.innerHTML = charHTML(c, key, {big:true});
+  G.q = {type:'match', answer:FEEL[key].word, answers:[FEEL[key].word], wrong:0, solved:false, hintFace:FEEL[key].face};
+  coach(`How does ${first(c)} feel? Tap the word.`, '🤖');
+  G.q.onChoose = (text, b) => handleChoice(text, b, text.toLowerCase()===FEEL[key].word.toLowerCase(),
+    ()=>{ coach(`${FEEL[key].word}! Yes. ${first(c)} feels ${FEEL[key].word.toLowerCase()}.`, '🤖'); hearts(50,40); wiggleHappy(); showNext(); },
+    t => `${t}? Hmm. ${FEEL[key].tip}`);
+  setChoices(opts, G.q.onChoose);
+  setNudge(()=>[...el.choices.children], coachLine);
+}
+
+/* ---------- 2. what happened? ---------- */
+function roundScene(){
+  const c = pick(CAST); const sc = pick(SCENES.filter(s=>G.cfg.feels.includes(s.feel) && s!==G.lastScene)); G.lastScene = sc;
+  const key = sc.feel, story = fill(sc.text, c);
+  layer('lay-diner'); el.story.hidden=false; el.story.innerHTML = `${story}<span class="em">${sc.em}</span>`;
+  el.chars.innerHTML = charHTML(c, key, {big:true, face:'😶', cue:'still', prop:sc.em});
+  const opts = shuffle([key, ...distractors(key)]).map(k=>({text:FEEL[k].word, em:FEEL[k].face}));
+  G.q = {type:'scene', answer:FEEL[key].word, answers:[FEEL[key].word], wrong:0, solved:false, hintFace:sc.em};
+  coach(`${story} How does ${first(c)} feel?`, '🤖');
+  G.q.onChoose = (text, b) => handleChoice(text, b, text.toLowerCase()===FEEL[key].word.toLowerCase(),
+    ()=>{ el.chars.innerHTML = charHTML(c, key, {big:true, prop:sc.em}); coach(`${FEEL[key].word}. Yes, ${first(c)} feels ${FEEL[key].word.toLowerCase()}. What could help?`, '🤖'); showNext('What could help? ▶'); el.btnNext.onclick = ()=>sceneHelp(c, sc); },
+    t => `${t}? Hmm. ${story} Think about ${first(c)}. ${FEEL[key].tip}`);
+  setChoices(opts, G.q.onChoose);
+  setNudge(()=>[...el.choices.children], coachLine);
+}
+function sceneHelp(c, sc){
+  el.btnNext.hidden = true; el.btnNext.onclick = null; clearHint();
+  const helps = sc.helps.map(h=>fill(h,c)); const unkind = fill(sc.unkind, c);
+  const opts = shuffle([...helps.map(h=>({text:h, em:'💛'})), {text:unkind, em:'🙃', silly:true}]);
+  G.q = {type:'scene-help', answer:helps[0], answers:helps, wrong:0, solved:false, revealText:`Try “${helps[0]}”. Tap it.`};
+  coach(`What could help ${first(c)}? Tap a kind idea.`, '🤖');
+  G.q.onChoose = (text, b) => handleChoice(text, b, helps.some(h=>h.toLowerCase()===text.toLowerCase()),
+    ()=>{ const better = ['happy','excited','proud','surprised','silly','calm'].includes(sc.feel) ? FEEL[sc.feel].face : '🙂';
+      el.chars.innerHTML = charHTML(c, sc.feel, {big:true, face:better, cue:'bounce', prop:sc.em}); coach(`${text}. That is kind. ${first(c)} feels a bit better.`, '🤖'); hearts(50,40); wiggleHappy(); showNext(); },
+    t => `Hmm, “${t}”? That might make ${c.him} feel worse. Try again.`);
+  setChoices(opts, G.q.onChoose);
+  setNudge(()=>[...el.choices.children], coachLine);
+}
+
+/* ---------- 3. body clues ---------- */
+function roundBody(){
+  const c = pick(CAST); const item = pick(BODY.filter(b=>b!==G.lastBody)); G.lastBody = item;
+  layer('lay-body'); el.bodyout.style.setProperty('--skin', c.skin); el.bodyWho.textContent = `${c.em} ${first(c)}`; el.bodyFace.textContent = item.face;
+  const parts = [...el.bodyout.querySelectorAll('.part')]; const targets = parts.filter(p=>p.dataset.part===item.part);
+  targets.forEach(p=>p.classList.add('glow'));
+  const line = fill(item.line, c);
+  G.q = {type:'body', answer:item.part, answers:[item.part], wrong:0, solved:false};
+  coach(`${line} Tap ${c.his} ${PART_NAME[item.part]}.`, '🤖');
+  hint(`<span class="hf">${item.face}</span>Feelings live in the body. Where does ${first(c)} feel it?`);
+  G.q.onTap = part => {
+    const q = G.q; if(q.solved) return;
+    if(part === item.part){
+      q.solved = true; markFirstTry(); Sound.ding(); targets.forEach(p=>p.classList.remove('reveal')); roboHappy();
+      coach(`Yes! ${first(c)} feels it in ${c.his} ${PART_NAME[part]}. Feelings live in our bodies.`, '🤖'); hearts(50,50); showNext(); return;
+    }
+    q.wrong++; Sound.hmm();
+    if(q.wrong === 1){ coach(`${PART_ARE[part]==='are'?'Those are':'That is'} ${c.his} ${PART_NAME[part]}. ${cap(c.his)} ${PART_NAME[item.part]} ${PART_WHERE[item.part]}. Look for the glow.`, '🤖'); return; }
+    targets.forEach(p=>p.classList.add('reveal')); coach(`Tap the glowing ${PART_NAME[item.part]}, with the pointing finger.`, '🤖');
+  };
+  setNudge(()=>targets, coachLine);
+}
+
+/* ---------- 4. dragon breathing ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function roundBreathe(){
+  layer('lay-calm'); el.robo.style.display='none';
+  el.breathdots.innerHTML = Array.from({length:BREATHS},(_,i)=>`<span class="${i<G.breaths?'done':''}">🐲</span>`).join('');
+  G.q = {type:'breathe', answer:'breathe', answers:['breathe'], wrong:0, solved:false, phase:'ready'};
+  el.btnBreathe.hidden = false; el.btnBreathe.textContent = G.breaths ? 'Breathe again 🐲' : 'Breathe in 🐲';
+  el.breathword.textContent = 'Tap to breathe with the dragon';
+  if(G.calm){ el.calmrow.hidden = false; coach(G.breaths ? 'Breathe again, or tap “I feel calm now”.' : 'Welcome to the calm corner. Tap the button. Breathe in while the dragon grows.', '🐲'); }
+  else coach(G.breaths ? 'Ready for another breath? Tap the button.' : 'Meet the dragon. Tap the button. Breathe in while the dragon grows.', '🐲');
+  setNudge(el.btnBreathe, 'Tap the button to breathe with the dragon.');
+}
+async function doBreath(){
+  if(!G || !G.q || G.q.type!=='breathe' || G.breathing) return;
+  const myRun = run; G.breathing = true; G.q.solved = false; G.q.phase = 'in';
+  el.btnBreathe.hidden = true; el.btnNext.hidden = true; setNudge(null);
+  const IN = T(4000), HOLD = T(2000), OUT = T(6000);
+  el.breathword.textContent = 'Breathe in…'; coach('Breathe in. The dragon grows.', '🐲'); Sound.breathIn(IN/1000);
+  el.dragon.style.transitionDuration = el.ring.style.transitionDuration = IN+'ms';
+  el.dragon.style.transform = 'translate(-50%,-50%) scale(1.4)'; el.ring.style.transform = 'scale(1)';
+  await sleep(IN); if(run!==myRun) return;
+  G.q.phase = 'hold'; el.breathword.textContent = 'Hold…'; coach('Hold.', '🐲'); Sound.hold(HOLD/1000);
+  await sleep(HOLD); if(run!==myRun) return;
+  G.q.phase = 'out'; el.breathword.textContent = 'Breathe out… blow the flame gently'; coach('Breathe out. Blow the flame gently.', '🐲'); Sound.breathOut(OUT/1000);
+  el.dragon.style.transitionDuration = el.ring.style.transitionDuration = el.flame.style.transitionDuration = OUT+'ms';
+  el.dragon.style.transform = 'translate(-50%,-50%) scale(1)'; el.ring.style.transform = 'scale(.55)'; el.flame.style.transform = 'scale(.25)';
+  for(let i=0;i<4;i++){ const p=document.createElement('span'); p.className='puff'; p.textContent='💨'; p.style.top=(i*1.5)+'cqw'; p.style.animationDelay=(i*OUT/5)+'ms'; el.puffs.appendChild(p); setTimeout(()=>p.remove(), OUT+2500); }
+  await sleep(OUT); if(run!==myRun) return;
+  el.flame.style.transitionDuration = '900ms'; el.flame.style.transform = 'scale(1)';
+  G.breaths++; G.breathing = false; G.q.solved = true; G.q.phase = 'done'; Sound.chime();
+  el.breathdots.querySelectorAll('span').forEach((s,i)=>s.classList.toggle('done', i<G.breaths));
+  el.breathword.textContent = 'Lovely.';
+  if(G.calm){ coach('Lovely. Breathe again, or tap “I feel calm now”.', '🐲'); el.btnBreathe.hidden = false; el.btnBreathe.textContent = 'Breathe again 🐲'; setNudge(null); return; }
+  if(G.breaths < BREATHS){ coach('Nice and slow. Well done.', '🐲'); showNext('Next breath ▶'); }
+  else { coach('Three calm breaths. Your dragon is sleepy and happy.', '🐲'); showNext(); }
+}
+
+/* ---------- 5. same feeling, different faces ---------- */
+function roundOdd(){
+  const grp = pick(ODD_GROUPS.filter(g=>g!==G.lastOdd)); G.lastOdd = grp; const [same, odd] = grp;
+  const cs = shuffle(CAST).slice(0,3); const oddIdx = rnd(0,2);
+  const faces = shuffle(FEEL[same].faces).slice(0,2); if(faces.length<2) faces.push(faces[0]);
+  let fi = 0;
+  el.chars.innerHTML = cs.map((c,i)=> i===oddIdx ? charHTML(c, odd, {pick:true, key:first(c)}) : charHTML(c, same, {pick:true, key:first(c), face:faces[fi++]})).join('');
+  layer('lay-diner');
+  const ans = first(cs[oddIdx]);
+  G.q = {type:'odd', answer:ans, answers:[ans], wrong:0, solved:false, revealText:`It’s ${ans}. ${ans} feels ${FEEL[odd].word.toLowerCase()}. Tap ${ans}.`};
+  coach(`Two friends feel ${FEEL[same].word.toLowerCase()}. One feels different. Tap the odd one out.`, '🤖');
+  const charOf = name => el.chars.querySelector(`.char[data-key="${name}"]`);
+  G.q.onChoose = (text, b) => handleChoice(text, b, text.toLowerCase()===ans.toLowerCase(),
+    ()=>{ cs.forEach(c=>{ const ch=charOf(first(c)); if(ch) ch.classList.toggle('fade', first(c)!==ans); }); const ch=charOf(ans); if(ch){ ch.classList.remove('reveal'); ch.classList.add('chosen'); }
+      coach(`Yes! ${ans} feels ${FEEL[odd].word.toLowerCase()}. The others feel ${FEEL[same].word.toLowerCase()}, with different faces.`, '🤖'); hearts(50,40); wiggleHappy(); showNext(); },
+    t => `${t} feels ${FEEL[same].word.toLowerCase()}, just like another friend. Look at the mouths and eyes. Which one is different?`);
+  const after = () => { if(G.q.wrong>=2 && !G.q.solved){ const ch=charOf(ans); if(ch) ch.classList.add('reveal'); } };
+  setChoices(cs.map(c=>({text:first(c), em:c.em})), (t,b)=>{ G.q.onChoose(t,b); after(); });
+  el.chars.onclick = e => { const ch = e.target.closest('.char'); if(!ch || !G.q) return; lastAction = performance.now(); G.q.onChoose(ch.dataset.key, null); after(); };
+  setNudge(()=>[...el.chars.querySelectorAll('.char')], coachLine);
+}
+
+/* ---------- 6. big feelings are OK ---------- */
+function roundBig(){
+  const c = pick(CAST); const b = pick(BIG.filter(x=>x!==G.lastBig)); G.lastBig = b; const story = fill(b.text, c);
+  layer('lay-diner'); el.story.hidden=false; el.story.innerHTML = `${story}<span class="em">${b.em}</span>`;
+  el.chars.innerHTML = charHTML(c, b.feel, {big:true, prop:b.em});
+  const helps = shuffle(HELPS).slice(0,2); const unkind = fill(b.unkind, c);
+  const opts = shuffle([...helps.map(h=>({text:h.text, em:h.em})), {text:unkind, em:'🙃', silly:true}]);
+  G.q = {type:'big', answer:helps[0].text, answers:helps.map(h=>h.text), wrong:0, solved:false, revealText:`Try “${helps[0].text}”. Tap it.`};
+  coach(`${story} Big feelings are OK. What could help? Tap one.`, '🤖');
+  G.q.onChoose = (text, b2) => { const h = helps.find(x=>x.text.toLowerCase()===text.toLowerCase());
+    handleChoice(text, b2, !!h,
+      async ()=>{ const myRun = run; el.chars.innerHTML = charHTML(c, b.feel, {big:true, face:FEEL[b.feel].face, cue:'still', prop:h.em});
+        coach(`${first(c)} ${fill(h.does, c, {feelword:FEEL[b.feel].word.toLowerCase()})}.`, '🤖');
+        await wait(1800); if(run!==myRun) return;
+        el.chars.innerHTML = charHTML(c, b.feel, {big:true, face:b.after, cue:'still', prop:h.em});
+        coach(`${first(c)} ${fill(h.does, c, {feelword:FEEL[b.feel].word.toLowerCase()})}. ${cap(c.he)} feels a little better. Not all better yet, and that is OK.`, '🤖'); hearts(50,45,4); wiggleHappy(); showNext(); },
+      t => `Hmm. “${t}”? That might make the feeling bigger. Try something kind.`); };
+  setChoices(opts, G.q.onChoose);
+  setNudge(()=>[...el.choices.children], coachLine);
+}
+
+/* ---------- 7. feelings can change ---------- */
+function roundOrder(){
+  const c = pick(CAST); const st = pick(STORIES.filter(s=>s!==G.lastStory)); G.lastStory = st; const story = fill(st.text, c);
+  const seq = st.seq, words = seq.map(k=>FEEL[k].word);
+  layer('lay-diner'); el.story.hidden=false; el.story.innerHTML = story;
+  el.chars.innerHTML = charHTML(c, seq[0], {big:true, face:'😶', cue:'still'});
+  el.oslots.hidden=false; el.oslots.innerHTML = seq.map((k,i)=>`<div class="oslot" data-i="${i}"><span class="n">${i+1}</span></div>`).join('<span class="oarrow">→</span>');
+  const slots = [...el.oslots.querySelectorAll('.oslot')];
+  const ORD = ['First','Then','At the end'];
+  G.q = {type:'order', step:0, answer:words[0], answers:words.slice(), wrong:0, solved:false, hintFace:FEEL[seq[0]].face};
+  coach(`${story} Put the faces in order. First, how did ${first(c)} feel?`, '🤖');
+  G.q.onChoose = (text, b) => {
+    const q = G.q; if(q.solved) return; const i = q.step; const want = words[i];
+    const btns = [...el.choices.children]; b = b || btns.find(x=>x.dataset.text.toLowerCase()===String(text).toLowerCase());
+    if(String(text).toLowerCase() === want.toLowerCase()){
+      Sound.pop(); slots[i].classList.add('filled'); slots[i].innerHTML = `<span class="n">${i+1}</span>${FEEL[seq[i]].face}`;
+      if(b){ b.classList.add('fade'); b.classList.remove('reveal'); } btns.forEach(x=>x.classList.remove('reveal'));
+      el.chars.innerHTML = charHTML(c, seq[i], {big:true}); clearHint();
+      q.step++;
+      if(q.step >= seq.length){ q.solved = true; markFirstTry(); Sound.ding(); roboHappy(); coach(`${words.join(', then ')}. Feelings can change!`, '🤖'); hearts(50,40); wiggleHappy(); showNext(); return; }
+      q.answer = words[q.step]; q.hintFace = FEEL[seq[q.step]].face; btns.forEach(x=>{ if(!x.classList.contains('fade')) x.classList.remove('fade'); });
+      coach(`${ORD[q.step]}, how did ${first(c)} feel?`, '🤖'); setNudge(()=>btns.filter(x=>!x.classList.contains('fade')), coachLine); return;
+    }
+    q.wrong++; Sound.hmm(); if(b){ b.classList.remove('hmm'); void b.offsetWidth; b.classList.add('hmm'); }
+    if(q.wrong === 1){ coach(`Hmm. ${ORD[i]}, ${first(c)} was ${want.toLowerCase()}. Which face is ${want.toLowerCase()}? ${FEEL[seq[i]].tip}`, '🤖'); hint(`<span class="hf">${FEEL[seq[i]].face}</span>${ORD[i]}: ${want}`); return; }
+    const target = btns.find(x=>x.dataset.text===want); if(target) target.classList.add('reveal');
+    coach(`${ORD[i]}, ${first(c)} was ${want.toLowerCase()}. Tap ${want}.`, '🤖'); setNudge(()=>[target], coachLine);
+  };
+  setChoices(shuffle(seq).map(k=>({text:FEEL[k].word, em:FEEL[k].face})), G.q.onChoose);
+  setNudge(()=>[...el.choices.children], coachLine);
+}
+
+/* ---------- level complete / goodbye ---------- */
+function finishLevel(){
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1; const calmLevel = !!G.cfg.calm;
+  G.done = true; run++;
+  progress.unlocked = Math.max(progress.unlocked, G.n+1);
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = calmLevel ? 'Three slow dragon breaths. You can do this any time you feel a big feeling.' : stars===3 ? 'You read every face on the first try. What a kind, careful looker!' : stars===2 ? 'Lovely work. You are getting really good at reading faces.' : 'You finished the whole level. Every face you look at helps you learn.';
+  if(calmLevel) Sound.chime(); else Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3;
+  const last = G.n >= LEVELS.length;
+  const nextBtn = last ? '' : `<button class="${breakTime?'subbtn':'bigbtn'}" id="btn-next-level">Next level ▶</button>`;
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${nextBtn}<button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `${nextBtn}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  const starRow = calmLevel ? `<div class="hero">🐲🕯️</div>` : `<div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>`;
+  showOverlay(`<div class="hero">${calmLevel?'😌':'🤖💛'}</div><h2>Level ${G.n} done!</h2>${starRow}<p>${msg}</p>
+    ${calmLevel ? '' : `<div class="fact"><b>${s.firstTry}</b> of <b>${s.questions}</b> faces read first time</div>`}
+    ${buttons}`, 'complete');
+  Voice.say(`Level ${G.n} done! ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  const n = G.n;
+  if(!last) $('#btn-next-level').addEventListener('click', ()=>startLevel(n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; levelsThisSitting = 0;
+  const idea = pick(['go make a happy face in a mirror','go tell someone how you feel today','go take three dragon breaths outside','go draw a face for every feeling you know','go give someone a hug, if they would like one']);
+  showOverlay(`<div class="hero">👋🤖</div><h2>Great work today!</h2><p>The diner is quiet now. Stretch your arms, ${idea}. Robo will be here whenever you want to play.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`, 'goodbye');
+  Voice.say(`Great work today! The diner is quiet now. Stretch your arms, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html, kind){ el.card.innerHTML = html; el.card.dataset.kind = kind || ''; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null;
+  showOverlay(`<div class="hero">😀😢<span class="robohero" id="robohero" role="button" tabindex="0" aria-label="Tap Robo">🤖</span>😮😴</div><h1>Feelings Faces</h1>
+    <p>Read faces, spot body clues, find what helps, and breathe with a friendly dragon. Robo is still working out his own feelings.</p>
+    <div class="fact">Learn <b>Happy</b> · <b>Sad</b> · <b>Angry</b> · <b>Scared</b> · <b>Calm</b> and more</div>
+    <button class="bigbtn" id="btn-play">Play! 😀</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-calm">Calm corner 🐲</button><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap Robo or 🔊 to hear it again.</p>`, 'title');
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-calm').addEventListener('click', ()=>{ Sound.ensure(); startCalm(); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+  const rh = $('#robohero'); const beep = ()=>{ Sound.ensure(); Sound.beepToot(); rh.classList.remove('spin'); void rh.offsetWidth; rh.classList.add('spin'); Voice.say('Beep, toot! I feel... buzzy?'); };
+  rh.addEventListener('click', beep); rh.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') beep(); });
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What it teaches</b><ul>
+      <li>Feelings words: happy, sad, angry, scared, tired, surprised, calm, silly, then proud, worried, shy and excited.</li>
+      <li>Level 1: naming a feeling from a face and a body cue (drooping shoulders, stomping feet, wide eyes).</li>
+      <li>Level 2: guessing how someone feels from what happened, then choosing something kind that helps.</li>
+      <li>Level 3: feelings live in the body (a fluttery tummy, a fast heart, tight fists).</li>
+      <li>Level 4 and the Calm corner: Dragon Breathing, in for 4, hold for 2, out for 6. Nothing is timed against the child. The Calm corner is always open from the title, with no stars or score.</li>
+      <li>Level 5: the same feeling can look different on different faces.</li>
+      <li>Level 6: big feelings are OK. Helpful things to do: take a breath, ask for a hug, say “I feel…”, get a drink of water, ask a grown-up. The character feels a bit better, never instantly fixed.</li>
+      <li>Level 7: feelings change over time (sad, then calm, then happy). Level 8 mixes everything.</li></ul>
+    <b style="display:block;margin-top:10px">How it helps without nagging</b><ul>
+      <li>Answers are never called wrong. First try: a gentle clue (“Look at his mouth. Is it up or down?”). Second try: the answer is shown to tap. Nobody fails.</li>
+      <li>If your child stops for a while, the instruction is repeated and the thing to tap wiggles.</li>
+      <li>No timers, no accounts, nothing leaves this device. Sound and read-aloud toggles are in the top bar. ⛶ makes it full screen on a tablet.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul><li>No streaks, daily rewards, countdowns or notifications. Nothing ever says “come back”.</li><li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li><li>Stars come only from accuracy. There is nothing random to chase.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`, 'grownups');
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null;
+  let cards='';
+  for(let n=1;n<=LEVELS.length;n++){
+    const c = LEVELS[n-1], locked = n > progress.unlocked && !c.calm, st = progress.stars[n]||0;
+    const starTxt = c.calm ? (st ? 'Always open 🐲' : 'Always open') : (st ? '⭐'.repeat(st) : (locked ? '' : 'Not played yet'));
+    cards += `<button class="lv ${locked?'locked':''} ${c.calm?'calm':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="em">${c.em}</span><span class="lvstars">${starTxt}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Finish one to open the next. Dragon Breathing is always open.</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`, 'levels');
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar & wiring ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+$('#btn-home').addEventListener('click', showLevels);
+const reSay = () => { const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; };
+$('#btn-say').addEventListener('click', e=>{ e.stopPropagation(); reSay(); });
+el.coach.addEventListener('click', reSay);
+el.story.addEventListener('click', reSay);
+el.robo.addEventListener('click', ()=>{ const line = pick(ROBO_LINES); roboSay(line, true); Sound.pop(); Voice.say(line); });
+el.btnNext.addEventListener('click', ()=>{ Sound.tap(); });
+el.btnBreathe.addEventListener('click', ()=>{ Sound.ensure(); doBreath(); });
+$('#btn-calm-done').addEventListener('click', ()=>{ Voice.say('Well done. Bye for now.'); showTitle(); });
+el.bodyout.addEventListener('click', e=>{ const p = e.target.closest('.part'); if(!p || !G || !G.q || G.q.type!=='body' || !G.q.onTap) return; lastAction = performance.now(); G.q.onTap(p.dataset.part); });
+el.chars.addEventListener('keydown', e=>{ const ch = e.target.closest('.char.pick'); if(ch && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); ch.click(); } });
+function nextRoundFromButton(){ if(el.btnNext.hidden) return; el.btnNext.hidden = true; nextRound(); }
+el.btnNext.onclick = nextRoundFromButton;
+// showNext always resets the default handler; rounds that need a different next step override it after calling showNext
+const _showNext = showNext;
+showNext = function(text){ el.btnNext.onclick = nextRoundFromButton; _showNext(text); };
+
+/* ---------- boot ---------- */
+function boot(data){ if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle(); }
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+/* ---------- debug hooks for automated testing ---------- */
+window.__game = {
+  startLevel, startCalm, levels: LEVELS,
+  get state(){ if(!G) return null; const q = G.q || {}; return {level:G.n, calm:G.calm, round:G.round, total:G.total, type:q.type||null, answer:q.answer||null, answers:q.answers||[], solved:!!q.solved, wrong:q.wrong||0, phase:q.phase||null, step:q.step, breaths:G.breaths, breathing:G.breathing, stats:Object.assign({},G.stats), done:G.done, nextReady:!el.btnNext.hidden}; },
+  choose(text){ if(G && G.q && G.q.onChoose) G.q.onChoose(String(text), null); },
+  tapBody(part){ if(G && G.q && G.q.onTap) G.q.onTap(part); },
+  breathe(){ doBreath(); },
+  next(){ if(!el.btnNext.hidden) el.btnNext.click(); },
+  get fast(){ return fast; }, set fast(v){ fast = !!v; },
+  get idleMs(){ return idleMs; }, set idleMs(v){ idleMs = v; },
+  get sittingDone(){ return levelsThisSitting; }
+};
+})();
+</script>
+</body>
+</html>

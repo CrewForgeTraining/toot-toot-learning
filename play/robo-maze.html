@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Robo Maze · Toot Toot Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --floor-a:#FBE3BF; --floor-b:#F3C89A; --white:#FFFDF8;
+  --sun:#FFC83D; --heat-cool:#5CC8FF; --heat-warm:#FFB703; --heat-hot:#FF3B3B; --grass:#8BD36F;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#app,#overlay{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:disabled{cursor:default}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+[hidden]{display:none!important}
+
+#app{max-width:1280px;margin:0 auto;padding-block:10px 20px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block}
+.logo .brand{font-size:.8rem;font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.08em}
+.chips{display:contents}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.spacer{flex:1 1 10px}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#stage.shake{animation:shake .6s}
+@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,4px)}40%{transform:translate(8px,-4px)}60%{transform:translate(-6px,-3px)}80%{transform:translate(6px,3px)}}
+@media (max-width:900px){#stage{grid-template-columns:1fr}}
+@media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.logo .brand{display:none}.chips{display:flex;gap:8px;flex-basis:100%;order:3;justify-content:center}.chip{padding:3px 10px;font-size:.85rem}.iconbtn{width:44px;height:44px;font-size:1.15rem}#topbar{gap:8px}}
+
+#scene{position:relative;--ar:1;width:min(100%,calc((100vh - 140px)*var(--ar)),640px);min-width:200px;max-width:100%;aspect-ratio:1;margin:0 auto;container-type:inline-size;overflow:hidden;border-radius:24px;background:#F9E7C8;box-shadow:var(--shadow);user-select:none;-webkit-user-select:none;--n:3;padding:2cqw}
+#grid{position:absolute;inset:2cqw;display:grid;grid-template-columns:repeat(var(--n),1fr);grid-template-rows:repeat(var(--n),1fr);border-radius:3cqw;overflow:hidden;background:var(--floor-a)}
+.cell{position:relative;display:grid;place-items:center}
+.cell.a{background:var(--floor-a)}
+.cell.b{background:var(--floor-b)}
+.cell.wall{background:var(--wood);box-shadow:inset 0 calc(-14cqw/var(--n)) 0 var(--wood-dark),inset 0 0 0 calc(2cqw/var(--n)) rgba(59,42,31,.18);border-radius:calc(12cqw/var(--n));border:calc(3cqw/var(--n)) solid #F9E7C8}
+.cell.wall::after{content:"";position:absolute;left:18%;top:16%;width:26%;height:14%;border-radius:999px;background:rgba(255,255,255,.35)}
+.cell.dock{background:#E4FBF5;box-shadow:inset 0 0 0 calc(5cqw/var(--n)) var(--mint)}
+.cell.dock .dockem{font-size:calc(50cqw/var(--n));line-height:1;animation:bob 1.4s infinite ease-in-out}
+.cell.start::before{content:"";position:absolute;inset:14%;border-radius:50%;border:calc(3cqw/var(--n)) dashed rgba(59,42,31,.25)}
+.crumb{font-size:calc(40cqw/var(--n));line-height:1;transition:opacity .25s,transform .25s;filter:drop-shadow(0 .3cqw 0 rgba(59,42,31,.2))}
+.crumb.gone{opacity:0;transform:scale(.2)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
+#paths{position:absolute;inset:2cqw;pointer-events:none}
+.arrow{position:absolute;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:calc(52cqw/var(--n));color:var(--mint-dark);text-shadow:0 0 .6cqw #fff,0 0 .6cqw #fff;opacity:0;animation:arrowin .4s forwards}
+@keyframes arrowin{to{opacity:.9}}
+
+.robo{position:absolute;width:calc(100%/var(--n));height:calc(100%/var(--n));display:grid;place-items:center;font-size:calc(58cqw/var(--n));line-height:1;transition:left .38s ease,top .38s ease;z-index:5;will-change:left,top}
+.robo .ring{position:absolute;inset:6%;border-radius:50%;transition:transform .25s ease}
+.robo .ring::before{content:"";position:absolute;left:50%;top:-6%;transform:translateX(-50%);border-left:calc(7cqw/var(--n)) solid transparent;border-right:calc(7cqw/var(--n)) solid transparent;border-bottom:calc(9cqw/var(--n)) solid var(--ketchup);filter:drop-shadow(0 .2cqw 0 var(--ketchup-dark))}
+.robo .bot{position:relative;display:inline-block;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
+.robo .glow{position:absolute;left:50%;top:50%;width:130%;height:130%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(47,191,166,.55) 0%,rgba(255,200,61,.3) 45%,transparent 70%);opacity:0;transition:opacity .3s;z-index:-1}
+.robo.driving .bot{animation:drive .18s infinite alternate}
+@keyframes drive{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-4%) rotate(2deg)}}
+.robo.bonk .bot{animation:bonk .5s}
+@keyframes bonk{0%{transform:translate(0,0)}30%{transform:translate(var(--bx),var(--by)) scale(1.1,.9)}60%{transform:translate(calc(var(--bx)*-.4),calc(var(--by)*-.4))}100%{transform:translate(0,0)}}
+.robo.charge .glow{opacity:1;animation:pulse .4s 4 alternate}
+.robo.charge .bot{animation:charge .4s 4 alternate}
+@keyframes charge{from{transform:scale(1)}to{transform:scale(1.18) rotate(4deg);filter:brightness(1.3) drop-shadow(0 0 1cqw var(--sun))}}
+@keyframes pulse{from{transform:translate(-50%,-50%) scale(.8)}to{transform:translate(-50%,-50%) scale(1.3)}}
+.robo.think .bot{animation:think .6s 2}
+@keyframes think{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+.puff{position:absolute;width:6cqw;height:6cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(214,232,120,.95),rgba(170,200,80,.6) 55%,rgba(150,180,60,0) 75%);animation:puff 1.3s forwards;z-index:4;pointer-events:none;display:grid;place-items:center;font-size:2.4cqw}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(3cqw,-7cqw) scale(1.7)}}
+.toast{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,7cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+.toast.mint{-webkit-text-stroke:.35cqw var(--mint-dark);text-shadow:0 .6cqw 0 var(--mint-dark)}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:280px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.label{font-family:var(--display);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--cocoa-soft);display:flex;justify-content:space-between;align-items:center}
+.label span{font-family:var(--body);text-transform:none;letter-spacing:0;font-weight:800;font-size:.85rem}
+
+.strip{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:flex-start;min-height:72px;background:rgba(255,226,154,.25);border-radius:18px;padding:8px}
+.pslot{min-width:64px;height:64px;border-radius:18px;border:3px dashed rgba(59,42,31,.3);display:grid;place-items:center;position:relative;background:rgba(255,226,154,.35)}
+.pslot.filled{border-style:solid;border-color:var(--mint);background:#E4FBF5;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.pslot.ghost{border-style:dashed;border-color:rgba(59,42,31,.2)}
+.pslot.ghost.next{border-color:var(--sun);background:#FFF6D6;animation:nudge 1s infinite}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.pslot.ghost .pblk{opacity:.35;filter:grayscale(.6)}
+.pslot.ghost.next .pblk{opacity:.55}
+.pblk{width:58px;height:58px;border-radius:15px;font-size:2rem;line-height:1;display:grid;place-items:center;transition:transform .15s,background .15s}
+.pblk.mini{width:44px;height:44px;font-size:1.5rem;border-radius:12px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14)}
+.pblk.cur,.mini.cur{background:var(--sun);transform:scale(1.12);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--sun)}
+.pslot.rep{height:auto;min-width:96px;padding:6px;border-style:solid;border-color:#B48CFF;background:#F1E9FF;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.pslot.rep.open{border-color:#7C4DFF;box-shadow:0 0 0 3px rgba(124,77,255,.25)}
+.pslot.rep.cur{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--sun)}
+.rephead{display:flex;align-items:center;gap:4px}
+.repopen{flex:1;font-size:1.1rem;font-weight:700;border-radius:10px;padding:4px 6px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14);text-align:left;white-space:nowrap}
+.repn{font-size:1.15rem;font-weight:700;border-radius:10px;padding:4px 8px;background:#7C4DFF;color:#fff;box-shadow:0 2px 0 #4F2BB8;font-variant-numeric:tabular-nums;white-space:nowrap}
+.repx{width:30px;height:30px;border-radius:10px;background:#FFE7E0;color:var(--ketchup-dark);font-weight:700}
+.repcount{font-family:var(--display);font-weight:700;font-size:.8rem;color:#4F2BB8;min-width:2.2em;text-align:center}
+.repbody{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;min-height:48px;background:rgba(255,255,255,.55);border-radius:12px;padding:4px}
+.mini.empty{width:44px;height:44px;border-radius:12px;border:3px dashed #B48CFF;display:inline-block;animation:nudge 1s infinite}
+.repdone{border-radius:10px;padding:6px 8px;background:var(--mint);color:#fff;font-weight:700;box-shadow:0 3px 0 var(--mint-dark);font-size:1rem}
+.repdone:active{transform:translateY(2px);box-shadow:0 1px 0 var(--mint-dark)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+.palette{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:10px}
+.blk{background:#fff;border-radius:18px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:88px;transition:transform .15s}
+.blk:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.blk .em{font-size:2.2rem;line-height:1}
+.blk .nm{font-size:.8rem;font-weight:800;color:var(--cocoa-soft);text-align:center;line-height:1.1}
+.blk.rep{background:#F1E9FF;box-shadow:0 4px 0 #B48CFF,0 0 0 2px rgba(124,77,255,.15)}
+.blk.rep.armed{background:#7C4DFF;color:#fff}
+.blk.rep.armed .nm{color:#fff}
+.blk.new{position:relative}
+.blk.new::after{content:"NEW";position:absolute;right:-6px;top:-8px;background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;font-size:.65rem;padding:2px 7px;border-radius:999px;letter-spacing:.08em}
+.blk.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#panel.running .palette,#panel.running .strip{pointer-events:none;opacity:.75}
+
+.bigbtn{width:100%;min-height:44px;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.bigbtn:disabled{opacity:.6;transform:none}
+.bigbtn.pulse{animation:runpulse 1.6s infinite ease-in-out}
+@keyframes runpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03);box-shadow:0 6px 0 var(--mint-dark),0 0 0 6px rgba(47,191,166,.25)}}
+.nudge{animation:nudgebig .5s 3!important;outline:4px solid var(--mint);outline-offset:3px;border-radius:18px}
+@keyframes nudgebig{0%,100%{transform:scale(1)}50%{transform:scale(1.1) rotate(-3deg)}}
+.coach{cursor:pointer}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.subbtn.glow{background:#FFF6D6;box-shadow:0 3px 0 #D89A00,0 0 0 2px rgba(216,154,0,.3);animation:nudge 1.2s infinite}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.runrow{display:flex;gap:8px;align-items:stretch}
+.runrow .bigbtn{flex:1;width:auto}
+.runrow .subbtn{flex:none;min-width:52px;font-size:1.2rem;padding:8px 12px}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
+.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 6px;font-size:.95rem}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+.fact.bonus{background:#E4FBF5;color:var(--mint-dark)}
+
+/* ---------- compact phones: portrait fits in ~one screen ---------- */
+@media (max-width:900px){
+  #app{gap:8px;padding-block:8px 12px}
+  #scene{width:min(100%,calc(40vh*var(--ar)));border-radius:18px}
+  #panel{padding:10px;gap:8px;min-height:0;border-radius:18px}
+  .coach{padding:8px 10px;gap:8px;border-radius:12px}
+  .coach .face{font-size:1.4rem}
+  .coach p{font-size:.92rem}
+  .coach .say{width:34px;height:34px;font-size:1rem}
+  .strip{min-height:60px;gap:6px;padding:6px}
+  .pslot{min-width:52px;height:52px;border-radius:14px;border-width:2px}
+  .pblk{width:46px;height:46px;font-size:1.6rem;border-radius:12px}
+  .pslot.rep{min-width:84px;padding:4px;gap:4px}
+  .palette{grid-template-columns:repeat(var(--items,3),1fr);gap:6px}
+  .blk{min-height:56px;padding:6px 2px 4px;border-radius:14px}
+  .blk .em{font-size:1.7rem}
+  .blk .nm{font-size:.68rem}
+  .bigbtn{padding:10px 14px;font-size:1.15rem;border-radius:16px;min-height:46px}
+  .runrow .subbtn{min-width:46px;padding:6px 10px}
+  .label{font-size:.72rem}
+}
+/* ---------- landscape phones: scene left, compact controls right ---------- */
+@media (max-height:520px) and (min-width:640px){
+  #app{gap:6px;padding-block:6px 8px}
+  #topbar{gap:8px}
+  .logo .sign{font-size:.95rem;padding:2px 10px}
+  .logo .brand{display:none}
+  .chip{padding:3px 10px;font-size:.8rem}
+  .iconbtn{width:44px;height:44px;font-size:1.1rem;border-radius:12px}
+  #stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}
+  #scene{width:min(100%,calc((100vh - 74px)*var(--ar)))}
+  #panel{padding:8px;gap:6px}
+  .coach{padding:6px 8px}
+  .coach p{font-size:.82rem}
+  .label{display:none}
+  .strip{min-height:56px;padding:4px;gap:4px}
+  .pslot{min-width:48px;height:48px}
+  .pblk{width:44px;height:44px;font-size:1.5rem}
+  .blk{min-height:50px;padding:4px 2px 3px}
+  .blk .em{font-size:1.5rem}
+  .blk .nm{font-size:.62rem}
+  .bigbtn{padding:6px 12px;font-size:1.05rem;min-height:44px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Robo Maze</span><span class="brand">Toot Toot Learning</span></div>
+    <div class="chips">
+      <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+      <div class="chip"><small>Runs</small><span id="runs-chip">0</span></div>
+      <div class="chip"><span>🍪</span><span id="crumb-chip">0/0</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Maze">
+      <div id="grid"></div>
+      <div id="paths"></div>
+      <div class="robo" id="robo" aria-label="Robo the robot"><span class="glow"></span><span class="ring"></span><span class="bot">🤖</span></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Get Robo to the charger!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="label">Robo’s steps <span id="slot-count"></span></div>
+      <div class="strip" id="strip" aria-label="Robo’s steps"></div>
+      <div class="palette" id="palette" aria-label="Blocks"></div>
+      <div class="runrow"><button class="subbtn" id="btn-hint" hidden aria-label="Show a hint">💡</button><button class="bigbtn mint" id="btn-run">▶ Run</button><button class="subbtn" id="btn-clear" aria-label="Clear the program" title="Clear">🗑️</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+
+/* ---------- data ---------- */
+const DIRS = [{dr:-1,dc:0},{dr:0,dc:1},{dr:1,dc:0},{dr:0,dc:-1}]; // up, right, down, left
+const DIR_NAMES = ['up','right','down','left'];
+const ARROWS = ['↑','→','↓','←'];
+const BLOCKS = {
+  F:{em:'⬆️',name:'Forward',say:'forward'},
+  L:{em:'↩️',name:'Turn left',say:'turn left'},
+  R:{em:'↪️',name:'Turn right',say:'turn right'},
+  U:{em:'⏫',name:'Until wall',say:'go until wall'},
+  REP:{em:'🔁',name:'Repeat',say:'repeat'}
+};
+const MAX_BODY = 5;
+// map legend: # wall · . floor · S start · E charging dock · o crumb
+const LEVELS = [
+  {title:'First Steps', dir:1, slots:2, tip:'Get Robo to the charger! Tap the arrows to tell Robo where to go. Then tap Run.',
+   map:['###','S.E','###'], solution:['F','F']},
+  {title:'One Turn', dir:1, slots:5, tip:'Robo needs to turn! Tap Turn right to make Robo look a new way.',
+   map:['S.o','##.','##E'], solution:['F','F','R','F','F']},
+  {title:'Turn Left', dir:0, slots:7, tip:'This time Robo turns left. Look at the red arrow. It shows where Robo is looking!',
+   map:['Eo..','###o','###.','###S'], solution:['F','F','F','L','F','F','F']},
+  {title:'Zig Zag', dir:1, slots:9, tip:'A zig zag! Go, turn, go, turn.',
+   map:['S.##','#o##','#.o.','###E'], solution:['F','R','F','F','L','F','F','R','F']},
+  {title:'Repeat!', dir:1, slots:1, tip:'Only one box! Tap Repeat. Tap the number until it says 4. Then tap Forward. Then tap Done and Run.',
+   map:['#####','#####','S..oE','#####','#####'], solution:[{rep:4,body:['F']}]},
+  {title:'Stairs', dir:0, slots:2, tip:'Stairs! Put Forward, Turn right, Forward, Turn left inside a Repeat.',
+   map:['###.E','##.o#','#o.##','..###','S####'], solution:[{rep:4,body:['F','R','F','L']}]},
+  {title:'Cookie Corners', dir:1, slots:2, tip:'Cookie corners! Four Forwards and one Turn right, three times.',
+   map:['S.o..','####.','####o','####.','E.o..'], solution:[{rep:3,body:['F','F','F','F','R']}]},
+  {title:'Twisty Halls', dir:0, slots:5, tip:'Long halls and turns! Use Repeat for the long halls.',
+   map:['######','...o..','.####.','o####o','.####.','S####E'], solution:[{rep:4,body:['F']},'R',{rep:5,body:['F']},'R',{rep:4,body:['F']}]},
+  {title:'Until the Wall', dir:1, slots:3, tip:'New block! Until wall makes Robo drive until it gets to a wall.',
+   map:['S.o..#','####.#','####.#','####o#','####.#','####E#'], solution:['U','R','U']},
+  {title:'Long Halls', dir:0, slots:7, tip:'Lots of long halls. Until wall, then turn. Again and again!',
+   map:['...o..','.####.','o####.','.#Eo..','.#####','S#####'], solution:['U','R','U','R','U','R','U']},
+  {title:'Big Maze', dir:0, slots:9, tip:'A big maze! Do one hall at a time. Which way does Robo turn?',
+   map:['..o.##E','.##.##.','.#o..o.','o######','.######','.######','S######'], solution:['U','R','U','R','U','L','U','L','U']},
+  {title:'Grand Finale', dir:2, slots:5, tip:'The last one! Try Until wall and Turn left inside a Repeat.',
+   map:['S######','.######','.#..o..','o#.###.','.#E###o','.#####.','...o...'], solution:[{rep:4,body:['U','L']},'U']}
+];
+const PRAISE = ['Robo is charged up!','Super coder!','You did it!','Amazing program!','High five! 🙌','Brilliant!','Beep boop, perfect!'];
+const OOPS = ['Oops! Let’s fix it.','Bonk! Let’s fix it.','Whoops! Let’s fix it.'];
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    turn(){ tone(420,0.07,{type:'triangle',gain:0.08,slide:520}); },
+    crumb(){ tone(880,0.07,{type:'triangle',gain:0.1,slide:1320}); tone(1320,0.12,{type:'triangle',gain:0.08,delay:0.06}); },
+    charge(){ [330,440,554,660,880].forEach((f,i)=>tone(f,0.16,{type:'sawtooth',gain:0.06,delay:i*0.09})); },
+    boom(){ noise(1.5,{gain:0.6,from:4000,to:60}); tone(70,1,{type:'sine',gain:0.5,slide:30}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    whirr(dur){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type='square'; o.frequency.setValueAtTime(95,t);
+      const lfo = c.createOscillator(); lfo.frequency.value = 11; const lg = c.createGain(); lg.gain.value = 18; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 650;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05,t+0.1); g.gain.setValueAtTime(0.05,t+Math.max(0.2,dur-0.2)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur); lfo.stop(t+dur);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text, force){
+      if((!enabled && !force) || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootRoboMaze')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootRoboMaze', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), stage:$('#stage'), grid:$('#grid'), paths:$('#paths'), robo:$('#robo'), fx:$('#fx'), panel:$('#panel'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), strip:$('#strip'), palette:$('#palette'), slotCount:$('#slot-count'),
+  btnRun:$('#btn-run'), btnHint:$('#btn-hint'), btnClear:$('#btn-clear'),
+  lvlChip:$('#lvl-chip'), runsChip:$('#runs-chip'), crumbChip:$('#crumb-chip'), overlay:$('#overlay'), card:$('#card')
+};
+
+/* ---------- level parsing + simulation ---------- */
+function parseLevel(L, n){
+  const rows = L.map.length, cols = L.map[0].length;
+  const cells = L.map.map(r => r.split(''));
+  const lv = {n, title:L.title, tip:L.tip, dir:L.dir, slots:L.slots, rows, cols, cells, crumbs:[], solution:L.solution, solProg:toProgram(L.solution)};
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const ch = cells[r][c];
+    if(ch==='S') lv.start = {r,c};
+    else if(ch==='E') lv.dock = {r,c};
+    else if(ch==='o') lv.crumbs.push({r,c});
+  }
+  lv.open = (r,c) => r>=0 && c>=0 && r<rows && c<cols && cells[r][c] !== '#';
+  lv.canRep = n >= 5; lv.canU = n >= 9;
+  return lv;
+}
+function toProgram(tokens){
+  return tokens.map(t => typeof t === 'string' ? {t} : {t:'REP', n:t.rep, body:t.body.map(b=>({t:b}))});
+}
+function flatten(prog){
+  const out = [];
+  prog.forEach((b,i) => {
+    if(b.t === 'REP'){ for(let k=0;k<b.n;k++) b.body.forEach((bb,j) => out.push({op:bb.t, i, j, k, n:b.n})); }
+    else out.push({op:b.t, i});
+  });
+  return out;
+}
+function simulate(lv, prog){
+  let r = lv.start.r, c = lv.start.c, d = lv.dir;
+  const moves = [], got = new Set(); let done = false, bonk = false;
+  const fwd = () => {
+    const nr = r + DIRS[d].dr, nc = c + DIRS[d].dc;
+    if(!lv.open(nr,nc)) return false;
+    moves.push({r,c,d}); r = nr; c = nc;
+    if(lv.cells[r][c]==='o') got.add(r+','+c);
+    if(r===lv.dock.r && c===lv.dock.c) done = true;
+    return true;
+  };
+  for(const s of flatten(prog)){
+    if(done) break;
+    if(s.op==='F'){ if(!fwd()){ bonk = true; break; } }
+    else if(s.op==='L') d = (d+3)%4;
+    else if(s.op==='R') d = (d+1)%4;
+    else if(s.op==='U'){ while(!done && fwd()){} }
+  }
+  return {ok:done, bonk, moves, crumbs:got, end:{r,c,d}};
+}
+// verify every level's stored solution at load
+LEVELS.forEach((L,i) => {
+  const lv = parseLevel(L, i+1);
+  if(!lv.start || !lv.dock){ console.warn(`Robo Maze: level ${i+1} is missing a start or dock`); return; }
+  const res = simulate(lv, lv.solProg);
+  if(!res.ok) console.warn(`Robo Maze: level ${i+1} (${L.title}) solution does not reach the dock`, res);
+  if(lv.solProg.length > L.slots) console.warn(`Robo Maze: level ${i+1} solution needs ${lv.solProg.length} slots but only ${L.slots} are shown`);
+  if(L.map.some(r => r.length !== lv.cols)) console.warn(`Robo Maze: level ${i+1} map rows have different lengths`);
+});
+
+/* ---------- game state ---------- */
+let G = null;       // current level
+let run = 0;        // token so abandoned runs stop
+let coachLine = '';
+let stepMs = 450;
+let sittingDone = 0; // levels finished this sitting (memory only, never saved)
+
+let coachSpoken = '';
+function coach(text, face, speak=true, spoken){
+  coachLine = text; coachSpoken = spoken || text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
+  if(speak) Voice.say(coachSpoken);
+}
+function toast(text, mint){
+  const t = document.createElement('div'); t.className='toast'+(mint?' mint':''); t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600);
+}
+function pct(x){ return x+'%'; }
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=pct(xPct); s.style.top=pct(yPct);
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1500);
+}
+function puff(xPct, yPct){
+  const p = document.createElement('div'); p.className='puff'; p.style.left=pct(xPct); p.style.top=pct(yPct); p.textContent = Math.random()<0.5?'💨':'';
+  el.fx.appendChild(p); setTimeout(()=>p.remove(), 1400);
+}
+function roboCenter(){ return {x:(G.robo.c+0.5)/G.lv.cols*100, y:(G.robo.r+0.5)/G.lv.rows*100}; }
+
+/* ---------- maze rendering ---------- */
+function drawMaze(){
+  const lv = G.lv;
+  el.scene.style.setProperty('--n', Math.max(lv.rows, lv.cols));
+  el.scene.style.aspectRatio = lv.cols+'/'+lv.rows; el.scene.style.setProperty('--ar', (lv.cols/lv.rows).toFixed(3));
+  el.grid.style.gridTemplateColumns = `repeat(${lv.cols},1fr)`; el.grid.style.gridTemplateRows = `repeat(${lv.rows},1fr)`;
+  let html = '';
+  for(let r=0;r<lv.rows;r++) for(let c=0;c<lv.cols;c++){
+    const ch = lv.cells[r][c];
+    const cls = ch==='#' ? 'wall' : ((r+c)%2 ? 'b' : 'a') + (ch==='E' ? ' dock' : ch==='S' ? ' start' : '');
+    html += `<div class="cell ${cls}" data-r="${r}" data-c="${c}">${ch==='E'?'<span class="dockem">⚡</span>':''}${ch==='o'?`<span class="crumb" id="crumb-${r}-${c}">🍪</span>`:''}</div>`;
+  }
+  el.grid.innerHTML = html;
+  el.paths.innerHTML = '';
+  placeRobo(true);
+}
+function placeRobo(instant){
+  const lv = G.lv, {r,c,d} = G.robo;
+  if(instant){ el.robo.style.transition = 'none'; }
+  el.robo.style.left = pct(c/lv.cols*100); el.robo.style.top = pct(r/lv.rows*100);
+  el.robo.querySelector('.ring').style.transform = `rotate(${d*90}deg)`;
+  if(instant){ void el.robo.offsetWidth; el.robo.style.transition = ''; }
+}
+function resetRobo(){
+  G.robo = {r:G.lv.start.r, c:G.lv.start.c, d:G.lv.dir};
+  G.got = new Set();
+  el.robo.classList.remove('driving','bonk','charge','think');
+  document.querySelectorAll('.crumb').forEach(c => c.classList.remove('gone'));
+  placeRobo(true); updateChips();
+}
+function showPath(){
+  const res = simulate(G.lv, G.lv.solProg);
+  const lv = G.lv;
+  el.paths.innerHTML = res.moves.map((m,i) => `<div class="arrow" style="left:${m.c/lv.cols*100}%;top:${m.r/lv.rows*100}%;width:${100/lv.cols}%;height:${100/lv.rows}%;animation-delay:${i*0.08}s">${ARROWS[m.d]}</div>`).join('');
+  G.hintOn = true;
+}
+function updateChips(){
+  el.lvlChip.textContent = G.n; el.runsChip.textContent = G.runs;
+  el.crumbChip.textContent = `${G.got.size}/${G.lv.crumbs.length}`;
+  el.slotCount.textContent = `${G.program.length} of ${G.lv.slots} blocks`;
+}
+
+/* ---------- program strip + palette ---------- */
+function blockHTML(b, i, j){
+  const B = BLOCKS[b.t];
+  const jj = j===undefined ? '' : ` data-j="${j}"`;
+  return `<button class="pblk ${j===undefined?'':'mini'}" data-i="${i}"${jj} aria-label="${B.name}, tap to remove">${B.em}</button>`;
+}
+function repHTML(b, i, open){
+  return `<div class="pslot rep ${open?'open':''}" data-rep="${i}">
+    <div class="rephead"><button class="repopen" data-repopen="${i}" aria-label="Repeat block, tap to ${open?'close':'open'}">🔁</button><button class="repn" data-repn="${i}" aria-label="Repeat ${b.n} times, tap to change">×${b.n}</button><span class="repcount" data-repcount="${i}"></span><button class="repx" data-repx="${i}" aria-label="Remove this repeat">✕</button></div>
+    <div class="repbody">${b.body.map((bb,j)=>blockHTML(bb,i,j)).join('')}${open && b.body.length<MAX_BODY ? '<span class="mini empty" aria-hidden="true"></span>' : ''}</div>
+    ${open ? `<button class="repdone" data-repdone="${i}">✓ Done</button>` : ''}
+  </div>`;
+}
+function ghostHTML(b, i, next){
+  const inner = b.t==='REP' ? `<span style="font-size:1.1rem;line-height:1.1">🔁×${b.n}<br>${b.body.map(bb=>BLOCKS[bb.t].em).join('')}</span>` : BLOCKS[b.t].em;
+  return `<div class="pslot ghost ${next?'next':''}"><button class="pblk" data-ghost="${i}" ${next?'':'disabled'} aria-label="Hint block: ${b.t==='REP'?'repeat':BLOCKS[b.t].name}${next?', tap to add':''}">${inner}</button></div>`;
+}
+function renderStrip(){
+  const lv = G.lv; let html = '';
+  for(let i=0;i<lv.slots;i++){
+    const b = G.program[i];
+    if(b){ html += b.t==='REP' ? repHTML(b, i, G.open===i) : `<div class="pslot filled">${blockHTML(b,i)}</div>`; }
+    else if(G.ghost && lv.solProg[i]) html += ghostHTML(lv.solProg[i], i, i===G.program.length);
+    else html += '<div class="pslot empty" aria-hidden="true"></div>';
+  }
+  el.strip.innerHTML = html;
+  el.palette.querySelector('.blk.rep')?.classList.toggle('armed', G.open!==null);
+  el.btnRun.classList.toggle('pulse', G.program.length>0 && !G.running && !G.done);
+  updateChips();
+}
+function renderPalette(){
+  const lv = G.lv;
+  const items = ['F','L','R'];
+  if(lv.canRep) items.push('REP');
+  if(lv.canU) items.push('U');
+  el.palette.style.setProperty('--cols', items.length<=3?3:items.length===4?2:3); el.palette.style.setProperty('--items', items.length);
+  el.palette.innerHTML = items.map(t => `<button class="blk ${t==='REP'?'rep':''} ${(t==='REP'&&lv.n===5)||(t==='U'&&lv.n===9)?'new':''}" data-t="${t}" aria-label="${BLOCKS[t].name}"><span class="em">${BLOCKS[t].em}</span><span class="nm">${BLOCKS[t].name}</span></button>`).join('');
+}
+function full(){
+  Sound.oops();
+  const b = el.palette.querySelector('.blk'); if(b){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); }
+  coach(G.open!==null ? 'That Repeat is full! Tap Done.' : 'All the boxes are full! Tap a block to take it out. Or tap Run.', '🤔');
+}
+function addBlock(type, n){
+  if(!G || G.running || G.done) return false;
+  if(type==='END'){ G.open = null; renderStrip(); return true; }
+  if(type==='REP'){
+    if(G.open!==null){ G.open = null; Sound.pop(); renderStrip(); return true; }
+    if(G.program.length >= G.lv.slots){ full(); return false; }
+    G.program.push({t:'REP', n:Math.max(2, Math.min(5, n||2)), body:[]}); G.open = G.program.length-1;
+    Sound.pop(); coach('Tap the number to pick how many times. Then tap blocks to put them inside. Tap Done when you are finished.', '🔁');
+    renderStrip(); return true;
+  }
+  if(!BLOCKS[type]) return false;
+  if(G.open!==null){
+    const rep = G.program[G.open];
+    if(rep.body.length >= MAX_BODY){ full(); return false; }
+    rep.body.push({t:type});
+  } else {
+    if(G.program.length >= G.lv.slots){ full(); return false; }
+    G.program.push({t:type});
+  }
+  Sound.pop(); renderStrip(); return true;
+}
+function removeLast(){
+  if(!G || G.running) return;
+  if(G.open!==null){ const rep = G.program[G.open]; if(rep.body.length){ rep.body.pop(); } else { G.program.splice(G.open,1); G.open = null; } }
+  else if(G.program.length){ G.program.pop(); }
+  Sound.pop(); renderStrip();
+}
+function fillGhost(i){
+  if(i !== G.program.length) return;
+  const s = G.lv.solProg[i];
+  if(s.t==='REP'){ G.program.push({t:'REP', n:s.n, body:s.body.map(b=>({t:b.t}))}); G.open = null; }
+  else G.program.push({t:s.t});
+  Sound.pop(); renderStrip();
+  if(G.program.length === G.lv.solProg.length) coach('All filled in! Now tap Run.', '🤖');
+}
+el.palette.addEventListener('click', e => {
+  const b = e.target.closest('.blk'); if(!b) return;
+  Sound.ensure(); addBlock(b.dataset.t);
+});
+el.strip.addEventListener('click', e => {
+  if(!G || G.running) return;
+  const t = e.target.closest('button'); if(!t) return;
+  const d = t.dataset;
+  if(d.ghost !== undefined){ fillGhost(+d.ghost); return; }
+  if(d.repn !== undefined){ const rep = G.program[+d.repn]; rep.n = rep.n >= 5 ? 2 : rep.n+1; Sound.pop(); renderStrip(); Voice.say(`Repeat ${rep.n} times`); return; }
+  if(d.repx !== undefined){ const i = +d.repx; G.program.splice(i,1); if(G.open===i) G.open=null; else if(G.open!==null && G.open>i) G.open--; Sound.pop(); renderStrip(); return; }
+  if(d.repdone !== undefined || d.repopen !== undefined){ const i = +(d.repdone ?? d.repopen); G.open = G.open===i ? null : i; Sound.pop(); renderStrip(); return; }
+  if(d.i !== undefined){
+    const i = +d.i;
+    if(d.j !== undefined){ G.program[i].body.splice(+d.j,1); }
+    else { G.program.splice(i,1); if(G.open!==null && G.open>i) G.open--; }
+    Sound.pop(); renderStrip();
+  }
+});
+el.btnClear.addEventListener('click', () => { if(!G || G.running) return; G.program = []; G.open = null; Sound.pop(); renderStrip(); coach('All clear! Tap the arrows to start again.', '🤖', false); });
+el.btnHint.addEventListener('click', () => { if(!G) return; showPath(); Sound.ding(); coach('Here is the way! Follow the green arrows. Which way does Robo look first?', '💡'); });
+el.btnRun.addEventListener('click', () => { Sound.ensure(); runProgram(); });
+document.addEventListener('keydown', e => {
+  if(!G || el.overlay.classList.contains('on')) return;
+  if(e.key==='ArrowUp'){ e.preventDefault(); addBlock('F'); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); addBlock('L'); }
+  else if(e.key==='ArrowRight'){ e.preventDefault(); addBlock('R'); }
+  else if(e.key==='Enter'){ e.preventDefault(); runProgram(); }
+  else if(e.key==='Backspace'){ e.preventDefault(); removeLast(); }
+});
+
+/* ---------- running the program ---------- */
+function highlight(step){
+  document.querySelectorAll('.cur').forEach(x => x.classList.remove('cur'));
+  document.querySelectorAll('.repcount').forEach(x => x.textContent = '');
+  if(!step) return;
+  if(step.j !== undefined){
+    el.strip.querySelector(`.pslot[data-rep="${step.i}"]`)?.classList.add('cur');
+    el.strip.querySelector(`.pblk[data-i="${step.i}"][data-j="${step.j}"]`)?.classList.add('cur');
+    const rc = el.strip.querySelector(`.repcount[data-repcount="${step.i}"]`); if(rc) rc.textContent = `${step.k+1}/${step.n}`;
+  } else el.strip.querySelector(`.pblk[data-i="${step.i}"]:not(.mini)`)?.classList.add('cur');
+}
+async function moveForward(myRun){
+  const lv = G.lv, {r,c,d} = G.robo;
+  const nr = r + DIRS[d].dr, nc = c + DIRS[d].dc;
+  if(!lv.open(nr,nc)) return false;
+  G.robo.r = nr; G.robo.c = nc;
+  el.robo.classList.add('driving'); Sound.whirr(Math.min(0.5, stepMs/1000));
+  placeRobo(false);
+  await wait(stepMs*0.7); if(run!==myRun) return false;
+  const key = nr+','+nc;
+  if(lv.cells[nr][nc]==='o' && !G.got.has(key)){
+    G.got.add(key); const ce = document.getElementById(`crumb-${nr}-${nc}`); if(ce) ce.classList.add('gone');
+    Sound.crumb(); const p = roboCenter(); spark(p.x, p.y, '✨', 6); updateChips();
+  }
+  await wait(stepMs*0.3);
+  return true;
+}
+async function runProgram(){
+  if(!G || G.running || G.done) return;
+  if(G.open!==null){ G.open = null; renderStrip(); }
+  if(!G.program.length){ Sound.oops(); coach('Tap some arrows first. Then tap Run!', '🤔'); return; }
+  if(G.program.some(b => b.t==='REP' && !b.body.length)){ Sound.oops(); coach('Your Repeat is empty! Tap it to open it. Then put blocks inside.', '🤔'); return; }
+  run++; const myRun = run;
+  G.running = true; G.runs++; el.panel.classList.add('running'); el.btnRun.disabled = true;
+  resetRobo(); renderStrip();
+  coach('Beep boop! Robo is going…', '🤖', false);
+  const steps = flatten(G.program);
+  let outcome = 'short';
+  await wait(300);
+  for(const s of steps){
+    if(run!==myRun) return;
+    highlight(s);
+    if(s.op==='F'){
+      const ok = await moveForward(myRun); if(run!==myRun) return;
+      if(!ok){ outcome = 'bonk'; break; }
+    } else if(s.op==='L' || s.op==='R'){
+      G.robo.d = (G.robo.d + (s.op==='L'?3:1)) % 4; placeRobo(false); Sound.turn();
+      await wait(stepMs);
+    } else if(s.op==='U'){
+      let moved = 0;
+      while(await moveForward(myRun)){ moved++; if(run!==myRun) return; if(atDock()) break; }
+      if(run!==myRun) return;
+      if(!moved){ await wait(stepMs*0.6); }
+    }
+    if(atDock()){ outcome = 'done'; break; }
+  }
+  if(run!==myRun) return;
+  el.robo.classList.remove('driving');
+  highlight(null);
+  if(outcome==='done') await success(myRun);
+  else if(outcome==='bonk') await bonk(myRun);
+  else await fellShort(myRun);
+}
+function atDock(){ return G.robo.r===G.lv.dock.r && G.robo.c===G.lv.dock.c; }
+function endRun(){ G.running = false; el.panel.classList.remove('running'); el.btnRun.disabled = false; renderStrip(); }
+async function bonk(myRun){
+  const d = DIRS[G.robo.d]; const p = roboCenter();
+  el.robo.style.setProperty('--bx', d.dc*30+'%'); el.robo.style.setProperty('--by', d.dr*30+'%');
+  el.robo.classList.add('bonk'); Sound.fart(); el.stage.classList.add('shake'); setTimeout(()=>el.stage.classList.remove('shake'),700);
+  for(let i=0;i<7;i++) spark(p.x, p.y, pick(['⚡','✨','💨','⚙️','💥']), 14);
+  puff(p.x-6, p.y+2); puff(p.x+2, p.y+4);
+  toast('BONK!');
+  G.fails++;
+  coach(pick(OOPS)+' Robo bumped into a wall. Take a block out, or add a turn.', '🤖');
+  afterFail();
+  await wait(900); if(run!==myRun) return;
+  el.robo.classList.remove('bonk'); endRun();
+}
+async function fellShort(myRun){
+  el.robo.classList.add('think'); Sound.oops();
+  G.fails++;
+  coach('Hmm, Robo stopped too soon. Add more blocks and try again!', '🤔');
+  afterFail();
+  await wait(900); if(run!==myRun) return;
+  el.robo.classList.remove('think'); endRun();
+}
+function afterFail(){
+  if(G.fails >= 2 && !G.hintOn){ el.btnHint.hidden = false; el.btnHint.classList.add('glow'); if(G.fails===2) setTimeout(()=>Voice.say('Need help? Tap the light bulb.'), 2500); }
+  if(G.fails >= 4 && !G.ghost){
+    G.ghost = true; G.program = []; G.open = null; showPath();
+    setTimeout(()=>coach('Here is the plan! Tap the faded blocks one by one. Then tap Run.', '💡'), 1200);
+  }
+}
+async function success(myRun){
+  G.done = true;
+  const p = roboCenter();
+  el.robo.classList.add('charge'); Sound.charge();
+  for(let i=0;i<14;i++) spark(p.x, p.y, pick(['⚡','✨','🌟','💛']), 22);
+  toast('CHARGED!', true);
+  coach(pick(PRAISE), '🎉', false);
+  await wait(1300); if(run!==myRun) return;
+  Sound.fanfare();
+  finishLevel();
+}
+function finishLevel(){
+  const stars = G.runs===1 ? 3 : G.runs===2 ? 2 : 1;
+  const allCrumbs = G.lv.crumbs.length>0 && G.got.size===G.lv.crumbs.length;
+  progress.unlocked = Math.max(progress.unlocked, G.n+1);
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'First try! Your steps were perfect.' : stars===2 ? 'Second try! Fixing your steps is what real coders do.' : 'You kept going and Robo made it. That’s real coding!';
+  const last = G.n >= LEVELS.length;
+  const usedRep = G.program.some(b=>b.t==='REP');
+  sittingDone++;
+  const breakTime = sittingDone >= 3;
+  const nextLabel = last ? 'Choose a level' : 'Next level ▶';
+  const nextBtn = big => `<button class="${big?'bigbtn':'subbtn'}" id="btn-next">${nextLabel}</button>`;
+  const doneBtn = big => `<button class="${big?'bigbtn mint':'subbtn'}" id="btn-done">All done for today 👋</button>`;
+  showOverlay(`<div class="hero">🤖⚡</div><h1>Charged up!</h1><h2>${breakTime ? `You’ve done ${sittingDone} levels! Time for a break?` : `Level ${G.n} complete!`}</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.2}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    ${allCrumbs ? '<div class="fact bonus">🍪 Cookie bonus! Robo got every crumb!</div>' : ''}
+    <div class="fact">Solved in <b>${G.runs}</b> run${G.runs===1?'':'s'} · <b>${G.program.length}</b> block${G.program.length===1?'':'s'}${usedRep?' · used <b>🔁 Repeat</b>':''} · 🍪 <b>${G.got.size}</b> of <b>${G.lv.crumbs.length}</b></div>
+    ${last ? '<div class="fact">🏆 You finished every level! You’re a Robo Maze master!</div>' : ''}
+    ${breakTime ? doneBtn(true) : nextBtn(true)}
+    <div class="rowbtns">${breakTime ? nextBtn(false) : ''}<button class="subbtn" id="btn-replay">Play it again</button>${breakTime ? '' : doneBtn(false)}</div>`, 'complete');
+  Voice.say(`Charged up! ${breakTime ? `You have done ${sittingDone} levels! Time for a break?` : `Level ${G.n} complete!`} ${msg}${allCrumbs?' Cookie bonus! Robo got every crumb!':''}`);
+  $('#btn-next').addEventListener('click', ()=> last ? showLevels() : startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null;
+  showOverlay(`<div class="hero">🤖👋</div><h2>Great work today!</h2>
+    <p>Stretch, drink some water, go draw a picture of Robo. See you next time.</p>
+    <button class="bigbtn" id="btn-title">Back to start</button>`, 'goodbye');
+  Voice.say('Great work today! Stretch, drink some water, go draw a picture of Robo. See you next time.');
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- main level flow ---------- */
+function startLevel(n){
+  n = Math.max(1, Math.min(LEVELS.length, n));
+  run++;
+  const lv = parseLevel(LEVELS[n-1], n);
+  G = {n, lv, program:[], open:null, running:false, done:false, runs:0, fails:0, ghost:false, hintOn:false, robo:{r:lv.start.r,c:lv.start.c,d:lv.dir}, got:new Set()};
+  el.fx.innerHTML = ''; el.robo.classList.remove('driving','bonk','charge','think');
+  el.btnHint.hidden = true; el.btnHint.classList.remove('glow'); el.btnRun.disabled = false; el.panel.classList.remove('running');
+  drawMaze(); renderPalette(); renderStrip(); updateChips();
+  hideOverlay();
+  coach(`Level ${n}: ${lv.title}. ${lv.tip}`, '🤖');
+  armIdle();
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html, kind){ document.querySelectorAll('.nudge').forEach(x=>x.classList.remove('nudge')); el.card.innerHTML = html; el.card.dataset.kind = kind || ''; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); el.card.dataset.kind = ''; }
+function previewLevel(n){
+  const lv = parseLevel(LEVELS[n-1], n);
+  G = {n, lv, program:[], open:null, running:false, done:true, runs:0, fails:0, ghost:false, hintOn:false, robo:{r:lv.start.r,c:lv.start.c,d:lv.dir}, got:new Set()};
+  drawMaze(); renderPalette(); renderStrip(); updateChips();
+  G = null;
+}
+function showTitle(){
+  run++; previewLevel(Math.min(progress.unlocked, LEVELS.length)); G = null;
+  showOverlay(`<div class="hero">🤖🧱⚡</div><h1>Robo Maze</h1>
+    <p>Robo needs a charge! Tap arrow blocks to drive Robo through the maze to the charger. Grab cookie crumbs on the way!</p>
+    <div class="fact">Learn <b>⬆️</b> steps in order · <b>↪️</b> turns · <b>🔁</b> repeats</div>
+    <button class="bigbtn" id="btn-play">Play! 🤖</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Tip: tap any message to hear it read out loud.</p>`, 'title');
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  run++; G = null;
+  const rows = LEVELS.map((L,i)=>`<li><b>${i+1}. ${L.title}</b> (${L.map.length}×${L.map[0].length}) — ${[
+    'a straight run: two Forward blocks in order','the first turn: Turn right changes where Robo faces','Turn left, and reading the direction marker','alternating turns: a longer sequence','loops: only one slot, so Repeat ×4 is needed','a pattern inside a loop (Forward, Turn right, Forward, Turn left)','a bigger pattern repeated three times','mixing loops with single turns','sensing: Until wall drives until Robo reaches a wall','chaining Until wall and turns','a long maze combining every block','loops with Until wall inside'][i]}</li>`).join('');
+  showOverlay(`<h2>For grown-ups</h2>
+    <p>Robo Maze introduces three beginner coding ideas: <b>sequencing</b> (steps in order), <b>turns</b> (left and right are relative to Robo), and <b>loops</b> (Repeat ×N). Levels 9–12 add a simple <b>sensing</b> block, Until wall.</p>
+    <div class="fact" style="text-align:left;font-weight:700"><ul style="margin:0;padding-left:1.2em;line-height:1.5">${rows}</ul></div>
+    <p><b>Hints:</b> the empty slots show how many blocks the shortest solution needs. After two runs that miss, a 💡 button draws the path on the maze. After four, the answer appears as faded blocks the child taps to fill in. There are no lives and no failure state: every run ends with encouragement, and the child always earns at least one star.</p>
+    <p><b>Privacy:</b> nothing leaves the device. Progress and the sound/voice settings are kept in this browser only. Read-aloud uses the device’s built-in voice; sounds are generated on the device.</p>
+    <p><b>Wholesome, not addictive:</b> there are no streaks, timers, countdowns, daily rewards, notifications or random prizes. Stars come only from how many tries a level took. The game never moves to the next level by itself, every finish card offers “All done for today”, and after three levels in one sitting it suggests a break. Celebrations are short and silly (bonks, wobbles and the odd toot), never mean.</p>
+    <p><b>Tips:</b> tap any message to hear it again. Tap ⛶ for full screen on a tablet. Arrow keys, Enter and Backspace also work.</p>
+    <div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`, 'grownups');
+  $('#btn-title').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null;
+  let cards='';
+  for(let n=1;n<=LEVELS.length;n++){
+    const L = LEVELS[n-1], locked = n > progress.unlocked, st = progress.stars[n]||0;
+    const ops = ['⬆️'].concat(n>=2?['↪️']:[], n>=5?['🔁']:[], n>=9?['⏫']:[]);
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n} · ${L.map.length}×${L.map[0].length}</span><span class="ttl">${L.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${ops.map(o=>`<span>${o}</span>`).join('')}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each maze gets a little bigger. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`, 'levels');
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar ---------- */
+$('#btn-sound').addEventListener('click', e=>{ Sound.enabled = !Sound.enabled; progress.sound = Sound.enabled; Save.save(progress); e.currentTarget.classList.toggle('off', !Sound.enabled); e.currentTarget.textContent = Sound.enabled?'🔊':'🔇'; if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', e=>{ Voice.enabled = !Voice.enabled; progress.voice = Voice.enabled; Save.save(progress); e.currentTarget.classList.toggle('off', !Voice.enabled); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+$('#btn-home').addEventListener('click', showLevels);
+$('.coach').addEventListener('click', ()=>{ Voice.say(coachSpoken, true); });
+const btnFull = $('#btn-full');
+if(!document.documentElement.requestFullscreen) btnFull.hidden = true;
+btnFull.addEventListener('click', ()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} });
+document.addEventListener('fullscreenchange', ()=>{ btnFull.textContent = document.fullscreenElement ? '🗗' : '⛶'; });
+// remembered toggles
+function applyToggles(){
+  Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false;
+  $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇';
+  $('#btn-voice').classList.toggle('off', !Voice.enabled);
+}
+applyToggles();
+
+/* ---------- idle nudge ---------- */
+let idleMs = 14000, idleT = null;
+function armIdle(){ clearTimeout(idleT); idleT = setTimeout(idleNudge, idleMs); }
+function idleNudge(){
+  if(!G || G.running || G.done || el.overlay.classList.contains('on')){ armIdle(); return; }
+  const target = G.open!==null ? el.strip.querySelector('.repdone')
+    : (G.ghost && G.program.length < G.lv.solProg.length) ? el.strip.querySelector('.pslot.ghost.next')
+    : G.program.length ? el.btnRun : el.palette.querySelector('.blk');
+  document.querySelectorAll('.nudge').forEach(x=>x.classList.remove('nudge'));
+  if(target){ target.classList.add('nudge'); setTimeout(()=>target.classList.remove('nudge'), 2000); }
+  Voice.say(coachSpoken);
+  armIdle();
+}
+document.addEventListener('pointerdown', armIdle, {capture:true});
+document.addEventListener('keydown', armIdle, {capture:true});
+
+/* ---------- boot ---------- */
+function boot(data){
+  if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle();
+}
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+// debug hooks for automated testing
+window.__game = {
+  startLevel, addBlock, run: runProgram, removeLast, showLevels, showTitle,
+  get state(){ return G ? {level:G.n, program:G.program, open:G.open, running:G.running, done:G.done, runs:G.runs, fails:G.fails, ghost:G.ghost, hintOn:G.hintOn, robo:Object.assign({}, G.robo), crumbs:G.got.size, slots:G.lv.slots} : null; },
+  levels: LEVELS, simulate:(n, tokens)=>simulate(parseLevel(LEVELS[n-1], n), toProgram(tokens)),
+  get stepMs(){ return stepMs; }, set stepMs(v){ stepMs = Math.max(10, +v||450); },
+  get idleMs(){ return idleMs; }, set idleMs(v){ idleMs = Math.max(100, +v||14000); armIdle(); },
+  clean: Voice.clean, get coachSpoken(){ return coachSpoken; }, showGrownups, get sittingDone(){ return sittingDone; }
+};
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Toot Toot">
+<title>Family Link · Toot Toot Learning</title>
+<link rel="stylesheet" href="../assets/fonts.css">
+<style>
+:root{--cream:#FFF4DC;--butter:#FFE29A;--ketchup:#F4552F;--ketchup-dark:#C9391A;--mint:#2FBFA6;--mint-dark:#1E8F7B;--cocoa:#3B2A1F;--cocoa-soft:#6E5546;--white:#FFFDF8;--display:'Fredoka','Nunito',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif;--shadow:0 6px 0 rgba(59,42,31,.14)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:17px;line-height:1.45}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:24px 40px}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+.logo{display:inline-block;font-family:var(--display);font-weight:700;font-size:1.2rem;background:var(--ketchup);color:#fff;padding:5px 14px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);text-decoration:none}
+.card{background:var(--white);border-radius:24px;padding:22px;box-shadow:var(--shadow)}
+.gate{max-width:520px;margin:32px auto;text-align:center}
+.gate p{color:var(--cocoa-soft);font-weight:700}
+.code{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.code input{flex:1 1 240px;font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.08em;text-transform:uppercase;padding:12px 14px;border-radius:16px;border:3px solid rgba(59,42,31,.15);background:#fff;color:var(--cocoa);text-align:center;min-width:0}
+.code input:focus{outline:none;border-color:var(--mint)}
+.btn{font-family:var(--display);font-weight:700;font-size:1.1rem;padding:12px 20px;border-radius:16px;background:var(--ketchup);color:#fff;border:0;box-shadow:0 6px 0 var(--ketchup-dark);cursor:pointer;text-decoration:none;display:inline-block}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.btn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.btn.small{font-size:.95rem;padding:9px 14px;border-radius:12px}
+.msg{min-height:1.5em;font-weight:800;margin-top:10px}
+.msg.bad{color:var(--ketchup-dark)}
+.msg.good{color:var(--mint-dark)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:16px}
+.tile{background:var(--white);border-radius:22px;padding:18px;box-shadow:var(--shadow);text-decoration:none;color:var(--cocoa);display:flex;flex-direction:column;gap:6px;transition:transform .12s}
+.tile:active{transform:translateY(3px)}
+.tile .icon{font-size:2.4rem;line-height:1}
+.tile h3{font-size:1.15rem}
+.tile p{margin:0;font-size:.9rem;color:var(--cocoa-soft);font-weight:700}
+.tile .go{margin-top:auto;font-family:var(--display);font-weight:700;color:var(--ketchup-dark)}
+.section{margin-top:28px}
+.eyebrow{font-family:var(--display);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem;color:var(--ketchup-dark)}
+.tip{font-size:.9rem;color:var(--cocoa-soft);font-weight:700;margin-top:18px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body><div class="wrap">
+<a class="logo" href="../index.html">Toot Toot Learning</a>
+
+<div class="gate card" id="gate">
+  <div style="font-size:3rem;line-height:1">🔑</div>
+  <h1>Your family link</h1>
+  <p>Type the family code from your email. You only do this once per device.</p>
+  <form class="code" id="form" autocomplete="off">
+    <input id="code" inputmode="latin" placeholder="TOOT-XXXX-XXXX-XXXX" aria-label="Family code" spellcheck="false">
+    <button class="btn" type="submit">Unlock</button>
+  </form>
+  <div class="msg" id="msg" aria-live="polite"></div>
+  <p class="tip">Don't have a code? <a href="../index.html#pack">Get the Everything Pack</a>. Lost it? Email us from the address you bought with.</p>
+</div>
+
+<div id="library" hidden>
+  <div class="card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <div style="font-size:2rem">🎉</div>
+    <div style="flex:1"><h2>Welcome back!</h2><p style="margin:2px 0 0;color:var(--cocoa-soft);font-weight:700">Everything below is yours. On an iPad, tap Share, then "Add to Home Screen" to make this an app icon.</p></div>
+    <button class="btn small mint" id="forget" type="button">Forget this device</button>
+  </div>
+
+  <!-- GAMES:family -->
+<div class="section"><div class="eyebrow">Games</div>
+    <div class="grid">
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Math</h3>
+      <a class="tile" href="../play/toot-toot-diner.html"><span class="icon">🍔</span><h3>Toot Toot Diner</h3><p>Adding, making change, times and sharing.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/train-station-clock.html"><span class="icon">🕒</span><h3>Train Station Clock</h3><p>Telling time.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/block-tower.html"><span class="icon">🧱</span><h3>Block Tower</h3><p>Number bonds and making 10.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/number-machine.html"><span class="icon">🔢</span><h3>Number Machine</h3><p>Place value, then decimals.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/pizza-slice-shop.html"><span class="icon">🍕</span><h3>Pizza Slice Shop</h3><p>Fractions.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/lemonade-stand.html"><span class="icon">🍋</span><h3>Lemonade Stand</h3><p>Coins, bills, change and profit.</p><span class="go">Play →</span></a>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Reading</h3>
+      <a class="tile" href="../play/sound-it-out.html"><span class="icon">🍪</span><h3>Sound It Out</h3><p>Phonics and reading.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/alphabet-zoo.html"><span class="icon">🔤</span><h3>Alphabet Zoo</h3><p>Letter names and sounds.</p><span class="go">Play →</span></a>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Science</h3>
+      <a class="tile" href="../play/zookeeper.html"><span class="icon">🦁</span><h3>Zookeeper</h3><p>Animals, homes and food.</p><span class="go">Play →</span></a>
+      <a class="tile" href="../play/seed-to-sunflower.html"><span class="icon">🌻</span><h3>Seed to Sunflower</h3><p>Plants and what they need.</p><span class="go">Play →</span></a>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Thinking</h3>
+      <a class="tile" href="../play/robo-maze.html"><span class="icon">🤖</span><h3>Robo Maze</h3><p>Beginner coding.</p><span class="go">Play →</span></a>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Feelings</h3>
+      <a class="tile" href="../play/feelings-faces.html"><span class="icon">😊</span><h3>Feelings Faces</h3><p>Feelings and calming down.</p><span class="go">Play →</span></a>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Life skills</h3>
+      <a class="tile" href="../play/crossing-guard.html"><span class="icon">🚸</span><h3>Crossing Guard</h3><p>Road and everyday safety.</p><span class="go">Play →</span></a>
+</div>
+  </div>
+<!-- /GAMES -->
+
+  <!-- PRINT:family -->
+<div class="section"><div class="eyebrow">Print and play</div>
+    <div class="grid">
+      <a class="tile" href="../downloads/diner-play-kit.pdf"><span class="icon">🧾</span><h3>Diner Play Kit</h3><p>Menu, order pad, Toot Toot Dollars, cheques, Robo mask.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-block-tower.pdf"><span class="icon">🧱</span><h3>Block Tower Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-clock.pdf"><span class="icon">✏️</span><h3>clock Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-crossing-guard.pdf"><span class="icon">🚸</span><h3>Crossing Guard Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-diner.pdf"><span class="icon">✏️</span><h3>diner Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-feelings-faces.pdf"><span class="icon">😊</span><h3>Feelings Faces Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-maze.pdf"><span class="icon">✏️</span><h3>maze Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-number-machine.pdf"><span class="icon">🔢</span><h3>Number Machine Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-pizza-slice-shop.pdf"><span class="icon">🍕</span><h3>Pizza Slice Shop Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-sound-it-out.pdf"><span class="icon">🍪</span><h3>Sound It Out Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/worksheets-zoo.pdf"><span class="icon">🦁</span><h3>Zookeeper Worksheets</h3><p>With answer key.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/certificates.pdf"><span class="icon">🏅</span><h3>Certificates</h3><p>One per game, plus a reward chart.</p><span class="go">Download PDF →</span></a>
+      <a class="tile" href="../downloads/robo-goes-boom.pdf"><span class="icon">📖</span><h3>Robo Goes Boom</h3><p>The bedtime storybook.</p><span class="go">Read PDF →</span></a>
+      <a class="tile" href="../downloads/toot-toot-learning-pack.zip"><span class="icon">📦</span><h3>Download everything</h3><p>The whole pack as a zip, for offline or USB.</p><span class="go">Download ZIP →</span></a>
+</div>
+  </div>
+<!-- /PRINT -->
+</div>
+</div>
+
+<script>
+/* SITE_KEY is filled in by tools/build.js from tools/site-key.txt. Codes are made with tools/make-codes.js. */
+const SITE_KEY = 'iw7Kw-_7AbOHXy-xNqvx9D9RVzN4AE6Z';
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+/* Optional: also accept Lemon Squeezy licence keys (set to true and fill in your store's product id if you use their built-in keys). */
+const LEMON = { enabled:false, endpoint:'https://api.lemonsqueezy.com/v1/licenses/validate' };
+
+function sha256(str){ // compact SHA-256, returns hex
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const bytes=new TextEncoder().encode(str); const l=bytes.length; const bitLen=l*8;
+  const padLen=((l+9+63)>>6)<<6; const m=new Uint8Array(padLen); m.set(bytes); m[l]=0x80;
+  const dv=new DataView(m.buffer); dv.setUint32(padLen-4, bitLen>>>0); dv.setUint32(padLen-8, Math.floor(bitLen/4294967296));
+  const w=new Uint32Array(64); const rotr=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let i=0;i<padLen;i+=64){
+    for(let t=0;t<16;t++) w[t]=dv.getUint32(i+t*4);
+    for(let t=16;t<64;t++){ const s0=rotr(w[t-15],7)^rotr(w[t-15],18)^(w[t-15]>>>3); const s1=rotr(w[t-2],17)^rotr(w[t-2],19)^(w[t-2]>>>10); w[t]=(w[t-16]+s0+w[t-7]+s1)>>>0; }
+    let [a,b,c,d,e,f,g,h]=H;
+    for(let t=0;t<64;t++){ const S1=rotr(e,6)^rotr(e,11)^rotr(e,25); const ch=(e&f)^(~e&g); const t1=(h+S1+ch+K[t]+w[t])>>>0; const S0=rotr(a,2)^rotr(a,13)^rotr(a,22); const maj=(a&b)^(a&c)^(b&c); const t2=(S0+maj)>>>0; h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0; }
+    H=[ (H[0]+a)>>>0,(H[1]+b)>>>0,(H[2]+c)>>>0,(H[3]+d)>>>0,(H[4]+e)>>>0,(H[5]+f)>>>0,(H[6]+g)>>>0,(H[7]+h)>>>0 ];
+  }
+  return H.map(x=>x.toString(16).padStart(8,'0')).join('');
+}
+function checksum(body){ const hex=sha256(SITE_KEY+':'+body); let out=''; for(let i=0;i<4;i++){ out+=ALPHABET[parseInt(hex.substr(i*2,2),16)%32]; } return out; }
+function normalize(raw){ return raw.toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/O/g,'0').replace(/I/g,'1'); }
+function isValidLocal(raw){ const s=normalize(raw); if(!s.startsWith('T00T') || s.length!==16) return false; const body=s.slice(4,12), chk=s.slice(12); return checksum(body)===chk; }
+async function isValidLemon(raw){
+  if(!LEMON.enabled) return false;
+  try{ const r=await fetch(LEMON.endpoint,{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/x-www-form-urlencoded'},body:'license_key='+encodeURIComponent(raw.trim())}); const j=await r.json(); return !!(j && j.valid); }catch(e){ return false; }
+}
+const gate=document.getElementById('gate'), lib=document.getElementById('library'), msg=document.getElementById('msg'), input=document.getElementById('code');
+function unlock(){ gate.hidden=true; lib.hidden=false; }
+try{ if(localStorage.getItem('tootFamilyCode')) unlock(); }catch(e){}
+document.getElementById('form').addEventListener('submit', async e=>{
+  e.preventDefault(); const raw=input.value; msg.className='msg'; msg.textContent='Checking…';
+  const ok = isValidLocal(raw) || await isValidLemon(raw);
+  if(ok){ msg.className='msg good'; msg.textContent='Unlocked! Have fun.'; try{ localStorage.setItem('tootFamilyCode', normalize(raw)); }catch(e){} setTimeout(unlock, 500); }
+  else { msg.className='msg bad'; msg.textContent='That code doesn’t look right. Check for typos, or paste it from your email.'; }
+});
+input.addEventListener('input', ()=>{ const s=normalize(input.value).slice(0,16); input.value=s.replace(/(.{4})(?=.)/g,'$1-'); });
+document.getElementById('forget').addEventListener('click', ()=>{ try{ localStorage.removeItem('tootFamilyCode'); }catch(e){} lib.hidden=true; gate.hidden=false; input.value=''; msg.textContent=''; });
+window.__family = { isValidLocal, checksum, sha256 };
+</script>
+</div></body></html>

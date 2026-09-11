@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Lemonade Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D; --grass:#8BD36F; --lemon:#FFE45C;
+  --silver:#D9DDE3; --silver-dark:#9AA3AE; --gold:#E9B94A; --gold-dark:#B98A1E;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem;padding:0}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+#app{max-width:1280px;margin:0 auto;padding-block:10px 16px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.3rem;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.logo small{font-family:var(--body);font-weight:800;font-size:.7rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.08em}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;align-items:start}
+#scene{position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:linear-gradient(#8FD6FF 0%,#C9ECFF 55%,#C9ECFF 100%);box-shadow:var(--shadow)}
+.sun{position:absolute;left:6%;top:6%;width:11cqw;height:11cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 3cqw rgba(255,200,61,.8);animation:sunspin 12s linear infinite}
+.sun::before{content:"";position:absolute;inset:-18%;border-radius:50%;border:.6cqw dashed rgba(255,200,61,.7)}
+@keyframes sunspin{to{transform:rotate(360deg)}}
+.cloud{position:absolute;font-size:6cqw;line-height:1;opacity:.95;animation:drift 40s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(110cqw)}}
+.grass{position:absolute;left:0;right:0;top:56%;height:12%;background:var(--grass)}
+.walk{position:absolute;left:0;right:0;top:66%;bottom:0;background:repeating-linear-gradient(90deg,#E8DCC5 0 12cqw,#DCCDB1 12cqw 12.6cqw)}
+.tree{position:absolute;right:4%;top:22%;font-size:14cqw;line-height:1}
+.stand{position:absolute;left:52%;top:26%;width:36%;height:52%}
+.awning{position:absolute;left:-6%;right:-6%;top:0;height:22%;background:repeating-linear-gradient(90deg,var(--ketchup) 0 4cqw,#fff 4cqw 8cqw);border-radius:2cqw 2cqw 0 0;box-shadow:0 .6cqw 0 var(--ketchup-dark)}
+.awning::after{content:"";position:absolute;left:0;right:0;bottom:-1.4cqw;height:1.6cqw;background:repeating-linear-gradient(90deg,var(--ketchup) 0 4cqw,#fff 4cqw 8cqw);clip-path:polygon(0 0,100% 0,100% 100%,95% 40%,90% 100%,85% 40%,80% 100%,75% 40%,70% 100%,65% 40%,60% 100%,55% 40%,50% 100%,45% 40%,40% 100%,35% 40%,30% 100%,25% 40%,20% 100%,15% 40%,10% 100%,5% 40%,0 100%)}
+.post{position:absolute;top:18%;bottom:0;width:2.2cqw;background:var(--wood-dark)}
+.post.l{left:-2%}.post.r{right:-2%}
+.counter{position:absolute;left:0;right:0;top:56%;bottom:0;background:repeating-linear-gradient(0deg,var(--wood) 0 3cqw,#D89B5B 3cqw 3.5cqw);border-radius:1.5cqw;box-shadow:0 .6cqw 0 var(--wood-dark);display:flex;align-items:center;justify-content:center}
+.counter .sign{background:#fff;border-radius:1.2cqw;padding:.3cqw 1.6cqw;font-family:var(--display);font-weight:700;font-size:clamp(9px,2.6cqw,22px);color:var(--ketchup);transform:rotate(-2deg);box-shadow:0 .3cqw 0 rgba(59,42,31,.15);white-space:nowrap}
+.counter .sign b{color:var(--mint-dark)}
+.pitcher{position:absolute;left:8%;top:38%;font-size:7cqw;line-height:1}
+.cups{position:absolute;right:6%;top:40%;font-size:4.2cqw;line-height:1;letter-spacing:-.25em}
+.robot{position:absolute;left:62%;top:22%;width:14%;font-size:9cqw;line-height:1;text-align:center;z-index:2}
+.robot .bot{display:inline-block;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2));position:relative}
+.robot .lemon{position:absolute;left:-30%;top:40%;font-size:.45em;transform-origin:center;animation:squeeze 1.6s infinite ease-in-out}
+@keyframes squeeze{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(.72,1.15) rotate(-14deg)}}
+.robot .squirt{position:absolute;left:10%;top:-10%;font-size:.5em;opacity:0;pointer-events:none}
+.robot.ouch .bot>.face{display:none}
+.robot .ouch{display:none}
+.robot.ouch .ouch{display:inline}
+.robot.ouch .squirt{animation:squirt .9s forwards}
+@keyframes squirt{0%{opacity:1;transform:translate(0,0) scale(.5)}60%{opacity:1;transform:translate(1.5cqw,-2cqw) scale(1.1)}100%{opacity:0;transform:translate(2cqw,-1cqw) scale(.4)}}
+.robot.ouch .bot{animation:ouchwob .4s 3}
+@keyframes ouchwob{0%,100%{transform:rotate(0)}50%{transform:rotate(-10deg)}}
+.robot.juggle .lemon{animation:none;display:none}
+.robot .balls{position:absolute;left:50%;top:-45%;transform:translateX(-50%);font-size:.4em;display:none;white-space:nowrap}
+.robot.juggle .balls{display:block}
+.robot.juggle .balls span{display:inline-block;animation:jug .7s infinite ease-in-out}
+.robot.juggle .balls span:nth-child(2){animation-delay:.23s}.robot.juggle .balls span:nth-child(3){animation-delay:.46s}
+@keyframes jug{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.2cqw)}}
+.customer{position:absolute;left:-16%;top:40%;width:14%;font-size:12cqw;line-height:1;text-align:center;transition:left 1.6s cubic-bezier(.4,.1,.5,1);z-index:5;will-change:left}
+.customer .body{display:inline-block;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.customer.walking .body{animation:walk .32s infinite alternate}
+@keyframes walk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-1.4cqw) rotate(3deg)}}
+.customer.happy .body{animation:happy .5s 2}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1cqw)}75%{transform:rotate(8deg) translateY(-1cqw)}}
+.customer .cup{position:absolute;right:-14%;top:32%;font-size:.42em;opacity:0;transition:opacity .3s}
+.customer.served .cup{opacity:1}
+.bubble{position:absolute;left:-4%;bottom:104%;width:max-content;min-width:12cqw;max-width:31cqw;background:#fff;border-radius:2cqw;padding:1.1cqw 1.5cqw;font-size:clamp(11px,2.3cqw,20px);font-weight:800;line-height:1.25;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:0 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);text-align:left;cursor:pointer;z-index:6}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:2.4cqw;bottom:-1.2cqw;border:1.4cqw solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble .big{font-size:1.5em;line-height:1.15;display:block;margin-top:.15em;color:var(--ketchup)}
+.robobubble{position:absolute;left:44%;top:6%;max-width:34cqw;background:#fff;border-radius:2cqw;padding:1cqw 1.4cqw;font-size:clamp(10px,2.1cqw,18px);font-weight:800;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transition:opacity .25s;z-index:6;pointer-events:none}
+.robobubble.show{opacity:1}
+.toast{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:260px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:9px 12px}
+.coach .face{font-size:1.7rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.02rem;flex:1;line-height:1.3}
+.coach .say{width:44px;height:44px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.view{display:none;flex-direction:column;gap:10px}
+.view.on{display:flex}
+.wait{text-align:center;font-weight:800;color:var(--cocoa-soft);padding:12px 0;font-size:1.02rem}
+.wait .em{display:block;font-size:2.4rem;margin-bottom:6px;animation:bob 1.2s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.info{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.info .box{background:#fff;border-radius:14px;padding:6px 12px;text-align:center;box-shadow:0 0 0 2px rgba(59,42,31,.08);min-width:92px;flex:1 1 92px}
+.info .box small{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:.62rem;font-weight:800;color:var(--cocoa-soft)}
+.info .box strong{font-family:var(--display);font-size:1.45rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.info .box.q strong{color:var(--ketchup)}
+.info .box.ok strong{color:var(--mint-dark)}
+.zone{position:relative;border-radius:16px;padding:8px;margin-top:4px}
+.zone .lab{position:absolute;left:12px;top:-8px;background:var(--white);padding:0 6px;font-family:var(--display);font-weight:700;font-size:.72rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.08em}
+.tray{background:#FFF9EA;border:3px dashed rgba(59,42,31,.22);min-height:78px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:10px 8px 8px}
+.tray.hand{background:#FFF1E0;border-color:rgba(244,85,47,.35)}
+.tray.box{background:#F3E2C4;border-color:var(--wood-dark)}
+.cashbox{background:linear-gradient(#5B4030,#3B2A1F);border-radius:16px;padding:12px 8px 8px;display:flex;gap:8px;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+.cashbox .lab{background:transparent;color:#FFE29A;top:2px;left:12px}
+.cashbox .slotc{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:44px}
+.cashbox .slotc small{font-family:var(--display);font-weight:700;font-size:.7rem;color:#FFE29A;white-space:nowrap}
+
+/* coins and bills */
+.coin{position:relative;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;line-height:1;color:var(--cocoa);flex:none;transition:transform .15s;box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 0 0 3px rgba(255,255,255,.55)}
+.coin:active{transform:translateY(2px)}
+.coin.c5{width:50px;height:50px;font-size:.92rem;background:radial-gradient(circle at 35% 30%,#F4F6F8,var(--silver) 60%,var(--silver-dark));border:3px solid #B9C0C8}
+.coin.c10{width:44px;height:44px;font-size:.85rem;background:radial-gradient(circle at 35% 30%,#F4F6F8,var(--silver) 60%,var(--silver-dark));border:3px solid #B9C0C8}
+.coin.c25{width:54px;height:54px;font-size:.95rem;background:radial-gradient(circle at 35% 30%,#F4F6F8,var(--silver) 60%,var(--silver-dark));border:3px solid #B9C0C8}
+.coin.c100{width:58px;height:58px;font-size:1rem;background:radial-gradient(circle at 35% 30%,#FFF1B8,var(--gold) 60%,var(--gold-dark));border:3px solid #C9992A;color:#4a3300}
+.coin.c200{width:62px;height:62px;font-size:1rem;background:radial-gradient(circle at 50% 50%,#FFE9A8 0 44%,var(--gold) 45% 55%,#E6E9ED 57%,var(--silver) 80%,var(--silver-dark));border:3px solid #B9C0C8;color:#4a3300}
+.coin.c500,.coin.c1000{border-radius:8px;width:80px;height:46px;font-size:1.05rem;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.3);box-shadow:0 3px 0 rgba(0,0,0,.25),inset 0 0 0 3px rgba(255,255,255,.35)}
+.coin.c500{background:linear-gradient(135deg,#3E7BD6,#2A5BB0);border:3px solid #1D4A94}
+.coin.c1000{background:linear-gradient(135deg,#8E5BC8,#6A3AA6);border:3px solid #52288A}
+.coin.c500::before,.coin.c1000::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:16px;border-radius:5px;background:rgba(255,255,255,.28)}
+.coin.c500::after,.coin.c1000::after{content:"🍁";position:absolute;right:6px;top:4px;font-size:.62rem;opacity:.8}
+.coin.c200::after{content:"🐻‍❄️";font-size:.55em;position:absolute;left:50%;top:6px;transform:translateX(-50%);opacity:.75}
+.coin.c100::after{content:"🦆";font-size:.55em;position:absolute;left:50%;top:6px;transform:translateX(-50%);opacity:.75}
+.coin.c25::after{content:"🫎";font-size:.5em;position:absolute;left:50%;top:5px;transform:translateX(-50%);opacity:.7}
+.coin.c10::after{content:"⛵";font-size:.5em;position:absolute;left:50%;top:3px;transform:translateX(-50%);opacity:.7}
+.coin.c5::after{content:"🦫";font-size:.5em;position:absolute;left:50%;top:4px;transform:translateX(-50%);opacity:.7}
+.coin .v{position:relative;z-index:1;margin-top:8px}
+.coin.c500 .v,.coin.c1000 .v{margin-top:0}
+.coin.ghost{opacity:.45;background:#fff!important;border-style:dashed!important;box-shadow:none;color:var(--cocoa-soft)}
+.coin.ghost::after{opacity:.3}
+.coin.counted{box-shadow:0 0 0 4px var(--mint),0 3px 0 rgba(0,0,0,.25)}
+.coin .tick{position:absolute;right:-8px;top:-8px;background:var(--mint);color:#fff;border-radius:999px;font-size:.7rem;padding:2px 6px;z-index:2;display:none;font-variant-numeric:tabular-nums}
+.coin.counted .tick{display:block}
+.coin.in{animation:drop .35s cubic-bezier(.2,1.5,.4,1)}
+@keyframes drop{0%{transform:scale(.4) translateY(-20px)}100%{transform:scale(1) translateY(0)}}
+.coin.bounce{animation:bounce .7s forwards}
+@keyframes bounce{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-22px) scale(1.05)}60%{transform:translateY(0) scale(.95)}100%{transform:translateY(0) scale(0);opacity:0}}
+.coin.reveal,.pick.reveal,.item.reveal{animation:nudge .55s 4;outline:4px solid var(--mint);outline-offset:3px}
+.coin.reveal{border-radius:50%}.coin.c500.reveal,.coin.c1000.reveal{border-radius:8px}
+
+.choices{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pick{min-height:54px;min-width:92px;flex:1 1 92px;border-radius:16px;background:#fff;font-weight:700;font-size:1.35rem;box-shadow:0 4px 0 rgba(59,42,31,.16),0 0 0 2px rgba(59,42,31,.06);font-variant-numeric:tabular-nums;padding:8px 10px}
+.pick:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.16),0 0 0 2px rgba(59,42,31,.06)}
+.pick.nope{animation:nope .4s}
+.pick small{display:block;font-family:var(--body);font-weight:800;font-size:.72rem;color:var(--cocoa-soft)}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.items{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.item{background:#fff;border-radius:16px;padding:8px 6px 6px;display:flex;flex-direction:column;align-items:center;gap:1px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:84px;min-width:84px;flex:1 1 84px;transition:transform .15s}
+.item:active{transform:translateY(3px)}
+.item .em{font-size:1.9rem;line-height:1}
+.item .nm{font-size:.75rem;font-weight:800;color:var(--cocoa-soft)}
+.item .pr{font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--ketchup)}
+.item.bought{opacity:.5;box-shadow:0 0 0 3px var(--mint)}
+.item.bought .pr{color:var(--mint-dark)}
+.hint{display:none;background:#F3FBFF;border-radius:14px;padding:8px 12px;font-weight:800;font-size:.92rem;line-height:1.4}
+.hint.on{display:block}
+.nline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:1.02rem;margin-top:4px}
+.nline span{background:#fff;border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.nline span.from{background:var(--butter)}
+.nline span.to{background:#E4FBF5;color:var(--mint-dark)}
+.nline i{font-style:normal;color:var(--ketchup)}
+.bigbtn{width:100%;padding:14px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.25rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;min-height:44px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.givebtn{display:none}
+.givebtn.on{display:block}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:22px 20px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700}
+.card h2{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.02rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(2.6rem,11vw,5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.parade{font-size:clamp(2rem,8vw,3.4rem);line-height:1;display:flex;justify-content:center;gap:.1em}
+.parade span{display:inline-block;animation:jug .7s infinite ease-in-out}
+.parade span:nth-child(2n){animation-delay:.23s}.parade span:nth-child(3n){animation-delay:.46s}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:100px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.02rem;line-height:1.1}
+.lv .ops{margin-top:auto;font-size:1.1rem;letter-spacing:.05em}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+#grownups{text-align:left;font-size:.93rem}#grownups li{margin-bottom:4px}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) and (orientation:portrait){#stage{grid-template-columns:1fr}#scene{width:min(100%,calc(30vh*16/9));margin-inline:auto}}
+@media (max-width:900px) and (orientation:landscape){#stage{grid-template-columns:minmax(0,1fr) 330px;gap:10px}}
+@media (orientation:landscape) and (max-height:560px){
+  #app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.logo small{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:40px;height:40px;font-size:1.05rem}
+  #scene{width:min(100%,calc((100vh - 60px)*16/9));margin-inline:auto}
+  #panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 60px);overflow:auto}
+  .coach{padding:4px 8px;gap:6px}.coach p{font-size:.8rem;line-height:1.2}.coach .face{font-size:1.1rem}.coach .say{width:40px;height:40px}
+  .info{gap:6px}.info .box{padding:2px 6px;min-width:64px;border-radius:10px}.info .box strong{font-size:1.05rem}.info .box small{font-size:.5rem}
+  .zone{padding:6px}.tray{min-height:56px;padding:6px 6px 4px;gap:4px}.cashbox{padding:9px 6px 5px;gap:6px}.cashbox .slotc small{display:none}
+  .pick{min-height:44px;font-size:1.1rem;padding:4px 8px}.item{min-height:64px;padding:4px 4px 3px}.item .em{font-size:1.4rem}
+  .hint{padding:4px 8px;font-size:.78rem}.bigbtn{padding:8px 12px;min-height:44px;font-size:1rem;border-radius:14px}.wait{padding:6px 0}.wait .em{font-size:1.8rem}
+}
+@media (max-width:600px) and (orientation:portrait){
+  #app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}.logo .sign{font-size:1rem;padding:3px 10px}.logo small{display:none}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:40px;height:40px}
+  #scene{aspect-ratio:16/10;width:min(100%,calc(24vh*1.6));margin-inline:auto}
+  #panel{padding:10px;gap:8px;min-height:0}.coach{padding:7px 10px}.coach p{font-size:.92rem}.coach .face{font-size:1.4rem}
+  .info .box{padding:4px 8px;min-width:80px}.info .box strong{font-size:1.25rem}
+  .tray{min-height:68px}.pick{min-height:50px;font-size:1.2rem}.item{min-height:76px}.hint{padding:6px 10px;font-size:.85rem}.wait{padding:8px 0}.wait .em{font-size:2rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Lemonade Stand</span><small>Toot Toot Learning</small></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Served</small><span id="served-chip">0</span></div>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Lemonade stand on a sunny sidewalk">
+      <div class="sun"></div>
+      <span class="cloud" style="left:-10%;top:10%">☁️</span><span class="cloud" style="left:30%;top:4%;animation-delay:-18s">☁️</span>
+      <div class="grass"></div><div class="walk"></div>
+      <span class="tree">🌳</span>
+      <div class="stand">
+        <div class="post l"></div><div class="post r"></div>
+        <div class="awning"></div>
+        <div class="robot" id="robot"><span class="bot"><span class="face">🤖</span><span class="ouch">😵</span><span class="lemon">🍋</span><span class="squirt">💦</span><span class="balls"><span>🍋</span><span>🍋</span><span>🍋</span></span></span></div>
+        <div class="counter"><span class="sign">LEMONADE <b id="sign-price"></b></span></div>
+        <span class="pitcher">🍹</span><span class="cups">🥤🥤🥤</span>
+      </div>
+      <div class="customer" id="customer"><span class="body" id="cust-body">🐻</span><span class="cup">🥤</span><div class="bubble" id="bubble"></div></div>
+      <div class="robobubble" id="robobubble"></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Welcome to the lemonade stand!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="view" id="v-wait"><div class="wait"><span class="em" id="wait-em">🍋</span><span id="wait-text">A customer is coming…</span></div></div>
+      <div class="view" id="v-play">
+        <div class="info" id="info"></div>
+        <div class="items" id="items"></div>
+        <div class="zone" id="trayzone"><span class="lab" id="tray-lab">Tray</span><div class="tray" id="tray"></div></div>
+        <div class="zone cashbox" id="cashbox"><span class="lab">Cash box</span></div>
+        <div class="hint" id="hint"></div>
+        <div class="choices" id="choices"></div>
+        <button class="bigbtn mint givebtn" id="btn-give">Give it ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+
+/* ---------- data ---------- */
+const CUSTOMERS = [
+  {em:'🐻',name:'Benny Bear'},{em:'🐰',name:'Rosie Rabbit'},{em:'🦊',name:'Felix Fox'},{em:'🐸',name:'Freddy Frog'},
+  {em:'🐷',name:'Penny Pig'},{em:'🐵',name:'Momo Monkey'},{em:'🐨',name:'Kiki Koala'},{em:'🐯',name:'Toby Tiger'},
+  {em:'🦁',name:'Leo Lion'},{em:'🐮',name:'Clara Cow'},{em:'🐼',name:'Pip Panda'},{em:'🐶',name:'Daisy Dog'}
+];
+// Canadian money, no pennies. Values in cents.
+const DENOMS = {
+  5:{name:'nickel', a:'a nickel', plural:'nickels', label:'5¢'}, 10:{name:'dime', a:'a dime', plural:'dimes', label:'10¢'},
+  25:{name:'quarter', a:'a quarter', plural:'quarters', label:'25¢'}, 100:{name:'loonie', a:'a loonie', plural:'loonies', label:'$1'},
+  200:{name:'toonie', a:'a toonie', plural:'toonies', label:'$2'}, 500:{name:'five dollar bill', a:'a five dollar bill', plural:'five dollar bills', label:'$5'},
+  1000:{name:'ten dollar bill', a:'a ten dollar bill', plural:'ten dollar bills', label:'$10'}
+};
+const SUPPLIES = [
+  {id:'lemons',name:'Lemons',em:'🍋',prices:[200,300,400]},{id:'sugar',name:'Sugar',em:'🍬',prices:[100,200,300]},
+  {id:'cups',name:'Cups',em:'🥤',prices:[100,200]},{id:'ice',name:'Ice',em:'🧊',prices:[100,200]},{id:'straws',name:'Straws',em:'🥢',prices:[100]}
+];
+const PRAISE = ['Ka-ching! You got it!','Super job!','Wow, money star! ⭐','Perfect!','Great counting!','You did it!','High five! 🙌','Brilliant!'];
+const TRY_AGAIN = ['Almost! Let’s look again.','Good try! Let’s count together.','So close! One more time.','Nice try! Look at the coins.'];
+const THANKS = ['Yum! Thank you!','Mmm, so cold and sweet!','Best lemonade ever!','Slurp! Thanks!'];
+
+/* ---------- money words (always spoken naturally, never "$0.75") ---------- */
+const ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function words(n){ n = Math.round(n); if(n < 20) return ONES[n]; if(n < 100) return TENS[Math.floor(n/10)] + (n%10 ? '-'+ONES[n%10] : ''); return ONES[Math.floor(n/100)] + ' hundred' + (n%100 ? ' and '+words(n%100) : ''); }
+function fmt(c){ if(c < 100) return c+'¢'; const d = Math.floor(c/100), r = c%100; return '$'+d+(r ? '.'+String(r).padStart(2,'0') : ''); }
+function spoken(c){
+  if(c === 0) return 'nothing';
+  const d = Math.floor(c/100), r = c%100;
+  const dollars = d ? words(d)+(d===1?' dollar':' dollars') : '';
+  const cents = r ? words(r)+' cents' : '';
+  return dollars && cents ? dollars+' and '+cents : dollars || cents;
+}
+// short form for running counts: "twenty-five", "one dollar", "one dollar twenty-five"
+function spokenShort(c){ if(c < 100) return words(c); const d = Math.floor(c/100), r = c%100; return words(d)+(d===1?' dollar':' dollars')+(r ? ' '+words(r) : ''); }
+function coinWords(list){ // [5,5,10] -> "two nickels and a dime"
+  const by = {}; list.forEach(v => by[v] = (by[v]||0)+1);
+  const parts = Object.keys(by).map(Number).sort((a,b)=>b-a).map(v => by[v] === 1 ? DENOMS[v].a : words(by[v])+' '+DENOMS[v].plural);
+  return parts.length > 1 ? parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1] : (parts[0] || 'nothing');
+}
+function coinsFor(cents, denoms){ // fewest coins from the given denominations (greedy works for these values)
+  const out = []; let left = cents;
+  for(const d of denoms.slice().sort((a,b)=>b-a)){ while(left >= d){ out.push(d); left -= d; } }
+  return left === 0 ? out : null;
+}
+function randomCoins(cents, denoms, maxCoins){ // a "handful": not always the fewest coins
+  for(let t=0;t<40;t++){
+    const out = []; let left = cents;
+    while(left > 0){ const opts = denoms.filter(d => d <= left); const d = pick(opts); out.push(d); left -= d; if(out.length > maxCoins) break; }
+    if(left === 0 && out.length <= maxCoins) return shuffle(out);
+  }
+  return coinsFor(cents, denoms);
+}
+function choicesFor(answer, step, lo){
+  const set = new Set([answer]);
+  const cands = shuffle([answer-step, answer+step, answer-2*step, answer+2*step, answer+3*step].filter(v => v >= (lo||5)));
+  for(const c of cands){ if(set.size >= 3) break; set.add(c); }
+  let k = 4; while(set.size < 3){ set.add(answer + step*k); k++; }
+  return shuffle([...set]);
+}
+
+/* ---------- levels ---------- */
+function mk(mode, o){ return Object.assign({mode}, o); }
+function payRound(prices, denoms, boxDenoms){ const price = pick(prices); return mk('pay', {price, target:price, denoms, boxDenoms:boxDenoms||denoms}); }
+function changeRound(price, paid, boxDenoms){ return mk('change', {price, paid, target:paid-price, boxDenoms}); }
+const LEVELS = [
+  {title:'Count the Coins', teach:'count nickels and dimes to 50¢', ops:'5¢ 10¢', build(){ return Array.from({length:6}, (_,i) => { const total = rnd(2, 10)*5; const coins = randomCoins(total, [5,10], i < 2 ? 3 : 5); return mk('count', {coins, target:total, choices:choicesFor(total, 5)}); }); }},
+  {title:'Pay for It', teach:'pay a price with nickels, dimes and quarters', ops:'5¢ 10¢ 25¢', build(){ return Array.from({length:6}, (_,i) => payRound(i < 2 ? [10,15,20,25] : [15,20,25,30,35,40,45,50], [5,10,25])); }},
+  {title:'Quarters & Loonies', teach:'pay prices up to $2 with quarters and loonies', ops:'25¢ $1 $2', build(){ return Array.from({length:6}, (_,i) => payRound(i < 2 ? [50,75,100] : [75,100,125,150,175,200], [5,10,25,100,200])); }},
+  {title:'Make Change', teach:'make change by counting up', ops:'🪙 → 🤲', build(){ return Array.from({length:6}, (_,i) => { const price = pick(i < 2 ? [25,50,75] : [25,50,75,100,125,150,175]); const paid = price < 100 && Math.random() < 0.5 ? 100 : 200; return changeRound(price, paid, [5,10,25,100]); }); }},
+  {title:'Bills!', teach:'pay and make change with $5 and $10 bills', ops:'$5 $10', build(){ return shuffle([ payRound([300,400,600,700], [100,200,500], [100,200,500,1000]), payRound([500,800,900,1000], [100,200,500], [100,200,500,1000]), payRound([200,300,400], [100,200,500], [100,200,500,1000]), changeRound(pick([200,300,400]), 500, [100,200,500]), changeRound(pick([300,600,700,800]), 1000, [100,200,500]), changeRound(pick([400,500,900]), 1000, [100,200,500]) ]); }},
+  {title:'Buy Supplies', teach:'spend a budget and work out what is left', ops:'🛒 $10', build(){ return Array.from({length:6}, (_,i) => buyRound(i < 2 ? 2 : 3, 1000)); }},
+  {title:'Sell & Count', teach:'pick a price, sell, count the money and find the profit', ops:'💰 profit', day:{prices:[25,50,100], demand:{25:6,50:4,100:2}, supplies:[{id:'lemons',name:'Lemons',em:'🍋',price:50},{id:'sugar',name:'Sugar',em:'🍬',price:25},{id:'cups',name:'Cups',em:'🥤',price:25}], boxDenoms:[5,10,25,100,200]}, build(){ return [mk('price', {prices:[25,50,100]})]; }},
+  {title:'Stand Day', teach:'a whole day: buy, sell, make change and count the profit', ops:'🍋 parade', day:{prices:[100,200,300], demand:{100:6,200:4,300:2}, boxDenoms:[100,200,500]}, build(){ const b = buyRound(3, 1000, true); return [b, mk('price', {prices:[100,200,300]})]; }}
+];
+function buyRound(n, budget, fixed){
+  let items;
+  if(fixed) items = [{id:'lemons',name:'Lemons',em:'🍋',price:200},{id:'sugar',name:'Sugar',em:'🍬',price:100},{id:'cups',name:'Cups',em:'🥤',price:100}];
+  else { for(let t=0;t<50;t++){ items = shuffle(SUPPLIES).slice(0,n).map(s => ({id:s.id,name:s.name,em:s.em,price:pick(s.prices)})); if(items.reduce((a,b)=>a+b.price,0) < budget) break; } }
+  const spent = items.reduce((a,b)=>a+b.price,0), left = budget - spent;
+  return mk('buy', {items, budget, spent, target:left, choices:choicesFor(left, 100, 0)});
+}
+function levelConfig(n){ return Object.assign({n}, LEVELS[Math.min(n, LEVELS.length)-1]); }
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    clink(){ tone(2100+Math.random()*400,0.1,{type:'triangle',gain:0.08}); tone(3200,0.16,{type:'sine',gain:0.05,delay:0.03}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    boing(){ tone(220,0.25,{type:'triangle',gain:0.12,slide:440}); },
+    squirt(){ noise(0.25,{gain:0.12,from:6000,to:1500}); tone(900,0.2,{type:'sine',gain:0.06,slide:300}); },
+    slurp(){ tone(300,0.3,{type:'sawtooth',gain:0.04,slide:900}); noise(0.3,{gain:0.04,from:2000,to:800}); },
+    coins(){ [1800,2200,2600].forEach((f,i)=>tone(f,0.12,{type:'triangle',gain:0.07,delay:i*0.07})); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootLemonadeStand')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootLemonadeStand', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), customer:$('#customer'), custBody:$('#cust-body'), bubble:$('#bubble'), robot:$('#robot'), robobubble:$('#robobubble'), signPrice:$('#sign-price'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), info:$('#info'), items:$('#items'), trayzone:$('#trayzone'), tray:$('#tray'), trayLab:$('#tray-lab'), cashbox:$('#cashbox'),
+  hint:$('#hint'), choices:$('#choices'), give:$('#btn-give'), lvlChip:$('#lvl-chip'), servedChip:$('#served-chip'), overlay:$('#overlay'), card:$('#card'), waitText:$('#wait-text'), waitEm:$('#wait-em')
+};
+
+/* ---------- game state ---------- */
+let G = null, run = 0, busy = false, coachLine = '', lastBubbleSpeech = '';
+let levelsThisSitting = 0; // in memory only, never saved: used to suggest a break, never to block
+const alive = r => run === r;
+
+/* ---------- idle nudge: 14 s with no taps -> say the instruction again and wiggle the target ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || busy || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- UI helpers ---------- */
+function show(viewId){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===viewId)); }
+function coach(text, face, speak=true, spokenText){ coachLine = spokenText || text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face; if(speak) Voice.say(coachLine); }
+function toast(text){ const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function bubble(html, speakText){ el.bubble.innerHTML = html; el.bubble.classList.add('show'); if(speakText){ lastBubbleSpeech = speakText; Voice.say(speakText); } }
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function roboSay(text, ms){ el.robobubble.textContent = text; el.robobubble.classList.add('show'); clearTimeout(roboSay.t); roboSay.t = setTimeout(()=>el.robobubble.classList.remove('show'), ms||2200); }
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=xPct+'%'; s.style.top=yPct+'%';
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1500);
+}
+function coinBurst(){ for(let i=0;i<8;i++) spark(66, 45, pick(['🪙','✨','🍋']), 20); }
+function coinEl(v, extra){ const b = document.createElement('button'); b.className = 'coin c'+v+(extra?' '+extra:''); b.dataset.v = v; b.setAttribute('aria-label', DENOMS[v].name+', '+spoken(v)); b.innerHTML = `<span class="v">${DENOMS[v].label}</span><span class="tick"></span>`; return b; }
+function setHint(html){ el.hint.innerHTML = html || ''; el.hint.classList.toggle('on', !!html); }
+function clearReveals(){ document.querySelectorAll('.reveal').forEach(e => e.classList.remove('reveal')); }
+async function roboSquirt(){ // Robo squeezes a lemon and squirts himself in the eye
+  if(el.robot.classList.contains('ouch')) return;
+  el.robot.classList.add('ouch'); Sound.squirt(); roboSay('Ouch! Right in my eye! 😵', 1800);
+  await wait(1500); el.robot.classList.remove('ouch');
+}
+
+/* ---------- level flow ---------- */
+function startLevel(n){
+  run++; const myRun = run; hideOverlay(); busy = false;
+  const cfg = levelConfig(n);
+  G = {n, cfg, queue:cfg.build(), i:0, served:0, stats:{questions:0, firstTry:0, wrong:0}, cast:shuffle(CUSTOMERS), q:null, complete:false, step:'wait', day:null};
+  if(cfg.day) G.day = {price:null, demand:cfg.day.demand, boxDenoms:cfg.day.boxDenoms, spent: cfg.day.supplies ? cfg.day.supplies.reduce((a,b)=>a+b.price,0) : 0, made:0, profit:null, supplies:cfg.day.supplies||null};
+  el.lvlChip.textContent = n; el.servedChip.textContent = 0; el.signPrice.textContent = ''; el.fx.innerHTML = '';
+  el.customer.style.left = '-16%'; el.customer.classList.remove('walking','happy','served'); hideBubble(); el.robot.classList.remove('juggle','ouch');
+  setNudge(null);
+  const intro = n === 7 ? `Level ${n}: ${cfg.title}. Robo bought lemons, sugar and cups for ${spoken(G.day.spent)}. Let’s sell lemonade!` : `Level ${n}: ${cfg.title}.`;
+  coach(intro, '🍋');
+  loop(myRun);
+}
+async function loop(myRun){
+  await wait(900); if(!alive(myRun)) return;
+  while(alive(myRun) && G.i < G.queue.length){
+    await playRound(myRun); if(!alive(myRun)) return;
+    G.i++;
+    await wait(500); if(!alive(myRun)) return;
+  }
+  if(alive(myRun)) finishLevel();
+}
+const NEEDS_CUSTOMER = {count:1, pay:1, change:1, collect:1};
+async function playRound(myRun){
+  const q = G.q = G.queue[G.i];
+  Object.assign(q, {tray:[], counted:0, wrong:0, hint:0, revealed:false, solved:false, graded:['count','pay','change','buy','profit'].includes(q.mode), cust:null});
+  if(NEEDS_CUSTOMER[q.mode]){
+    q.cust = G.cast[G.served % G.cast.length];
+    G.step = 'wait'; busy = true; show('v-wait'); el.waitEm.textContent = '🍋'; el.waitText.textContent = `${q.cust.name} is coming!`;
+    coach(`Here comes ${q.cust.name}.`, '🍋');
+    el.custBody.textContent = q.cust.em; el.customer.classList.remove('happy','served'); el.customer.style.left = '-16%'; hideBubble();
+    await wait(60); if(!alive(myRun)) return;
+    el.customer.classList.add('walking'); el.customer.style.left = '17%'; Sound.pop();
+    await wait(1700); if(!alive(myRun)) return;
+    el.customer.classList.remove('walking');
+  }
+  render(q);
+  G.step = 'play'; busy = false;
+  await new Promise(res => { q.resolve = res; }); if(!alive(myRun)) return;
+  await celebrate(q, myRun);
+}
+function render(q){
+  show('v-play'); setHint(''); clearReveals();
+  el.items.innerHTML = ''; el.choices.innerHTML = ''; el.tray.innerHTML = ''; el.tray.className = 'tray'; el.trayzone.hidden = false; el.cashbox.hidden = true; el.give.classList.remove('on'); el.items.hidden = true;
+  const boxHtml = denoms => `<span class="lab">Cash box</span>` + denoms.map(v => `<span class="slotc"><button class="coin c${v}" data-v="${v}" aria-label="${DENOMS[v].name}, ${spoken(v)}"><span class="v">${DENOMS[v].label}</span></button><small>${DENOMS[v].name}</small></span>`).join('');
+  if(q.mode === 'count' || q.mode === 'collect' || q.mode === 'profit'){
+    el.trayLab.textContent = q.mode === 'profit' ? 'Money in the box' : `${q.cust.name}’s coins`;
+    if(q.mode === 'profit') el.tray.classList.add('box');
+    q.coins.forEach((v,i) => { const c = coinEl(v); c.dataset.i = i; el.tray.appendChild(c); });
+    el.info.innerHTML = `<div class="box q"><small>Counted so far</small><strong id="run-total">0</strong></div>`;
+    if(q.mode === 'profit'){
+      el.info.innerHTML = `<div class="box"><small>Spent on supplies</small><strong>${fmt(G.day.spent)}</strong></div><div class="box q"><small>Counted so far</small><strong id="run-total">0</strong></div>`;
+      roboSay('Let’s count the money!'); coach(`The day is done! Tap each coin in the box to count it.`, '💰');
+    } else if(q.mode === 'count'){
+      bubble(`Here’s my money!<span class="big">🪙 How much?</span>`, `Hi! One lemonade please. Here is my money!`);
+      coach(`Tap each coin to count it.`, '🪙', false);
+    } else {
+      bubble(`One lemonade!<span class="big">${fmt(q.target)}</span>`, `One lemonade please! Here is ${spoken(q.target)}.`);
+      coach(`Tap each coin to put it in the box.`, '🪙', false);
+    }
+    setNudge(()=>[el.tray.querySelector('.coin:not(.counted)') || el.choices.querySelector('.pick')], q.mode === 'profit' || q.mode === 'count' ? 'Tap each coin to count it. Then tap the total.' : 'Tap each coin to put it in the box.');
+  }
+  else if(q.mode === 'pay'){
+    el.signPrice.textContent = fmt(q.price);
+    el.trayLab.textContent = 'Tray'; el.cashbox.hidden = false; el.cashbox.innerHTML = boxHtml(q.boxDenoms);
+    el.info.innerHTML = `<div class="box"><small>Lemonade costs</small><strong>${fmt(q.price)}</strong></div><div class="box q"><small>In the tray</small><strong id="run-total">0</strong></div>`;
+    bubble(`One lemonade, please!<span class="big">${fmt(q.price)}</span>`, `One lemonade please! Can you help me pay?`);
+    coach(`Lemonade is ${fmt(q.price)}. Tap coins into the tray.`, '🪙', true, `Lemonade is ${spoken(q.price)}. Tap coins into the tray to pay.`);
+    el.give.classList.add('on');
+    setNudge(()=>[el.cashbox], `Lemonade is ${spoken(q.price)}. Tap coins from the cash box into the tray.`);
+  }
+  else if(q.mode === 'change'){
+    el.signPrice.textContent = fmt(q.price);
+    el.trayLab.textContent = `${q.cust.name}’s hand 🤲`; el.tray.classList.add('hand'); el.cashbox.hidden = false; el.cashbox.innerHTML = boxHtml(q.boxDenoms);
+    el.info.innerHTML = `<div class="box"><small>Lemonade costs</small><strong>${fmt(q.price)}</strong></div><div class="box"><small>They paid</small><strong>${fmt(q.paid)}</strong></div><div class="box q"><small>Change given</small><strong id="run-total">0</strong></div>`;
+    const paidCoins = coinsFor(q.paid, [1000,500,200,100]);
+    bubble(`Here’s ${coinWords(paidCoins)}!<span class="big">${fmt(q.paid)}</span>`, `One lemonade please! Here is ${coinWords(paidCoins)}.`);
+    coach(`Lemonade is ${fmt(q.price)}. They paid ${fmt(q.paid)}. Give the change!`, '🤲', true, `Lemonade is ${spoken(q.price)}. ${q.cust.name} paid ${spoken(q.paid)}. Tap coins to give the change.`);
+    el.give.classList.add('on');
+    setNudge(()=>[el.cashbox], `Tap coins from the cash box into ${q.cust.name}’s hand to make ${spoken(q.target)} change.`);
+  }
+  else if(q.mode === 'buy'){
+    el.trayzone.hidden = true; el.items.hidden = false;
+    el.info.innerHTML = `<div class="box ok"><small>You have</small><strong id="wallet">${fmt(q.budget)}</strong></div><div class="box"><small>Spent</small><strong id="spent">${fmt(0)}</strong></div>`;
+    el.items.innerHTML = q.items.map(it => `<button class="item" data-id="${it.id}" aria-label="${it.name}, ${spoken(it.price)}"><span class="em">${it.em}</span><span class="nm">${it.name}</span><span class="pr">${fmt(it.price)}</span></button>`).join('');
+    const list = q.items.map(it => `${it.name} ${fmt(it.price)}`).join(', '), listSp = q.items.map(it => `${it.name.toLowerCase()} ${spoken(it.price)}`).join(', ');
+    roboSay('🛒 Shopping time!');
+    coach(`You have ${fmt(q.budget)}. ${list}. Tap to buy them all!`, '🛒', true, `You have ${spoken(q.budget)}. ${listSp}. Can you buy them all? Tap each one.`);
+    setNudge(()=>[el.items.querySelector('.item:not(.bought)') || el.choices.querySelector('.pick')], `Tap each thing to buy it. Then tap how much money is left.`);
+  }
+  else if(q.mode === 'price'){
+    el.trayzone.hidden = true;
+    el.info.innerHTML = `<div class="box q"><small>Pick a price</small><strong>🍋 ?</strong></div>`;
+    el.choices.innerHTML = q.prices.map(p => `<button class="pick" data-v="${p}" aria-label="${spoken(p)}">${fmt(p)}<small>${G.day.demand[p]} customers</small></button>`).join('');
+    roboSay('How much for a cup?');
+    coach(`Pick a price. A low price brings more customers!`, '🏷️');
+    setNudge(()=>[el.choices], 'Pick a price for the lemonade. Tap one.');
+  }
+  updateTotal(q);
+}
+function updateTotal(q){
+  const t = $('#run-total'); if(!t) return;
+  const v = q.mode === 'count' || q.mode === 'collect' || q.mode === 'profit' ? q.coins.slice(0, q.counted).reduce((a,b)=>a+b,0) : q.tray.reduce((a,b)=>a+b,0);
+  t.textContent = fmt(v);
+}
+function trayTotal(q){ return q.tray.reduce((a,b)=>a+b,0); }
+function showChoices(q, label){
+  el.choices.innerHTML = q.choices.map(v => `<button class="pick" data-v="${v}" aria-label="${spoken(v)}">${fmt(v)}</button>`).join('');
+  coach(label, '🤔', true, q.mode === 'buy' ? 'How much money is left? Tap it.' : 'How much money is that? Tap the total.');
+}
+
+/* ---------- actions ---------- */
+function playable(){ return G && G.step === 'play' && !busy && G.q && !G.q.solved; }
+function tapCoin(v){
+  if(!playable()) return false; const q = G.q; v = +v;
+  if(q.mode === 'count' || q.mode === 'collect' || q.mode === 'profit'){
+    const next = [...el.tray.querySelectorAll('.coin:not(.counted)')].find(c => +c.dataset.v === v);
+    if(!next) return false;
+    return countCoin(next);
+  }
+  if(q.mode === 'pay' || q.mode === 'change'){
+    if(!q.boxDenoms.includes(v)) return false;
+    const btn = el.cashbox.querySelector(`.coin[data-v="${v}"]`);
+    return addToTray(v, btn);
+  }
+  return false;
+}
+function countCoin(c){
+  const q = G.q; const v = +c.dataset.v;
+  c.classList.add('counted'); q.counted++;
+  // coins are counted in the order tapped: move this coin's value to its counted position
+  const idx = q.coins.indexOf(v, q.counted-1); if(idx > q.counted-1){ q.coins.splice(idx,1); q.coins.splice(q.counted-1,0,v); }
+  const total = q.coins.slice(0, q.counted).reduce((a,b)=>a+b,0);
+  c.querySelector('.tick').textContent = fmt(total); Sound.clink(); updateTotal(q);
+  Voice.say(spokenShort(total));
+  if(q.counted === q.coins.length){
+    if(q.mode === 'collect'){ setTimeout(()=>{ if(G && G.q === q && !q.solved) solve(q); }, 500); }
+    else { setTimeout(()=>{ if(G && G.q === q && !q.solved){ showChoices(q, `That’s all the coins. How much is it?`); } }, 700); }
+  }
+  return true;
+}
+function addToTray(v, fromBtn){
+  const q = G.q; const cur = trayTotal(q);
+  if(cur + v > q.target){ // over-pay: the coin bounces gently back
+    const c = coinEl(v, 'bounce'); el.tray.appendChild(c); Sound.boing(); setTimeout(()=>c.remove(), 700);
+    miss(q, `${DENOMS[v].a} is too much. We need ${spoken(q.target - cur)} more.`);
+    return false;
+  }
+  q.tray.push(v); const c = coinEl(v, 'in'); el.tray.appendChild(c); Sound.clink();
+  el.tray.querySelectorAll('.coin.ghost').forEach(g => g.remove());
+  const now = cur + v; updateTotal(q);
+  if(now === q.target){ Voice.say(spokenShort(now)); setTimeout(()=>{ if(G && G.q === q && !q.solved) solve(q); }, 500); }
+  else { Voice.say(spokenShort(now)); if(q.hint) ghostRemaining(q); }
+  return true;
+}
+function removeFromTray(c){
+  const q = G.q; const v = +c.dataset.v; const i = q.tray.lastIndexOf(v); if(i < 0) return;
+  q.tray.splice(i,1); c.remove(); Sound.pop(); updateTotal(q); if(q.hint) ghostRemaining(q);
+}
+function choose(label){
+  if(!playable()) return false; const q = G.q;
+  const btns = [...el.choices.querySelectorAll('.pick')]; if(!btns.length) return false;
+  const want = typeof label === 'number' ? label : null;
+  const b = btns.find(x => want !== null ? +x.dataset.v === want : (x.firstChild.textContent.trim() === String(label).trim() || fmt(+x.dataset.v) === String(label).trim()));
+  if(!b) return false;
+  const v = +b.dataset.v;
+  if(q.mode === 'price') return pickPrice(v);
+  if(v === q.target){ b.classList.add('reveal'); solve(q); return true; }
+  b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope');
+  miss(q, `${fmt(v)} is not it.`); return false;
+}
+function submit(){
+  if(!playable()) return false; const q = G.q;
+  if(q.mode === 'pay' || q.mode === 'change'){
+    const cur = trayTotal(q);
+    if(cur === q.target){ solve(q); return true; }
+    miss(q, `Not enough yet. That’s ${spoken(cur)}. We need ${spoken(q.target)}.`); return false;
+  }
+  return false;
+}
+function pickPrice(cents){
+  if(!playable() || G.q.mode !== 'price') return false; const q = G.q; cents = +cents;
+  if(!q.prices.includes(cents)) return false;
+  const n = G.day.demand[cents]; G.day.price = cents; el.signPrice.textContent = fmt(cents);
+  // build the rest of the day: customers pay exactly or need change, then count the box
+  const rounds = [];
+  for(let i=0;i<n;i++){
+    if(i % 2 === 0) rounds.push(mk('collect', {coins: coinsFor(cents, [200,100,25]), target:cents}));
+    else { const paid = cents < 100 ? 100 : cents === 100 ? pick([200,500]) : cents === 200 ? 500 : pick([500,1000]); rounds.push(changeRound(cents, paid, G.day.boxDenoms)); }
+  }
+  G.day.made = cents * n;
+  const box = []; for(let i=0;i<n;i++) box.push(...coinsFor(cents, [200,100,25]));
+  rounds.push(mk('profit', {coins:box, target:G.day.made, choices:choicesFor(G.day.made, cents < 100 ? 25 : 100)}));
+  G.queue.splice(G.i+1, 0, ...rounds);
+  coach(`${fmt(cents)} a cup! ${n} customers are coming.`, '🏷️', true, `${spoken(cents)} a cup! ${words(n)} customers are coming.`);
+  q.solved = true; busy = true; setNudge(null); el.choices.innerHTML = ''; Sound.ding();
+  setTimeout(()=>{ if(G && G.q === q) q.resolve(); }, 900);
+  return true;
+}
+function buy(id){
+  if(!playable() || G.q.mode !== 'buy') return false; const q = G.q;
+  const it = q.items.find(i => i.id === id), b = el.items.querySelector(`.item[data-id="${id}"]`);
+  if(!it || !b || b.classList.contains('bought')) return false;
+  b.classList.add('bought'); q.tray.push(it.price); Sound.clink();
+  const spent = trayTotal(q), left = q.budget - spent;
+  $('#wallet').textContent = fmt(left); $('#spent').textContent = fmt(spent);
+  Voice.say(`${it.name}, ${spoken(it.price)}. ${spoken(left)} left.`);
+  if(q.tray.length === q.items.length){ setTimeout(()=>{ if(G && G.q === q && !q.solved) showChoices(q, `You bought them all! How much is left?`); }, 900); }
+  return true;
+}
+
+/* ---------- hint ladder: miss 1 = picture hint, miss 2 = the answer to tap. No failure. ---------- */
+function ghostRemaining(q){
+  el.tray.querySelectorAll('.coin.ghost').forEach(g => g.remove());
+  const need = coinsFor(q.target - trayTotal(q), q.boxDenoms) || [];
+  need.forEach(v => el.tray.appendChild(coinEl(v, 'ghost' + (q.revealed ? ' reveal' : ''))));
+  if(q.revealed){ el.cashbox.querySelectorAll('.coin').forEach(c => c.classList.toggle('reveal', need.includes(+c.dataset.v))); }
+  return need;
+}
+function countUpHTML(from, coins){ // "75 → 100 → 200" with the coin used for each hop
+  let cur = from, line = `<span class="from">${fmt(from)}</span>`;
+  coins.slice().sort((a,b)=>a-b).forEach(v => { cur += v; line += `<i>→</i><span class="${cur===from+coins.reduce((a,b)=>a+b,0)?'to':''}">${fmt(cur)}</span>`; });
+  return `<div class="nline">${line}</div>`;
+}
+function countUpSpoken(from, coins){
+  let cur = from, parts = [spokenShort(from)];
+  coins.slice().sort((a,b)=>a-b).forEach(v => { cur += v; parts.push(`then ${spoken(v)} more makes ${spokenShort(cur)}`); });
+  return parts.join(', ') + '.';
+}
+function miss(q, why){
+  q.wrong++; G.stats.wrong++; Sound.oops();
+  const second = q.wrong >= 2;
+  q.hint = second ? 2 : 1; if(second) q.revealed = true;
+  if(q.mode === 'pay' || q.mode === 'change'){
+    const need = ghostRemaining(q);
+    const hopFrom = q.mode === 'change' ? q.price : trayTotal(q);
+    const line = q.mode === 'change' ? `Count up from ${fmt(q.price)} to ${fmt(q.paid)}:` + countUpHTML(q.price, need) : `Fill the ghost coins:` + countUpHTML(trayTotal(q), need);
+    setHint(line);
+    const sp = q.mode === 'change' ? countUpSpoken(q.price, need) : `Tap ${coinWords(need)}.`;
+    if(!second) coach(`${pick(TRY_AGAIN)} ${why}`, '🤗', true, `${pick(TRY_AGAIN)} ${why} ${sp}`);
+    else coach(`Tap ${coinWords(need)}. Then tap Give it ✓`, '💛', true, `Here is the answer. Tap ${coinWords(need)}. ${sp} Then tap give it.`);
+    void hopFrom;
+  } else if(q.mode === 'count' || q.mode === 'profit'){
+    let cur = 0; const hops = q.coins.map(v => { cur += v; return cur; });
+    setHint(`Count the coins together:<div class="nline">${hops.map((h,i)=>`<span class="${i===hops.length-1?'to':''}">${fmt(h)}</span>`).join('<i>→</i>')}</div>`);
+    const sp = 'Let’s count together: ' + hops.map(spokenShort).join(', ') + '.';
+    if(!second) coach(`${pick(TRY_AGAIN)} Count again, then tap the total.`, '🤗', true, `${pick(TRY_AGAIN)} ${sp} Tap the total.`);
+    else { revealChoice(q); coach(`It’s ${fmt(q.target)}! Tap ${fmt(q.target)}.`, '💛', true, `It is ${spoken(q.target)}! ${sp} Tap ${spoken(q.target)}.`); }
+  } else if(q.mode === 'buy'){
+    let cur = q.budget; const steps = q.items.map(it => { cur -= it.price; return `<span>${fmt(cur)}</span>`; });
+    setHint(`Start with ${fmt(q.budget)} and take away each price:<div class="nline"><span class="from">${fmt(q.budget)}</span><i>→</i>${steps.join('<i>→</i>')}</div>`);
+    let c2 = q.budget; const sp = `Start with ${spoken(q.budget)}. ` + q.items.map(it => { c2 -= it.price; return `Take away ${spoken(it.price)} for ${it.name.toLowerCase()}, that leaves ${spoken(c2)}`; }).join('. ') + '.';
+    if(!second) coach(`${pick(TRY_AGAIN)} Take away each price.`, '🤗', true, `${pick(TRY_AGAIN)} ${sp}`);
+    else { revealChoice(q); coach(`${fmt(q.target)} is left! Tap ${fmt(q.target)}.`, '💛', true, `${spoken(q.target)} is left! ${sp} Tap ${spoken(q.target)}.`); }
+  }
+  if(second && q.mode === 'count'){ // count all the coins for them so only the total is left to tap
+    el.tray.querySelectorAll('.coin:not(.counted)').forEach(c => { const v = +c.dataset.v; c.classList.add('counted'); q.counted++; c.querySelector('.tick').textContent = fmt(q.coins.slice(0,q.counted).reduce((a,b)=>a+b,0)); });
+    updateTotal(q); if(!el.choices.children.length) el.choices.innerHTML = q.choices.map(v => `<button class="pick" data-v="${v}">${fmt(v)}</button>`).join(''); revealChoice(q);
+  }
+}
+function revealChoice(q){ const b = el.choices.querySelector(`.pick[data-v="${q.target}"]`); if(b) b.classList.add('reveal'); }
+
+/* ---------- solve + celebrate ---------- */
+function solve(q){
+  if(q.solved) return; q.solved = true; busy = true; setNudge(null); setHint(''); clearReveals();
+  el.tray.querySelectorAll('.coin.ghost').forEach(g => g.remove());
+  if(q.graded){ G.stats.questions++; if(q.wrong === 0) G.stats.firstTry++; }
+  Sound.ding(); coinBurst();
+  if(q.mode === 'profit'){
+    const d = G.day; d.profit = d.made - d.spent;
+    el.info.innerHTML = `<div class="box"><small>Spent</small><strong>${fmt(d.spent)}</strong></div><div class="box"><small>Made</small><strong>${fmt(d.made)}</strong></div><div class="box ok"><small>Profit</small><strong>${fmt(d.profit)}</strong></div>`;
+    el.choices.innerHTML = '';
+    const line = d.profit > 0 ? `You spent ${spoken(d.spent)} and made ${spoken(d.made)}. That’s ${spoken(d.profit)} profit! Profit is the money left over after paying for the lemons.` : `You spent ${spoken(d.spent)} and made ${spoken(d.made)}. No profit today, but you had fun!`;
+    coach(`Spent ${fmt(d.spent)}, made ${fmt(d.made)}. Profit: ${fmt(d.profit)}!`, '💰', true, `${spoken(d.made)}! ` + line);
+    toast(`${fmt(d.profit)} profit!`);
+  } else if(q.mode === 'buy'){
+    if(G.day) G.day.spent = q.spent; // a stand day: what the supplies cost comes off the profit later
+    coach(`${pick(PRAISE)} ${fmt(q.target)} left.`, '🎉', true, `${pick(PRAISE)} ${spoken(q.target)} left.`);
+  } else {
+    const p = pick(PRAISE);
+    coach(`${p} ${fmt(q.target)}!`, '🎉', true, `${p} ${spoken(q.target)}!`);
+  }
+  setTimeout(()=>{ if(G && G.q === q) q.resolve(); }, q.mode === 'profit' ? 2600 : 900);
+}
+async function celebrate(q, myRun){
+  if(!q.cust){ await wait(300); return; }
+  el.customer.classList.add('served','happy'); Sound.slurp();
+  const t = pick(THANKS); bubble(t, t);
+  G.served++; el.servedChip.textContent = G.served;
+  if(Math.random() < 0.35) roboSquirt(); else if(Math.random() < 0.3){ Sound.fart(); roboSay('…toot… 💨', 1200); }
+  await wait(1300); if(!alive(myRun)) return;
+  hideBubble(); el.customer.classList.remove('happy'); el.customer.classList.add('walking'); el.customer.style.left = '105%';
+  show('v-wait'); el.waitEm.textContent = '👋'; el.waitText.textContent = 'Bye bye!';
+  await wait(1200); if(!alive(myRun)) return;
+  el.customer.classList.remove('walking','served');
+}
+
+/* ---------- level complete ---------- */
+function finishLevel(){
+  G.complete = true; G.step = 'done'; busy = false; setNudge(null);
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  progress.unlocked = Math.max(progress.unlocked, Math.min(G.n+1, LEVELS.length));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'Every answer right on the first try. You’re a money superstar!' : stars===2 ? 'Great work! Your counting is getting stronger every time.' : 'You finished the whole level! Practice makes you stronger.';
+  Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3, last = G.n >= LEVELS.length;
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${last?'':'<button class="subbtn" id="btn-next">Next level ▶</button>'}<button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `${last?'':'<button class="bigbtn" id="btn-next">Next level ▶</button>'}<div class="rowbtns">${last?'<button class="subbtn" id="btn-levels">Choose level</button>':''}<button class="subbtn" id="btn-replay">Play it again</button>${last?'':'<button class="subbtn" id="btn-levels">Choose level</button>'}<button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  const d = G.day;
+  const profitFact = d && d.profit !== null ? `<div class="fact">Spent <b>${fmt(d.spent)}</b> · Made <b>${fmt(d.made)}</b> · Profit <b>${fmt(d.profit)}</b></div>` : '';
+  const parade = G.n === 8 ? `<div class="parade" aria-hidden="true"><span>🍋</span><span>🤖</span><span>🍋</span><span>🐻</span><span>🍋</span><span>🐰</span><span>🍋</span></div>` : '';
+  if(G.n === 8) el.robot.classList.add('juggle');
+  showOverlay(`<div class="hero">🍋🤖</div><h1>${G.n === 8 ? 'Lemon parade!' : 'Stand closed!'}</h1><h2>Level ${G.n} done!</h2>${parade}
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>${profitFact}
+    <div class="fact">Served <b>${G.served}</b> customers · <b>${s.firstTry}</b> of <b>${s.questions}</b> right first time</div>
+    ${buttons}`);
+  Voice.say(`${G.n === 8 ? 'Lemon parade! Robo is juggling lemons.' : 'The stand is closed.'} Level ${G.n} done! ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  const nx = $('#btn-next'); if(nx) nx.addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; busy = false; levelsThisSitting = 0;
+  const idea = pick(['go find some real coins and sort them by size','go make some real lemonade with a grown-up','go draw a picture of Robo squeezing lemons','go play outside for a bit','go get a drink of water and a stretch']);
+  showOverlay(`<div class="hero">👋🍋</div><h2>Great work today!</h2><p>The stand is closed for now. Stretch your arms, ${idea}. Robo will be here when you come back.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say(`Great work today! The stand is closed for now. Stretch your arms, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null; busy = false; show('v-wait'); el.waitEm.textContent='🍋'; el.waitText.textContent='Tap Play to open the stand!';
+  showOverlay(`<div class="hero">🍋🤖🥤</div><h1>Lemonade Stand</h1>
+    <p>Count the coins, pay for lemonade, make change, buy the lemons… and find out if your stand made a profit! Robo squeezes the lemons (and sometimes squirts himself in the eye).</p>
+    <div class="fact">Canadian coins: <b>5¢</b> nickels · <b>10¢</b> dimes · <b>25¢</b> quarters · <b>$1</b> loonies · <b>$2</b> toonies · <b>$5</b> and <b>$10</b> bills</div>
+    <button class="bigbtn" id="btn-play">Play! 🍋</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap any speech bubble or 🔊 to hear it again.</p>`);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What it teaches</b> (Canadian money: nickels, dimes, quarters, loonies, toonies, $5 and $10 bills — no pennies, so every amount is a multiple of 5¢)<ul style="margin:6px 0 0;padding-left:18px">
+      ${LEVELS.map((l,i)=>`<li>Level ${i+1} <b>${l.title}</b>: ${l.teach}</li>`).join('')}
+      <li>Money is always said the way we say it: “seventy-five cents”, “two dollars and twenty-five cents”, “a loonie”.</li></ul>
+    <b style="display:block;margin-top:10px">How it helps without nagging</b><ul style="margin:6px 0 0;padding-left:18px">
+      <li>First miss: a picture hint (ghost coins in the tray, or a count-up line). Second miss: the answer, to tap. Nobody fails.</li>
+      <li>Paying too much just bounces the coin back gently.</li>
+      <li>If your child stops for a while, the instruction is repeated and the thing to tap wiggles.</li>
+      <li>No timers, no accounts, nothing leaves this device. Sound and read-aloud toggles are in the top bar. ⛶ makes it full screen on a tablet.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul style="margin:6px 0 0;padding-left:18px"><li>No streaks, daily rewards, countdowns or notifications. Nothing ever says “come back”.</li><li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li><li>Stars come only from accuracy. There is nothing random to chase.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null; busy = false;
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}${n>=7?' · ages 7+':''}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${c.ops}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level starts easy and gets a little trickier. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- pointer wiring ---------- */
+el.cashbox.addEventListener('click', e => { const b = e.target.closest('.coin'); if(b) tapCoin(+b.dataset.v); });
+el.tray.addEventListener('click', e => {
+  const c = e.target.closest('.coin'); if(!c || !playable() || c.classList.contains('ghost') || c.classList.contains('bounce')) return;
+  const q = G.q;
+  if(q.mode === 'count' || q.mode === 'collect' || q.mode === 'profit'){ if(!c.classList.contains('counted')) countCoin(c); }
+  else removeFromTray(c);
+});
+el.choices.addEventListener('click', e => { const b = e.target.closest('.pick'); if(b) choose(+b.dataset.v); });
+el.items.addEventListener('click', e => { const b = e.target.closest('.item'); if(b) buy(b.dataset.id); });
+el.give.addEventListener('click', submit);
+el.bubble.addEventListener('pointerdown', e=>{ e.stopPropagation(); if(lastBubbleSpeech){ const was=Voice.enabled; Voice.enabled=true; Voice.say(lastBubbleSpeech); Voice.enabled=was; } });
+el.robot.addEventListener('pointerdown', ()=>{ if(G) roboSquirt(); });
+
+/* ---------- top bar ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+
+showTitle();
+
+/* ---------- debug hooks for automated testing ---------- */
+window.__game = {
+  startLevel, tapCoin, choose, submit, pickPrice, buy, showTitle, showLevels, spoken, fmt,
+  get sittingLevels(){ return levelsThisSitting; },
+  get data(){ return {LEVELS, CUSTOMERS, DENOMS}; },
+  get state(){
+    if(!G) return {level:null, complete:false, step:'title', mode:null, target:null, tray:0, solved:false};
+    const q = G.q || {};
+    return {level:G.n, title:G.cfg.title, step:G.step, complete:G.complete, busy, served:G.served, total:G.queue.length, index:G.i, stats:Object.assign({}, G.stats),
+      mode:q.mode || null, target:q.target ?? null, tray:(q.tray||[]).reduce((a,b)=>a+b,0), trayCoins:(q.tray||[]).slice(), coins:(q.coins||[]).slice(), counted:q.counted||0,
+      solved:!!q.solved, wrong:q.wrong||0, hint:q.hint||0, revealed:!!q.revealed, graded:!!q.graded, customer:q.cust ? q.cust.name : null,
+      options:[...el.choices.querySelectorAll('.pick')].map(b => +b.dataset.v), price:q.price ?? (G.day ? G.day.price : null), paid:q.paid ?? null, boxDenoms:(q.boxDenoms||[]).slice(),
+      prices:(q.prices||[]).slice(), items:(q.items||[]).map(i=>({id:i.id, price:i.price})), budget:q.budget ?? null,
+      day:G.day ? {price:G.day.price, spent:G.day.spent, made:G.day.made, profit:G.day.profit} : null};
+  }
+};
+})();
+</script>
+</body>
+</html>

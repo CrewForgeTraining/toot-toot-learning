@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toot Toot Learning</title>
+<meta name="description" content="Calm, ad-free learning games for kids 5 and up. Play free in any browser. No accounts, no ads, no nagging. Buy once and own every game.">
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+:root{--cream:#FFF4DC;--butter:#FFE29A;--ketchup:#F4552F;--ketchup-dark:#C9391A;--mint:#2FBFA6;--mint-dark:#1E8F7B;--sky:#BDE8FF;--cocoa:#3B2A1F;--cocoa-soft:#6E5546;--white:#FFFDF8;--wood:#E0A96D;--display:'Fredoka','Nunito',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif;--shadow:0 6px 0 rgba(59,42,31,.14)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:17px;line-height:1.5}
+a{color:var(--ketchup-dark)}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:20px}
+header{position:sticky;top:0;background:rgba(255,244,220,.92);backdrop-filter:blur(8px);z-index:10;border-bottom:2px solid rgba(59,42,31,.06)}
+nav{display:flex;align-items:center;gap:18px;padding-block:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.25rem;background:var(--ketchup);color:#fff;padding:5px 14px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);text-decoration:none}
+nav .links{display:flex;gap:6px 16px;flex-wrap:wrap;margin-left:auto;font-weight:800;font-size:.95rem}
+nav .links a{text-decoration:none;color:var(--cocoa)}
+.btn{display:inline-block;font-family:var(--display);font-weight:700;font-size:1.1rem;padding:14px 22px;border-radius:18px;background:var(--ketchup);color:#fff;text-decoration:none;box-shadow:0 6px 0 var(--ketchup-dark);border:0;cursor:pointer}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.btn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.btn.ghost{background:var(--white);color:var(--cocoa);box-shadow:0 6px 0 rgba(59,42,31,.14)}
+.btn.small{font-size:.95rem;padding:10px 16px;border-radius:14px}
+section{padding-block:56px}
+.eyebrow{font-family:var(--display);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem;color:var(--ketchup-dark)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:center;padding-block:48px 40px}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:700}
+.hero p{font-size:1.15rem;max-width:44ch}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.scene{background:#F9E7C8;border-radius:28px;box-shadow:var(--shadow);aspect-ratio:4/3;position:relative;overflow:hidden;container-type:inline-size}
+.scene .wall{position:absolute;inset:0 0 50% 0;background:repeating-linear-gradient(90deg,#FFE9BC 0 8cqw,#FFF2D6 8cqw 16cqw)}
+.scene .floor{position:absolute;left:0;right:0;top:50%;bottom:0;background:repeating-conic-gradient(#FBE3BF 0 25%,#F3C89A 0 50%) 0 0/12cqw 12cqw}
+.scene .trim{position:absolute;left:0;right:0;top:48%;height:3%;background:#B97B3F}
+.scene .table{position:absolute;left:35%;top:56%;width:30%;height:14%;border-radius:50%;background:repeating-conic-gradient(#E8503A 0 25%,#FFF8EC 0 50%) 0 0/4cqw 4cqw;box-shadow:0 .8cqw 0 #C63D2A}
+.scene .em{position:absolute;font-size:16cqw;line-height:1}
+.scene .bub{position:absolute;background:#fff;border-radius:2cqw;padding:1cqw 1.6cqw;font-family:var(--display);font-weight:700;font-size:3.6cqw;box-shadow:0 .5cqw 0 rgba(59,42,31,.12)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.card{background:var(--white);border-radius:24px;padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+.card .icon{font-size:2.6rem;line-height:1}
+.card h3{font-size:1.3rem}
+.card p{margin:0;color:var(--cocoa-soft);font-weight:700;font-size:.98rem}
+.card .tag{align-self:flex-start;font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;background:var(--butter);padding:3px 10px;border-radius:8px}
+.card .tag.free{background:#E4FBF5;color:var(--mint-dark)}
+.card .tag.pack{background:#FFE7E0;color:var(--ketchup-dark)}
+.card .foot{margin-top:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.price{font-family:var(--display);font-weight:700;font-size:1.4rem}
+.price small{font-size:.8rem;color:var(--cocoa-soft);font-weight:700}
+.promise{background:var(--white);border-radius:28px;padding:32px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.promise ul{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.promise li{display:flex;gap:10px;align-items:flex-start;font-weight:800}
+.promise li::before{content:"✔";color:var(--mint-dark);font-weight:900}
+.pack{background:linear-gradient(135deg,#FFE29A,#FFD46B);border-radius:32px;padding:36px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;box-shadow:0 10px 0 #E0B443}
+.pack h2{font-size:clamp(1.9rem,4vw,2.8rem)}
+.pack ul{padding-left:20px;font-weight:800;margin:14px 0;columns:2;column-gap:24px}
+.pack li{break-inside:avoid;margin-bottom:6px}
+.pricebox{background:var(--white);border-radius:24px;padding:26px;text-align:center;box-shadow:var(--shadow)}
+.pricebox .big{font-family:var(--display);font-weight:700;font-size:3.2rem;line-height:1}
+.pricebox .big small{font-size:1rem;color:var(--cocoa-soft)}
+.pricebox p{margin:8px 0 16px;font-weight:800;color:var(--cocoa-soft);font-size:.95rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.faq details{background:var(--white);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:10px}
+.faq summary{font-family:var(--display);font-weight:700;font-size:1.1rem;cursor:pointer}
+.faq p{margin:8px 0 0;color:var(--cocoa-soft);font-weight:700}
+footer{padding-block:40px;font-weight:700;color:var(--cocoa-soft);font-size:.92rem}
+footer .links{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.note{font-size:.9rem;color:var(--cocoa-soft);font-weight:700}
+@media (max-width:820px){.hero,.promise,.pack,.two{grid-template-columns:1fr}.pack ul{columns:1}section{padding-block:40px}}
+@media (prefers-reduced-motion:no-preference){.scene .em.bob{animation:bob 2s infinite ease-in-out}@keyframes bob{50%{transform:translateY(-1.5cqw)}}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <a class="logo" href="#top">Toot Toot Learning</a>
+  <div class="links"><a href="#play">Play free</a><a href="#pack">Get everything</a><a href="#shop">Shop</a><a href="#teachers">Teachers</a><a href="#sponsors">Sponsors</a><a href="family/">Family link</a></div>
+</nav></div></header>
+
+<main class="wrap" id="top">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Wholesome, silly, ad-free learning games for ages 5+</div>
+      <h1>Games built to be put down.</h1>
+      <p>Math, reading, telling time, coding, feelings, safety and animals, wrapped in a diner where the customers toot and the cleaning robot goes KA-BOOM. Every level ends with an “All done for today” button. No ads, no accounts, no streaks, nothing that begs your kid to come back.</p>
+      <div class="cta"><a class="btn" href="#play">Play free now</a><a class="btn ghost" href="#pack">Buy once, own everything</a></div>
+    </div>
+    <div class="scene" aria-hidden="true">
+      <div class="wall"></div><div class="trim"></div><div class="floor"></div>
+      <div class="table"></div>
+      <span class="em bob" style="left:12%;top:32%">🐻</span>
+      <span class="em" style="left:70%;top:62%;font-size:11cqw">🤖</span>
+      <span class="em" style="left:44%;top:48%;font-size:8cqw">🍔</span>
+      <div class="bub" style="left:34%;top:18%">Order up! 🍔 + 🍟 = ?</div>
+      <div class="bub" style="left:58%;top:44%;font-size:3cqw">💨 toot</div>
+    </div>
+  </section>
+
+  <section id="play">
+    <div class="eyebrow">Play free</div>
+    <h2>Two full games, free forever. The rest are in the pack.</h2>
+    <p class="note">Everything runs in the browser. Nothing to install, nothing to sign up for. Works on iPad, Android tablets, laptops and school computers.</p>
+    <!-- GAMES:site -->
+<div class="grid" style="margin-top:20px">
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Math</h3>
+      <div class="card"><span class="tag free">Free</span><div class="icon">🍔</div><h3>Toot Toot Diner</h3><p>Take orders, add up the prices, serve the food and count the change. Serve fast and Robo the cleaning robot goes KA-BOOM.</p><div class="foot"><a class="btn small" href="play/toot-toot-diner.html">Play</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🕒</div><h3>Train Station Clock</h3><p>Set the clock so the passengers catch their train. O'clock to minutes, and what half past really means.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🧱</div><h3>Block Tower</h3><p>Stack numbered blocks to build a tower that is exactly the right height. Too tall and it topples.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🔢</div><h3>Number Machine</h3><p>Slide the ones, tens and hundreds to make the number. Later levels add dollars and cents.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🍕</div><h3>Pizza Slice Shop</h3><p>Cut pizzas into equal slices, share them fairly, and find out why two quarters is one half.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🍋</div><h3>Lemonade Stand</h3><p>Count Canadian coins, pay for lemonade, make change, buy the lemons and see what's left over. Robo squirts himself in the eye.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Reading</h3>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🍪</div><h3>Sound It Out</h3><p>Tap letter cookies to hear their sounds, blend them into words, and build words for the customers.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag free">Free</span><div class="icon">🔤</div><h3>Alphabet Zoo</h3><p>Every letter has an animal in its cage. Hear the names, hear the sounds, match big and small, and march the alphabet parade.</p><div class="foot"><a class="btn small" href="play/alphabet-zoo.html">Play</a></div></div>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Science</h3>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🦁</div><h3>Zookeeper</h3><p>Put every animal in the right home and feed it the right food. Wrong food has consequences.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🌻</div><h3>Seed to Sunflower</h3><p>Sun, water, soil. Too much water and the worm floats by with a snorkel. Grow a sunflower from seed to seeds.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Thinking</h3>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🤖</div><h3>Robo Maze</h3><p>Tell Robo where to go with arrow blocks and repeat loops. Bumping walls makes him fart sparks.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Feelings</h3>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">😊</div><h3>Feelings Faces</h3><p>Name the feeling, find what helps, and practise dragon breathing in the calm corner.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+<h3 class="subject" style="grid-column:1/-1;margin-top:8px;font-family:var(--display);font-size:1rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa-soft)">Life skills</h3>
+      <div class="card"><span class="tag pack">In the pack</span><div class="icon">🚸</div><h3>Crossing Guard</h3><p>Look left, right, left. Helmets, seatbelts, what to do if you get lost, and when to call 9-1-1.</p><div class="foot"><a class="btn small ghost" href="#pack">Get the pack</a></div></div>
+</div>
+<!-- /GAMES -->
+  </section>
+
+  <section id="promise">
+    <div class="promise">
+      <div><div class="eyebrow">Our promise to parents</div><h2>Wholesome but silly. Never sticky.</h2><p class="note" style="margin-top:10px">Most kids’ games are designed to be hard to stop. Ours are designed to be easy to stop. Here is exactly what that means, in writing, for every game we make.</p></div>
+      <ul>
+        <li>No ads, ever. Not even “kid-safe” ones.</li>
+        <li>No accounts, logins or passwords. Nothing leaves your device.</li>
+        <li>No streaks, timers, countdowns, daily rewards or notifications. Nothing ever says “come back”.</li>
+        <li>No in-game shop, coins, chests or random prizes. Stars come from getting it right, never from luck.</li>
+        <li>Levels never auto-advance. Every level ends with an “All done for today” button.</li>
+        <li>After three levels in a row, the game itself suggests a break.</li>
+        <li>Mistakes get a picture hint, then the answer. Nobody ever fails a level.</li>
+        <li>If your child goes quiet, the game repeats the instruction out loud and wiggles the thing to tap. No reading required.</li>
+        <li>The jokes are farts, bonks and a robot that goes boom. Never mean, never scary.</li>
+        <li>Works offline. Copy it to a USB stick if you like. Buy once and every future game is included.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="pack">
+    <div class="pack">
+      <div>
+        <div class="eyebrow">The Everything Pack</div>
+        <h2>One price. Every game, every kit, forever.</h2>
+        <ul>
+          <li>All four games, full versions</li>
+          <li>Every future game we release</li>
+          <li>Print-and-play Diner kit</li>
+          <li>Worksheets for every game, with answer keys</li>
+          <li>The storybook <em>Robo Goes Boom</em> (PDF)</li>
+          <li>Certificates and reward chart</li>
+          <li>Download it, or use the hosted family link</li>
+          <li>Personalized edition add-on for $10</li>
+        </ul>
+        <p class="note">Delivered by email as a download link and a family code. Use it on every device in your home.</p>
+      </div>
+      <div class="pricebox">
+        <div class="big" data-price="pack">$20 <small>CAD</small></div>
+        <p>One-time. No subscription.</p>
+        <a class="btn" data-link="pack" href="#">Get the Everything Pack</a>
+        <p style="margin-top:14px">Already bought it? <a href="family/">Open your family link</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop">
+    <div class="eyebrow">Shop</div>
+    <h2>Little extras that get kids off the screen.</h2>
+    <div class="grid" style="margin-top:20px">
+      <div class="card"><div class="icon">🧾</div><h3>Diner Play Kit</h3><p>Printable menu, order pad, Toot Toot Dollars, cheques and a Robo mask. Turn the game into a pretend restaurant on the kitchen floor.</p><div class="foot"><span class="price" data-price="kit">$6</span><a class="btn small mint" data-link="kit" href="#">Buy PDF</a></div></div>
+      <div class="card"><div class="icon">✏️</div><h3>Worksheet Bundle</h3><p>Diner math, clock, coding and animal worksheets with answer keys and certificates. Included in the pack.</p><div class="foot"><span class="price" data-price="worksheets">$6</span><a class="btn small mint" data-link="worksheets" href="#">Buy PDF</a></div></div>
+      <div class="card"><div class="icon">💛</div><h3>Personalized Diner</h3><p>Your child's name on the door, their favourite foods on the menu, and a certificate with their name on it. A game made just for them.</p><div class="foot"><span class="price" data-price="personal">$10</span><a class="btn small mint" data-link="personal" href="#">Make one</a></div></div>
+      <div class="card"><div class="icon">📖</div><h3>Robo Goes Boom</h3><p>A picture book about trying, getting too hot, and friends who help you rebuild. PDF now, paperback coming.</p><div class="foot"><span class="price" data-price="book">$5</span><a class="btn small mint" data-link="book" href="#">Buy PDF</a></div></div>
+      <div class="card"><div class="icon">🎁</div><h3>USB Gift Box</h3><p>Every game on a USB stick in a little box with stickers. No internet, no download. The grandparent-proof option.</p><div class="foot"><span class="price" data-price="usb">$35</span><a class="btn small mint" data-link="usb" href="#">Order</a></div></div>
+      <div class="card"><div class="icon">💌</div><h3>Gift a Pack</h3><p>Buy the Everything Pack as a gift. You get a printable card and a code to write inside it.</p><div class="foot"><span class="price" data-price="gift">$20</span><a class="btn small mint" data-link="gift" href="#">Gift it</a></div></div>
+    </div>
+  </section>
+
+  <section id="teachers">
+    <div class="two">
+      <div class="card"><div class="icon">🏫</div><h3>For teachers</h3><p>A classroom licence covers one class, unlimited students, no student accounts. Comes with a one-page lesson plan per game, a curriculum alignment table for K to 3, worksheets and certificates. Install on school devices or a USB stick.</p><div class="foot"><span class="price" data-price="classroom">$60 <small>per class</small></span><a class="btn small" data-link="classroom" href="#">Classroom licence</a><a class="btn small ghost" href="mailto:hello@example.com?subject=School%20licence">School pricing</a></div></div>
+      <div class="card" id="sponsors"><div class="icon">🤝</div><h3>Sponsor a game</h3><p>Your organization already has to teach something: electrical safety, saving money, brushing teeth, fire safety. We build the game, put your name on it, and it goes in the free library for every family. You get education that kids actually ask to play.</p><div class="foot"><a class="btn small" href="mailto:hello@example.com?subject=Sponsor%20a%20game">Talk to us</a></div></div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="eyebrow">Questions</div>
+    <h2 style="margin-bottom:16px">Things parents ask</h2>
+    <details><summary>What do you collect about my child?</summary><p>Nothing. The games have no accounts and send nothing anywhere. Progress is saved in your own browser. When you buy, we only get the email address you give the checkout so we can send your download.</p></details>
+    <details><summary>Which devices does it work on?</summary><p>Any browser from the last couple of years: Chrome, Safari, Edge or Firefox, on iPad, Android tablets, Chromebooks, Mac and Windows. On an iPad, open your family link in Safari and tap Share, then "Add to Home Screen" for an app icon.</p></details>
+    <details><summary>Do I need internet?</summary><p>Only to download. After that the games run offline. The USB gift box never needs internet at all.</p></details>
+    <details><summary>Is it really one payment?</summary><p>Yes. The Everything Pack is a one-time purchase and includes every game we release in the future. We may sell a separate second volume someday, but your pack stays complete.</p></details>
+    <details><summary>Can I share it with my other kids?</summary><p>Of course. One purchase covers every device in your home. Sharing with a whole school needs a classroom licence.</p></details>
+    <details><summary>What ages is it for?</summary><p>Designed for 5 to 8. Every game starts very easy and gets harder slowly, and a read-aloud button reads every instruction for kids who aren't reading yet.</p></details>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <div>© <span id="year"></span> Toot Toot Learning · Made in Canada 🍁</div>
+  <div class="links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="family/">Family link</a><a href="mailto:hello@example.com">hello@example.com</a></div>
+</div></footer>
+
+<script>
+/* ===== EDIT THIS ONE BLOCK after you create your products in Lemon Squeezy (or Gumroad / Paddle) ===== */
+const CONFIG = {
+  currency: 'CAD',
+  prices: { pack:'$20', kit:'$6', worksheets:'$6', personal:'$10', book:'$5', usb:'$35', gift:'$20', classroom:'$60' },
+  links: {
+    pack:      'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    kit:       'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    worksheets:'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    personal:  'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    book:      'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    usb:       'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    gift:      'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME',
+    classroom: 'https://YOURSTORE.lemonsqueezy.com/checkout/buy/REPLACE-ME'
+  },
+  email: 'hello@example.com'
+};
+/* ===== end of config ===== */
+document.querySelectorAll('[data-link]').forEach(a => { a.href = CONFIG.links[a.dataset.link] || '#'; });
+document.querySelectorAll('[data-price]').forEach(el => { const p = CONFIG.prices[el.dataset.price]; if(p){ const small = el.querySelector('small'); el.textContent = p + ' '; if(small) el.appendChild(small); } });
+document.querySelectorAll('a[href^="mailto:"]').forEach(a => { a.href = a.href.replace('hello@example.com', CONFIG.email); if(a.textContent.includes('hello@example.com')) a.textContent = CONFIG.email; });
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

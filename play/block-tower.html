@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Block Tower · Toot Toot Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D; --grass:#8BD36F;
+  --dirt:#D9A066; --dirt-dark:#B97B3F; --steel:#FFB703; --steel-dark:#C98A00;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{max-width:1280px;margin:0 auto;padding-block:10px 20px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block}
+.logo .brand{font-size:.7rem;font-weight:800;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+#spacer{flex:1 1 10px}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#stage.shake{animation:shake .6s}
+@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,4px)}40%{transform:translate(8px,-4px)}60%{transform:translate(-6px,-3px)}80%{transform:translate(6px,3px)}}
+
+#scene{--sh:min(520px,calc(100vh - 150px));position:relative;width:min(100%,calc(var(--sh)*1.5));aspect-ratio:3/2;margin-inline:auto;container-type:inline-size;overflow:hidden;border-radius:24px;background:linear-gradient(#A9DFFF,#E4F5FF 62%,#E4F5FF 100%);box-shadow:var(--shadow);user-select:none;-webkit-user-select:none}
+.sun{position:absolute;left:8%;top:6%;width:9cqw;height:9cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 3cqw rgba(255,200,61,.8)}
+.cloud{position:absolute;font-size:6cqw;line-height:1;opacity:.9;animation:drift 30s linear infinite}
+.cloud.c2{animation-duration:42s;animation-delay:-20s}
+@keyframes drift{from{transform:translateX(-20cqw)}to{transform:translateX(110cqw)}}
+.ground{position:absolute;left:0;right:0;bottom:0;height:22%;background:repeating-linear-gradient(90deg,var(--dirt) 0 8cqw,#E3AE78 8cqw 16cqw);border-top:1cqw solid var(--dirt-dark)}
+.ground::before{content:"";position:absolute;left:0;right:0;top:-1cqw;height:1.2cqw;background:var(--grass)}
+.cones{position:absolute;left:2%;bottom:8%;font-size:3.6cqw;line-height:1;letter-spacing:-.2em}
+.cones.r{left:auto;right:2%}
+.pad{position:absolute;left:33%;width:34%;bottom:20.5%;height:2.4cqw;background:#8F8F8F;border-radius:1cqw;box-shadow:0 .5cqw 0 #5f5f5f}
+/* crane */
+.mast{position:absolute;left:82%;bottom:22%;width:4.5cqw;height:74%;background:repeating-linear-gradient(0deg,var(--steel) 0 2cqw,var(--steel-dark) 2cqw 2.4cqw);border:.5cqw solid var(--steel-dark);border-radius:.6cqw .6cqw 0 0}
+.jib{position:absolute;left:40%;top:5%;width:52%;height:4.2cqw;background:repeating-linear-gradient(90deg,var(--steel) 0 2cqw,var(--steel-dark) 2cqw 2.4cqw);border:.5cqw solid var(--steel-dark);border-radius:.8cqw}
+.weight{position:absolute;left:86%;top:8%;width:6.5cqw;height:6cqw;background:#7a7a7a;border-radius:.6cqw;box-shadow:inset 0 -1cqw 0 #555}
+.cab{position:absolute;left:78%;bottom:22%;width:12cqw;height:9cqw;background:var(--steel);border:.5cqw solid var(--steel-dark);border-radius:1.5cqw 1.5cqw .5cqw .5cqw;display:grid;place-items:center;z-index:3}
+.cab .bot{font-size:6cqw;line-height:1;display:inline-block;filter:drop-shadow(0 .4cqw 0 rgba(59,42,31,.2))}
+.cab.working .bot{animation:drive .18s infinite alternate}
+.cab.panic .bot{animation:wobble .12s infinite alternate}
+@keyframes drive{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-.5cqw) rotate(3deg)}}
+@keyframes wobble{from{transform:translateX(-.4cqw) rotate(-6deg)}to{transform:translateX(.4cqw) rotate(6deg)}}
+.cab .wheels{position:absolute;bottom:-1.6cqw;left:8%;font-size:1.8cqw;letter-spacing:.6em;line-height:1}
+.cable{position:absolute;left:50%;width:.7cqw;background:var(--cocoa);transform:translateX(-50%);height:0;transition:height .45s cubic-bezier(.3,.7,.4,1);z-index:4;pointer-events:none}
+.cable::after{content:"";position:absolute;left:50%;bottom:-1.4cqw;width:3cqw;height:1.6cqw;transform:translateX(-50%);background:var(--cocoa);border-radius:.5cqw .5cqw 1.5cqw 1.5cqw}
+.cable.lifting{transition-timing-function:cubic-bezier(.5,0,.8,.4)}
+
+/* tower */
+#tower{position:absolute;left:37%;width:26%;top:13%;bottom:22%;cursor:pointer;z-index:2;--u:20px;--st:20px}
+#tower.wobble{animation:twobble .7s}
+@keyframes twobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-4deg) translateX(-1cqw)}40%{transform:rotate(5deg) translateX(1.5cqw)}60%{transform:rotate(-6deg) translateX(-2cqw)}80%{transform:rotate(4deg) translateX(1cqw)}}
+#ghost{position:absolute;left:0;width:100%;bottom:0;height:0;border:.5cqw dashed rgba(59,42,31,.45);border-bottom:0;border-radius:.8cqw .8cqw 0 0;background:rgba(255,255,255,.35);background-image:repeating-linear-gradient(to top,transparent 0 calc(var(--tick) - 1px),rgba(59,42,31,.35) calc(var(--tick) - 1px) var(--tick)),repeating-linear-gradient(to top,transparent 0 calc(var(--big) - 1.5px),rgba(59,42,31,.55) calc(var(--big) - 1.5px) var(--big));background-size:10% 100%,18% 100%;background-repeat:no-repeat;--tick:20px;--big:100px;transition:height .3s;pointer-events:none}
+#ghost .lab{position:absolute;left:50%;top:-.8cqw;transform:translate(-50%,-100%);background:#fff;border-radius:999px;padding:.3cqw 1.8cqw;font-family:var(--display);font-weight:700;font-size:clamp(14px,4.2cqw,34px);line-height:1.15;box-shadow:0 .5cqw 0 rgba(59,42,31,.14);white-space:nowrap;color:var(--ketchup)}
+#ghost .lab small{font-size:.5em;color:var(--cocoa-soft);margin-left:.3em}
+#gap{position:absolute;left:0;width:100%;display:none;background:rgba(47,191,166,.28);border:.5cqw dashed var(--mint);border-radius:.6cqw;pointer-events:none;z-index:3}
+#gap.on{display:block}
+#gap .lab{position:absolute;left:104%;top:50%;transform:translateY(-50%);background:var(--mint);color:#fff;border-radius:999px;padding:.3cqw 1.6cqw;font-family:var(--display);font-weight:700;font-size:clamp(12px,3.4cqw,26px);white-space:nowrap;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:translateY(-50%) scale(1.08)}}
+#blocks{position:absolute;inset:0}
+.blk{position:absolute;left:0;width:100%;border:2px solid rgba(59,42,31,.6);border-radius:3px;background-color:var(--c,#FFC83D);background-image:repeating-linear-gradient(to top,transparent 0 calc(var(--st) - 1px),rgba(59,42,31,.22) calc(var(--st) - 1px) var(--st));display:grid;place-items:center;font-family:var(--display);font-weight:700;color:var(--t,#3B2A1F);transition:bottom .45s cubic-bezier(.3,.7,.4,1),transform .35s,opacity .35s;box-shadow:inset 0 -3px 0 rgba(0,0,0,.14);will-change:bottom;overflow:visible}
+.blk.lift{transition-timing-function:cubic-bezier(.5,0,.8,.4)}
+.blk .n{font-size:var(--fs,18px);line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.blk.preset{border-style:double;border-width:4px}
+.blk.preset::after{content:"🔩";position:absolute;right:.6cqw;top:50%;transform:translateY(-50%);font-size:min(2.6cqw,60%)}
+.blk.fall{animation:fall 1s cubic-bezier(.3,.6,.6,1) forwards}
+@keyframes fall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+#tower.locked .blk{animation:lit .5s 5 alternate}
+@keyframes lit{from{box-shadow:inset 0 -3px 0 rgba(0,0,0,.14),0 0 0 0 rgba(255,255,255,0)}to{box-shadow:inset 0 -3px 0 rgba(0,0,0,.14),0 0 0 .8cqw rgba(255,255,255,.9),0 0 3cqw var(--sun)}}
+#tower .glowtop{outline:.8cqw solid var(--mint);outline-offset:2px;animation:pulseo .9s infinite}
+@keyframes pulseo{50%{outline-color:rgba(47,191,166,.3)}}
+
+.customer{position:absolute;left:-18%;bottom:22%;width:16%;font-size:12cqw;line-height:1;text-align:center;transition:left 1s cubic-bezier(.4,.1,.5,1);z-index:5;will-change:left}
+.customer .body{display:inline-block;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.customer.walking .body{animation:walk .32s infinite alternate}
+@keyframes walk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-1.4cqw) rotate(3deg)}}
+.customer.happy .body{animation:happy .5s 3}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1.5cqw)}75%{transform:rotate(8deg) translateY(-1.5cqw)}}
+.customer .hat{position:absolute;left:50%;top:-14%;transform:translateX(-50%);font-size:.5em;line-height:1;pointer-events:none}
+.bubble{position:absolute;left:-4%;bottom:112%;width:max-content;min-width:14cqw;max-width:34cqw;background:#fff;border-radius:2cqw;padding:1.2cqw 1.6cqw;font-size:clamp(11px,2.4cqw,20px);font-weight:800;line-height:1.25;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:15% 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:left;pointer-events:auto;cursor:pointer;z-index:6}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:3cqw;bottom:-1.3cqw;border:1.4cqw solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble b{color:var(--ketchup);font-size:1.5em;line-height:1}
+
+.puff{position:absolute;width:6cqw;height:6cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(214,232,120,.95),rgba(170,200,80,.6) 55%,rgba(150,180,60,0) 75%);animation:puff 1.3s forwards;z-index:4;pointer-events:none;display:grid;place-items:center;font-size:2.4cqw}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(3cqw,-7cqw) scale(1.7)}}
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+.toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+.toast.mint{-webkit-text-stroke-color:var(--mint-dark);text-shadow:0 .6cqw 0 var(--mint-dark)}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:280px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.status{display:flex;align-items:center;justify-content:center;gap:10px;background:#F3FBFF;border-radius:16px;padding:8px 12px;font-family:var(--display);font-weight:700}
+.status .big{font-size:2rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--mint-dark);min-width:1.4em;text-align:center}
+.status .big.over{color:var(--ketchup)}
+.status .of{font-size:1rem;color:var(--cocoa-soft);line-height:1.1}
+.status .of b{color:var(--ketchup);font-size:1.3rem}
+.slots{display:none;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.slots.on{display:flex}
+.slots .lbl{font-weight:800;font-size:.9rem;color:var(--cocoa-soft);width:100%;text-align:center}
+.slot{width:48px;height:48px;border-radius:14px;border:3px dashed rgba(59,42,31,.3);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.4rem;background:rgba(255,226,154,.35);transition:background .2s}
+.slot.filled{border-style:solid;border-color:rgba(59,42,31,.5);animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.slot.preset{border-style:double;border-color:rgba(59,42,31,.5)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.equation{display:none;text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1.2;background:#E4FBF5;color:var(--mint-dark);border-radius:14px;padding:6px 10px;animation:pop .4s}
+.equation.on{display:block}
+.supply{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.bb{width:60px;height:64px;border-radius:12px;border:3px solid rgba(59,42,31,.55);background-color:var(--c);background-image:repeating-linear-gradient(to top,transparent 0 calc(100%/var(--s) - 1px),rgba(59,42,31,.2) calc(100%/var(--s) - 1px) calc(100%/var(--s)));color:var(--t);display:grid;place-items:center;font-size:1.6rem;font-weight:700;box-shadow:0 4px 0 rgba(59,42,31,.3);transition:transform .15s;position:relative;text-shadow:0 1px 0 rgba(255,255,255,.4);font-variant-numeric:tabular-nums}
+.bb.hundred{background-image:repeating-linear-gradient(to top,transparent 0 calc(10% - 1px),rgba(255,255,255,.35) calc(10% - 1px) 10%),repeating-linear-gradient(to right,transparent 0 calc(10% - 1px),rgba(255,255,255,.35) calc(10% - 1px) 10%);font-size:1.25rem}
+.bb.wide{font-size:1.35rem}
+.bb:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.3)}
+.bb.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.bb.glow{outline:4px solid var(--mint);outline-offset:3px;animation:glowb .9s infinite}
+@keyframes glowb{50%{transform:scale(1.08);outline-color:rgba(47,191,166,.35)}}
+.bb .cnt{position:absolute;right:-7px;top:-9px;background:var(--mint);color:#fff;font-size:.8rem;border-radius:999px;padding:1px 7px;box-shadow:0 2px 0 var(--mint-dark)}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem;min-height:44px}
+.subbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.subbtn.glow{outline:4px solid var(--mint);outline-offset:3px;animation:glowb .9s infinite}
+.subbtn[disabled]{opacity:.45;cursor:default}
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
+.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 8px;font-size:.95rem}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}
+
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) and (orientation:portrait){#stage{grid-template-columns:1fr}#scene{--sh:36vh}}
+@media (max-width:900px) and (orientation:landscape){#stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}}
+@media (orientation:landscape) and (max-height:560px){#app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.logo .brand{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:44px;height:44px;font-size:1.1rem}#scene{--sh:calc(100vh - 94px)}#panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 94px);overflow:auto}.coach{padding:5px 8px}.coach p{font-size:.85rem}.coach .face{font-size:1.2rem}.coach .say{width:30px;height:30px}.status{padding:4px 10px}.status .big{font-size:1.5rem}.status .of{font-size:.85rem}.status .of b{font-size:1.1rem}.slot{width:40px;height:40px;font-size:1.1rem}.supply{gap:6px}.bb{width:46px;height:48px;font-size:1.25rem;border-width:2px}.bb.hundred{font-size:1rem}.bb.wide{font-size:1.05rem}.subbtn{padding:6px 12px;font-size:.9rem;min-height:44px}.equation{font-size:1.2rem;padding:4px 8px}}
+@media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.logo .brand{display:none}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:44px;height:44px;border-radius:12px}}
+@media (max-width:600px) and (orientation:portrait){#app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}#scene{--sh:40vh;aspect-ratio:1/1;width:min(100%,var(--sh))}#panel{padding:10px;gap:8px;min-height:0}.coach{padding:7px 10px}.coach p{font-size:.92rem}.coach .face{font-size:1.4rem}.coach .say{width:34px;height:34px}.status{padding:5px 10px}.status .big{font-size:1.6rem}.status .of{font-size:.9rem}.slot{width:44px;height:44px;font-size:1.2rem}.supply{gap:6px}.bb{width:50px;height:54px;font-size:1.4rem}.bb.hundred{font-size:1.05rem}.bb.wide{font-size:1.15rem}.equation{font-size:1.3rem;padding:4px 8px}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Block Tower</span><span class="brand">Toot Toot Learning</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Towers</small><span id="tower-chip">0/6</span></div>
+    <div id="spacer"></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Construction site">
+      <div class="sun"></div>
+      <span class="cloud" style="left:10%;top:14%">☁️</span>
+      <span class="cloud c2" style="left:50%;top:4%">☁️</span>
+      <div class="ground"></div>
+      <span class="cones">🚧</span><span class="cones r">🚧</span>
+      <div class="pad"></div>
+      <div class="mast"></div>
+      <div class="jib" id="jib"></div>
+      <div class="weight"></div>
+      <div class="cab" id="cab"><span class="bot">🤖</span><span class="wheels">⚫⚫</span></div>
+      <div class="cable" id="cable"></div>
+      <div id="tower" role="button" aria-label="The tower. Tap to take the top block off" tabindex="0">
+        <div id="ghost"><span class="lab" id="ghost-lab"></span></div>
+        <div id="blocks"></div>
+        <div id="gap"><span class="lab" id="gap-lab"></span></div>
+      </div>
+      <div class="customer" id="customer"><span class="hat">⛑️</span><span class="body" id="cust-body">🐻</span><div class="bubble" id="bubble"></div></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Welcome to the building site!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="status"><span class="big" id="total">0</span><span class="of">so far<br>goal <b id="goal">–</b></span></div>
+      <div class="slots" id="slots"></div>
+      <div class="equation" id="eq"></div>
+      <div class="supply" id="supply"></div>
+      <div class="rowbtns"><button class="subbtn" id="btn-remove">⬇ Take one off</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast = false; // set by tests to shorten waits
+const wait = ms => new Promise(r => setTimeout(r, (reduced || fast) ? Math.min(ms,40) : ms));
+
+/* ---------- data ---------- */
+const CUSTOMERS = [
+  {em:'🐻',name:'Benny Bear'},{em:'🐰',name:'Rosie Rabbit'},{em:'🦊',name:'Felix Fox'},{em:'🐸',name:'Freddy Frog'},
+  {em:'🐷',name:'Penny Pig'},{em:'🐵',name:'Momo Monkey'},{em:'🐨',name:'Kiki Koala'},{em:'🐯',name:'Toby Tiger'},
+  {em:'🦁',name:'Leo Lion'},{em:'🐮',name:'Clara Cow'},{em:'🐼',name:'Pip Panda'},{em:'🐶',name:'Daisy Dog'},
+  {em:'🐱',name:'Milo Cat'},{em:'🐭',name:'Minnie Mouse'},{em:'🦄',name:'Uma Unicorn'},{em:'🐙',name:'Ollie Octopus'}
+];
+const COLORS = {1:['#FFC83D','#3B2A1F'],2:['#2FBFA6','#FFFFFF'],3:['#5CC8FF','#3B2A1F'],4:['#F4552F','#FFFFFF'],5:['#B388FF','#FFFFFF'],
+  6:['#8BD36F','#3B2A1F'],7:['#FF8FB1','#3B2A1F'],8:['#E0A96D','#3B2A1F'],9:['#7FD8E8','#3B2A1F'],10:['#2A7BFF','#FFFFFF'],
+  12:['#FFB703','#3B2A1F'],15:['#6E5546','#FFFFFF'],20:['#1E8F7B','#FFFFFF'],50:['#C9391A','#FFFFFF'],100:['#3B2A1F','#FFFFFF']};
+const colorOf = z => COLORS[z] || ['#E8E8E8','#3B2A1F'];
+const range = (a,b) => { const r=[]; for(let i=a;i<=b;i++) r.push(i); return r; };
+function pickTargets(lo, hi, n, filter){
+  // n targets spread over [lo,hi], no immediate repeats, shuffled
+  let pool = range(lo,hi).filter(filter || (()=>true));
+  const out=[]; let bag = shuffle(pool);
+  while(out.length < n){ if(!bag.length) bag = shuffle(pool); const t = bag.pop(); if(out.length && out[out.length-1]===t && pool.length>1) continue; out.push(t); }
+  return out;
+}
+const LEVELS = [
+  {title:'Make 5',          sizes:[1,2],                   teach:'1s and 2s make 5',          targets:()=>[3,4,5,5,5,5]},
+  {title:'Up to 10',        sizes:[1,2,3,4,5],             teach:'parts of numbers to 10',    targets:()=>pickTargets(4,10,6)},
+  {title:'Bonds to 10',     sizes:[1,2,3,4,5,6,7,8,9],     teach:'two parts that make 10',    targets:()=>[10,10,10,10,10,10], exact:2},
+  {title:'Up to 20',        sizes:[10,5,2,1],              teach:'tens, fives, twos and ones', targets:()=>pickTargets(11,20,6)},
+  {title:'20 in 3',         sizes:[2,3,4,5,6,8,10,12,15],  teach:'three parts that make 20',  targets:()=>[20,20,20,20,20,20], exact:3},
+  {title:'Tens and Ones',   sizes:[10,1],                  teach:'place value to 50',         targets:()=>pickTargets(11,50,6, t=>t%10!==0)},
+  {title:'Race to 100',     sizes:[10,5,1],                teach:'fewest blocks to 100',      targets:()=>pickTargets(21,100,6), fewest:true},
+  {title:'Missing Part',    sizes:[1,2,3,4,5,6,7,8,9],     teach:'how much more to 10?',      targets:()=>[10,10,10,10,10,10], exact:1, presets:()=>shuffle([6,3,8,2,5,7])}
+];
+const PRAISE = ['Perfect height!','Super builder!','Wow, tower star! ⭐','Exactly right!','Amazing stacking!','You did it!','High five! 🙌','Brilliant!','Spot on!'];
+
+/* ---------- solver: fewest blocks (or exactly n blocks) that sum to rem ---------- */
+function solve(rem, sizes, o={}){
+  const exact = (o.exact==null) ? null : o.exact;
+  if(rem < 0) return null;
+  if(rem === 0) return (exact===null || exact===0) ? [] : null;
+  if(exact !== null && exact <= 0) return null;
+  const maxC = exact !== null ? exact : Math.min(rem, 60);
+  const S = sizes.slice().sort((a,b)=>b-a);
+  const reach = [new Map([[0,null]])];
+  for(let c=1;c<=maxC;c++){
+    const m = new Map();
+    for(const s of reach[c-1].keys()) for(const z of S){ const t=s+z; if(t<=rem && !m.has(t)) m.set(t,[s,z]); }
+    reach.push(m);
+    if(m.has(rem) && (exact===null || c===exact)){
+      const out=[]; let s=rem; for(let k=c;k>0;k--){ const [p,z]=reach[k].get(s); out.push(z); s=p; }
+      return out.sort((a,b)=>b-a);
+    }
+    if(!m.size) return null;
+  }
+  return null;
+}
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    thud(){ noise(0.12,{gain:0.18,from:900,to:120}); tone(120,0.12,{type:'triangle',gain:0.12,slide:70}); },
+    boom(){ noise(1.5,{gain:0.6,from:4000,to:60}); tone(70,1,{type:'sine',gain:0.5,slide:30}); },
+    crash(){ noise(0.8,{gain:0.5,from:5000,to:150}); tone(90,0.5,{type:'square',gain:0.18,slide:40}); [1300,950,700,500].forEach((f,i)=>tone(f,0.1,{type:'square',gain:0.05,delay:0.12+i*0.11})); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    wobble(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.7;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(240, t); o.frequency.exponentialRampToValueAtTime(140, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.setValueAtTime(6, t); lfo.frequency.linearRampToValueAtTime(14, t+dur);
+      const lg = c.createGain(); lg.gain.value = 45; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 900;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.05); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    whirr(dur){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type='square'; o.frequency.setValueAtTime(95,t);
+      const lfo = c.createOscillator(); lfo.frequency.value = 11; const lg = c.createGain(); lg.gain.value = 18; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 650;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05,t+0.1); g.gain.setValueAtTime(0.05,t+Math.max(0.2,dur-0.2)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur); lfo.stop(t+dur);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootBlockTower')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootBlockTower', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), stage:$('#stage'), fx:$('#fx'), tower:$('#tower'), blocks:$('#blocks'), ghost:$('#ghost'), ghostLab:$('#ghost-lab'), gap:$('#gap'), gapLab:$('#gap-lab'),
+  cable:$('#cable'), jib:$('#jib'), cab:$('#cab'), customer:$('#customer'), custBody:$('#cust-body'), bubble:$('#bubble'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), total:$('#total'), goal:$('#goal'), slots:$('#slots'), eq:$('#eq'), supply:$('#supply'), btnRemove:$('#btn-remove'),
+  lvlChip:$('#lvl-chip'), towerChip:$('#tower-chip'), overlay:$('#overlay'), card:$('#card')
+};
+
+/* ---------- game state ---------- */
+let G = null;          // current level run
+let T = null;          // current tower
+let run = 0;           // token so abandoned runs stop
+let coachLine = '', lastBubbleSpeech = '';
+
+function levelConfig(n){ return Object.assign({n}, LEVELS[n-1]); }
+
+/* ---------- idle nudge ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- UI helpers ---------- */
+function coach(text, face, speak=true){
+  coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
+  if(speak) Voice.say(text);
+}
+function toast(text, cls){ const t = document.createElement('div'); t.className='toast'+(cls?' '+cls:''); t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function bubble(html, speakText){ el.bubble.innerHTML = html; el.bubble.classList.add('show'); if(speakText){ lastBubbleSpeech = speakText; Voice.say(speakText); } }
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function pct(x){ return x+'%'; }
+function puff(xPct, yPct){ const p = document.createElement('div'); p.className='puff'; p.style.left=pct(xPct); p.style.top=pct(yPct); p.textContent = Math.random()<0.5?'💨':''; el.fx.appendChild(p); setTimeout(()=>p.remove(), 1400); }
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=pct(xPct); s.style.top=pct(yPct);
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1500);
+}
+function sumOf(arr){ return arr.reduce((s,b)=>s+b.size,0); }
+function total(){ return T ? sumOf(T.stacked) : 0; }
+function placed(){ return T ? T.stacked.filter(b=>!b.preset).length : 0; }
+function blocksLeft(){ return (T && T.exact!=null) ? T.exact - placed() : Infinity; }
+function joinAnd(parts){ return parts.length>1 ? parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1] : String(parts[0]); }
+function sentenceText(parts, target){ return parts.map(String).join(' + ')+' = '+target; }
+function sentenceSpeech(parts, target){
+  if(parts.length <= 4) return parts.join(' and ')+' make '+target+'!';
+  const counts = {}; parts.forEach(p=>counts[p]=(counts[p]||0)+1);
+  const names = {1:'one',5:'five',10:'ten',100:'hundred'};
+  const segs = Object.keys(counts).map(Number).sort((a,b)=>b-a).map(z=>{ const c=counts[z], nm=names[z]||String(z); return c===1 ? `one ${nm}` : `${c} ${nm}s`; });
+  return joinAnd(segs)+' make '+target+'!';
+}
+
+/* ---------- tower drawing ---------- */
+function layout(){
+  if(!T) return;
+  const towerH = el.tower.clientHeight;
+  const maxSize = Math.max(...G.cfg.sizes);
+  const scaleUnits = T.target + Math.min(maxSize, Math.ceil(T.target/2));
+  const u = towerH / scaleUnits;
+  T.unit = u; T.towerH = towerH;
+  const st = u >= 5 ? u : (u*5 >= 5 ? u*5 : u*10);
+  const tick = u >= 4 ? u : (u*5 >= 4 ? u*5 : u*10);
+  const big = u >= 4 ? u*5 : u*10;
+  el.tower.style.setProperty('--u', u+'px'); el.tower.style.setProperty('--st', st+'px');
+  el.ghost.style.setProperty('--tick', tick+'px'); el.ghost.style.setProperty('--big', big+'px');
+  el.ghost.style.height = (T.target*u)+'px';
+  el.ghostLab.innerHTML = `${T.target}<small>tall</small>`;
+  let b = 0;
+  T.stacked.forEach(bl => { placeBlock(bl, b); b += bl.size; });
+  updateGap();
+}
+function styleBlock(bl){
+  const h = bl.size*T.unit, [c,t] = colorOf(bl.size);
+  bl.el.style.height = h+'px'; bl.el.style.setProperty('--c', c); bl.el.style.setProperty('--t', t);
+  const n = bl.el.querySelector('.n'); const fs = Math.max(10, Math.min(36, h*0.62)); n.style.setProperty('--fs', fs+'px'); n.style.display = h >= 13 ? '' : 'none';
+}
+function placeBlock(bl, below){ styleBlock(bl); bl.el.style.bottom = (below*T.unit)+'px'; }
+function makeBlockEl(bl){
+  const d = document.createElement('div'); d.className = 'blk'+(bl.preset?' preset':''); d.dataset.size = bl.size;
+  d.innerHTML = `<span class="n">${bl.size}</span>`; d.setAttribute('aria-label', `${bl.size} block`);
+  bl.el = d; el.blocks.appendChild(d); return d;
+}
+function cableTo(bottomPx){
+  // cable from under the jib down to the given tower-bottom-relative height
+  const sr = el.scene.getBoundingClientRect(), jr = el.jib.getBoundingClientRect(), tr = el.tower.getBoundingClientRect();
+  const top = jr.bottom - sr.top; el.cable.style.top = top+'px';
+  const h = (tr.bottom - sr.top) - bottomPx - top;
+  el.cable.style.height = Math.max(0, h)+'px';
+}
+function updateTotal(){
+  const tot = total(); el.total.textContent = tot; el.total.classList.toggle('over', T && tot > T.target);
+  el.goal.textContent = T ? T.target : '–';
+  if(T && T.exact!=null){
+    const presets = T.stacked.filter(b=>b.preset), mine = T.stacked.filter(b=>!b.preset);
+    el.slots.innerHTML = `<span class="lbl">${T.exact === 1 ? 'Add exactly 1 block' : 'Use exactly '+T.exact+' blocks'}</span>` +
+      presets.map(b=>`<span class="slot preset filled" style="background:${colorOf(b.size)[0]};color:${colorOf(b.size)[1]}">${b.size}</span>`).join('') +
+      Array.from({length:T.exact}, (_,i)=> mine[i] ? `<span class="slot filled" style="background:${colorOf(mine[i].size)[0]};color:${colorOf(mine[i].size)[1]}">${mine[i].size}</span>` : '<span class="slot"></span>').join('');
+    el.slots.classList.add('on');
+  } else el.slots.classList.remove('on');
+  el.btnRemove.disabled = !T || placed() === 0 || T.solved || T.busy;
+}
+function updateGap(){
+  if(!T || T.hint < 1 || T.solved){ el.gap.classList.remove('on'); return; }
+  const tot = total(), rem = T.target - tot;
+  if(rem <= 0){ el.gap.classList.remove('on'); return; }
+  el.gap.style.bottom = (tot*T.unit)+'px'; el.gap.style.height = (rem*T.unit)+'px'; el.gapLab.textContent = rem+' more'; el.gap.classList.add('on');
+}
+function applyHints(){
+  el.supply.querySelectorAll('.bb').forEach(b=>{ b.classList.remove('glow'); const c=b.querySelector('.cnt'); if(c) c.remove(); });
+  el.btnRemove.classList.remove('glow');
+  el.blocks.querySelectorAll('.glowtop').forEach(b=>b.classList.remove('glowtop'));
+  updateGap();
+  if(!T || T.solved || T.hint < 2) return;
+  const rem = T.target - total();
+  const sol = solve(rem, G.cfg.sizes, T.exact!=null ? {exact:blocksLeft()} : {});
+  if(sol && sol.length){
+    const counts = {}; sol.forEach(z=>counts[z]=(counts[z]||0)+1);
+    Object.keys(counts).forEach(z=>{ const b = el.supply.querySelector(`.bb[data-size="${z}"]`); if(b){ b.classList.add('glow'); if(counts[z]>1) b.insertAdjacentHTML('beforeend', `<span class="cnt">×${counts[z]}</span>`); } });
+  } else if(placed() > 0){
+    el.btnRemove.classList.add('glow');
+    const top = T.stacked[T.stacked.length-1]; if(top && top.el && !top.preset) top.el.classList.add('glowtop');
+  }
+}
+function renderSupply(){
+  el.supply.innerHTML = G.cfg.sizes.map(z => { const [c,t]=colorOf(z); return `<button class="bb${z===100?' hundred':(z>=10?' wide':'')}" data-size="${z}" style="--c:${c};--t:${t};--s:${Math.min(z,10)}" aria-label="${z} block">${z}</button>`; }).join('');
+}
+function nudgeTargets(){
+  const glow = [...el.supply.querySelectorAll('.bb.glow')];
+  if(glow.length) return glow.slice(0,2);
+  if(el.btnRemove.classList.contains('glow')) return [el.btnRemove];
+  return [...el.supply.querySelectorAll('.bb')].slice(0,1);
+}
+
+/* ---------- actions ---------- */
+function addBlock(size){
+  if(!G || !T || T.busy || T.solved) return false;
+  size = +size; if(!G.cfg.sizes.includes(size)) return false;
+  const btn = el.supply.querySelector(`.bb[data-size="${size}"]`);
+  if(T.exact!=null && blocksLeft() <= 0){
+    if(btn){ btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); }
+    Sound.oops(); coach(T.exact===1 ? 'Only 1 more block! Take that one off first.' : `Only ${T.exact} blocks! Take one off first.`, '🙂');
+    return false;
+  }
+  const below = total();
+  const bl = {size, preset:false}; T.stacked.push(bl); T.taps++;
+  makeBlockEl(bl); styleBlock(bl);
+  bl.el.style.bottom = (T.towerH + 10)+'px'; void bl.el.offsetWidth; // start above, then drop in
+  bl.el.style.bottom = (below*T.unit)+'px';
+  el.cable.classList.remove('lifting'); cableTo((below+size)*T.unit);
+  el.cab.classList.add('working'); Sound.whirr(0.5);
+  updateTotal(); applyHints();
+  const myTower = T, myRun = run; T.pending = (T.pending||0) + 1;
+  wait(480).then(()=>{ if(run!==myRun || T!==myTower) return; myTower.pending--; el.cab.classList.remove('working'); Sound.thud(); el.cable.style.height='0px'; if(myTower.pending===0 && myTower.stacked.includes(bl)) evaluate(); });
+  return true;
+}
+function removeTop(){
+  if(!G || !T || T.busy || T.solved) return false;
+  const top = T.stacked[T.stacked.length-1];
+  if(!top || top.preset){ coach(top ? 'That block is bolted on! Tap a block from the supply.' : 'Nothing to take off yet. Tap a block!', '🙂'); return false; }
+  T.stacked.pop();
+  const bel = top.el; bel.classList.add('lift'); el.cable.classList.add('lifting');
+  cableTo(total()*T.unit + top.size*T.unit); void bel.offsetWidth;
+  bel.style.bottom = (T.towerH + 10)+'px'; el.cable.style.height='0px';
+  Sound.whirr(0.4); Sound.pop(); el.cab.classList.add('working');
+  setTimeout(()=>{ bel.remove(); el.cab.classList.remove('working'); }, reduced||fast ? 40 : 480);
+  updateTotal(); applyHints();
+  const tot = total();
+  coach(tot ? `${tot} so far. ${T.target-tot} more to go.` : `Back to zero. Make it ${T.target} tall.`, '🤖', false);
+  Voice.say(tot ? `${tot} so far` : 'Back to zero');
+  return true;
+}
+function evaluate(){
+  if(!T || T.busy || T.solved) return;
+  const tot = total(), target = T.target, n = placed();
+  if(tot === target && (T.exact==null || n === T.exact)) return succeed();
+  if(tot > target) return topple();
+  if(tot === target) return softMiss(`That is ${target}, but use exactly ${T.exact} blocks. Take one off and try again.`);
+  const rem = target - tot, left = blocksLeft();
+  const fits = left > 0 && solve(rem, G.cfg.sizes, T.exact!=null ? {exact:left} : {}) !== null;
+  if(!fits) return softMiss(`Hmm, ${rem} more to go, but no block fits. Take one off and try a different block.`);
+  coach(`${tot} so far. ${rem} more to go!`, '🤖', false); Voice.say(`${tot} so far`);
+  setNudge(nudgeTargets, coachLine);
+}
+function miss(){ T.misses++; T.firstTry = false; T.hint = Math.min(2, T.misses); G.stats.misses++; }
+function softMiss(text){
+  miss(); Sound.oops(); Sound.wobble();
+  el.tower.classList.remove('wobble'); void el.tower.offsetWidth; el.tower.classList.add('wobble'); setTimeout(()=>el.tower.classList.remove('wobble'), 800);
+  coach(text, '🤔'); applyHints(); setNudge(nudgeTargets, text);
+}
+async function topple(){
+  const myRun = run, myTower = T; miss(); T.busy = true; updateTotal();
+  coach('Whoa, too tall!', '😬', false); Voice.say('Whoa! Too tall!');
+  el.tower.classList.add('wobble'); Sound.wobble(); el.cab.classList.add('panic');
+  await wait(700); if(run!==myRun || T!==myTower) return;
+  el.tower.classList.remove('wobble');
+  Sound.crash(); Sound.fart(); el.stage.classList.add('shake'); setTimeout(()=>el.stage.classList.remove('shake'), 700);
+  puff(80, 70); puff(84, 66); setTimeout(()=>{ Sound.fart(); puff(82, 72); }, 260);
+  toast('CRASH!');
+  for(let i=0;i<8;i++) spark(50, 50, pick(['💨','✨','⭐','🧱']), 24);
+  T.stacked.filter(b=>!b.preset).forEach((b,i)=>{ b.el.style.setProperty('--dx', ((i%2?1:-1)*(30+Math.random()*40))+'cqw'); b.el.style.setProperty('--dy', (10+Math.random()*30)+'cqw'); b.el.style.setProperty('--rot', ((Math.random()*2-1)*140)+'deg'); b.el.classList.add('fall'); });
+  await wait(900); if(run!==myRun || T!==myTower) return;
+  T.stacked.filter(b=>!b.preset).forEach(b=>b.el.remove());
+  T.stacked = T.stacked.filter(b=>b.preset);
+  el.cab.classList.remove('panic'); T.busy = false; updateTotal(); layout();
+  const text = 'Too tall! Let’s try smaller blocks.' + (T.hint>=2 ? ' The glowing blocks fit just right.' : (T.hint>=1 ? ' Look at the green gap.' : ''));
+  coach(text, '🤖'); applyHints(); setNudge(nudgeTargets, text);
+}
+async function succeed(){
+  const myRun = run, myTower = T; T.solved = true; T.busy = true; updateTotal(); applyHints(); setNudge(null);
+  const parts = T.stacked.map(b=>b.size), target = T.target;
+  G.stats.towers++; if(T.firstTry) G.stats.firstTry++;
+  const fewestN = G.cfg.fewest ? solve(target, G.cfg.sizes).length : null;
+  const isFewest = fewestN!==null && placed() === fewestN; if(isFewest) G.stats.fewest++;
+  el.tower.classList.add('locked'); Sound.ding(); Sound.yay();
+  for(let i=0;i<10;i++) spark(50, 30, pick(['✨','⭐','💡','🌟']), 26);
+  el.customer.classList.add('happy');
+  const sent = sentenceText(parts, target), speech = sentenceSpeech(parts, target);
+  el.eq.textContent = sent; el.eq.classList.add('on');
+  bubble(`Perfect! <b>${target}</b> tall!`, null);
+  toast(isFewest ? 'Fewest blocks! ⭐' : pick(['Perfect!','Exactly!','Ta-da!']), 'mint');
+  coach(`${pick(PRAISE)} ${speech}`, '🎉');
+  el.towerChip.textContent = `${G.stats.towers}/6`;
+  await wait(2000); if(run!==myRun || T!==myTower) return;
+  el.customer.classList.remove('happy'); hideBubble(); el.customer.classList.add('walking'); el.customer.style.left = '-18%';
+  await wait(700); if(run!==myRun || T!==myTower) return;
+  el.customer.classList.remove('walking');
+  if(G.stats.towers >= 6) finishLevel(); else nextTower();
+}
+
+/* ---------- level flow ---------- */
+function startLevel(n){
+  run++;
+  const cfg = levelConfig(n);
+  let targets = cfg.targets();
+  const presets = cfg.presets ? cfg.presets() : null;
+  G = {cfg, n, idx:-1, targets, presets, stats:{towers:0, firstTry:0, misses:0, fewest:0}, done:false, startedAt:performance.now()};
+  T = null;
+  el.lvlChip.textContent = n; el.towerChip.textContent = '0/6';
+  el.blocks.innerHTML=''; el.fx.innerHTML=''; el.tower.classList.remove('locked','wobble'); el.cab.classList.remove('working','panic'); el.cable.style.height='0px';
+  el.customer.style.left='-18%'; el.customer.classList.remove('walking','happy'); hideBubble(); el.eq.classList.remove('on'); el.gap.classList.remove('on'); el.ghost.style.height='0px'; el.ghostLab.textContent='';
+  renderSupply(); updateTotal(); hideOverlay();
+  const intro = cfg.n===3 ? 'Make 10 with two blocks.' : cfg.n===5 ? 'Make 20 with three blocks.' : cfg.n===8 ? 'Find the missing part.' : cfg.n===7 ? 'Build big towers with the fewest blocks.' : 'Build towers that are exactly the right height.';
+  coach(`Level ${n}: ${cfg.title}. ${intro}`, '🤖'); setNudge(null);
+  nextTower();
+}
+async function nextTower(){
+  const myRun = run; G.idx++;
+  const target = G.targets[G.idx];
+  const presetSize = G.presets ? G.presets[G.idx] : null;
+  T = {target, stacked:[], misses:0, hint:0, solved:false, busy:true, firstTry:true, taps:0, exact:(G.cfg.exact!=null ? G.cfg.exact : null), unit:10, towerH:0};
+  if(presetSize!=null){ const b={size:presetSize, preset:true}; T.stacked.push(b); makeBlockEl(b); }
+  el.blocks.querySelectorAll('.blk:not(.preset)').forEach(b=>b.remove());
+  el.tower.classList.remove('locked'); el.eq.classList.remove('on'); el.gap.classList.remove('on');
+  layout(); updateTotal();
+  const who = pick(CUSTOMERS.filter(c=>c.em!==el.custBody.textContent));
+  el.custBody.textContent = who.em; el.customer.classList.remove('happy');
+  await wait(80); if(run!==myRun) return;
+  el.customer.classList.add('walking'); el.customer.style.left = '6%'; Sound.pop();
+  await wait(1000); if(run!==myRun) return;
+  el.customer.classList.remove('walking');
+  let bubbleHTML, bubbleSay, instr;
+  if(G.cfg.n===8){ bubbleHTML = `Finish my tower! Make it <b>${target}</b>`; bubbleSay = `Finish my tower! Make it ${target} tall.`; instr = `The tower already has ${presetSize}. How much more makes ${target}? Tap one block.`; }
+  else if(T.exact!=null){ bubbleHTML = `<b>${target}</b> tall, with ${T.exact} blocks please!`; bubbleSay = `${target} tall, with ${T.exact} blocks please!`; instr = `Make a tower that is exactly ${target} tall. Use exactly ${T.exact} blocks.`; }
+  else { bubbleHTML = `Exactly <b>${target}</b> tall, please!`; bubbleSay = `Exactly ${target} tall, please!`; instr = `Make a tower that is exactly ${target} tall. Tap the blocks.` + (G.cfg.fewest ? ' Try to use the fewest blocks.' : ''); }
+  bubble(bubbleHTML, null);
+  coach(instr, '🤖', false); Voice.say(bubbleSay+' '+instr); lastBubbleSpeech = bubbleSay+' '+instr;
+  T.busy = false; updateTotal(); setNudge(nudgeTargets, instr);
+}
+let sessionLevels = 0; // levels finished this sitting (memory only, never saved)
+function finishLevel(){
+  const s = G.stats; const rate = s.towers ? s.firstTry/s.towers : 1;
+  let stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  const bonus = G.cfg.fewest && s.fewest >= 6 && stars < 3; if(bonus) stars++;
+  G.done = true; T = null; sessionLevels++;
+  progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, G.n+1) + (G.n>=LEVELS.length?1:0));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'Every tower was the right height on the first try. You’re a building superstar!' : stars===2 ? 'Great building! Your number bonds are getting stronger every time.' : 'You finished the whole level! Practice makes you stronger.';
+  Sound.fanfare();
+  const hasNext = G.n < LEVELS.length, breakTime = sessionLevels >= 3;
+  const nextLabel = hasNext ? 'Next level ▶' : 'Choose a level 🏗️';
+  const buttons = breakTime
+    ? `<button class="bigbtn mint" id="btn-done">All done for today 👋</button>
+       <div class="rowbtns"><button class="subbtn" id="btn-next">${nextLabel}</button><button class="subbtn" id="btn-replay">Play it again</button></div>`
+    : `<button class="bigbtn" id="btn-next">${nextLabel}</button>
+       <div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay(`<div class="hero">${breakTime ? '🧘🏗️' : '🏗️🎉'}</div>
+    ${breakTime ? `<h1>You’ve done ${sessionLevels} levels!</h1><h2>Time for a break?</h2>` : `<h1>Level ${G.n} done!</h1><h2>${G.cfg.title}</h2>`}
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    <div class="fact"><b>${s.firstTry}</b> of <b>${s.towers}</b> towers right first time${G.cfg.fewest ? ` · fewest blocks on <b>${s.fewest}</b> of 6${bonus?' — bonus star! 🏗️⭐':''}` : ''}</div>
+    ${buttons}`);
+  el.card.dataset.kind = 'complete'; el.card.dataset.break = breakTime ? '1' : '';
+  Voice.say(breakTime ? `You've done ${sessionLevels} levels! Time for a break? ${msg}` : `Level ${G.n} done! ${msg}`);
+  const n = G.n;
+  $('#btn-next').addEventListener('click', ()=> hasNext ? startLevel(n+1) : showLevels());
+  $('#btn-replay').addEventListener('click', ()=>startLevel(n));
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; T = null;
+  showOverlay(`<div class="hero">👋🧱</div><h2>Great building today!</h2>
+    <p>Stretch, drink some water, go stack some real blocks. See you next time.</p>
+    <div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  el.card.dataset.kind = 'goodbye';
+  Voice.say('Great building today! Stretch, drink some water, go stack some real blocks. See you next time.');
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null; T = null;
+  showOverlay(`<div class="hero">🏗️🤖🧱</div><h1>Block Tower</h1>
+    <p>Robo drives the crane. The animals order towers that are <b>exactly</b> the right height. Stack the numbered blocks to make the number… but not too tall, or CRASH!</p>
+    <div class="fact">Practise making <b>5</b> · <b>10</b> · <b>20</b> · <b>100</b> from parts</div>
+    <button class="bigbtn" id="btn-play">Play! 🏗️</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap any speech bubble or 🔊 to hear it again.</p>`);
+  el.card.dataset.kind = 'title';
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What it teaches</b> — composing numbers (part–whole, number bonds, place value)<ul style="margin:6px 0 0;padding-left:18px">
+      <li>Levels 1–2: making 5, then numbers to 10, from small parts</li>
+      <li>Level 3: number bonds to 10 with exactly two blocks (3 + 7, 4 + 6…)</li>
+      <li>Levels 4–5: numbers to 20 from tens, fives, twos and ones; 20 as three parts</li>
+      <li>Level 6: tens and ones to 50 (place value)</li>
+      <li>Level 7: numbers to 100 with the fewest blocks (a bonus star)</li>
+      <li>Level 8: the missing part — “6 and how many more make 10?”</li></ul>
+    <b style="display:block;margin-top:10px">How it helps without nagging</b><ul style="margin:6px 0 0;padding-left:18px">
+      <li>Block heights match their numbers, with stripes to count. The total is shown and read out as blocks land.</li>
+      <li>Too tall? The tower topples (with a crash and a rude noise from the crane) and the blocks come back. Nobody fails.</li>
+      <li>First topple: the remaining gap is highlighted with its number. Second: the exact blocks glow. Tap the tower or “Take one off” to remove a block.</li>
+      <li>If your child stops for a while, the instruction is repeated and the right thing to tap wiggles.</li>
+      <li>No timers, no accounts, nothing leaves this device. Sound and read-aloud toggles are in the top bar. ⛶ makes it full screen on a tablet.</li></ul>
+    <b style="display:block;margin-top:10px">Wholesome, silly, not addictive</b><ul style="margin:6px 0 0;padding-left:18px">
+      <li>No streaks, timers, countdowns, daily rewards, notifications or “come back” nudges.</li>
+      <li>Levels never auto-advance. Every level-complete card offers “All done for today”, which ends with a calm goodbye.</li>
+      <li>After three levels in one sitting the game suggests a break (never blocks play, just suggests it).</li>
+      <li>Stars come only from accuracy (plus the deterministic fewest-blocks bonus). No random rewards, chests or collectibles.</li>
+      <li>Celebrations are short (under 3 seconds) and silly. The humour is gentle: Robo’s crane makes a rude noise, but nobody is laughed at.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  el.card.dataset.kind = 'grownups';
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null; T = null;
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${c.sizes.slice(0,5).map(z=>`<span>${z}</span>`).join('')}${c.sizes.length>5?'<span>…</span>':''}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level starts easy and gets a little trickier. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.dataset.kind = 'levels';
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- input ---------- */
+el.supply.addEventListener('click', e => { const b = e.target.closest('.bb'); if(!b) return; Sound.ensure(); addBlock(+b.dataset.size); });
+el.btnRemove.addEventListener('click', ()=>{ Sound.ensure(); removeTop(); });
+el.tower.addEventListener('click', ()=>{ Sound.ensure(); removeTop(); });
+el.tower.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); removeTop(); } });
+el.bubble.addEventListener('pointerdown', e=>{ e.stopPropagation(); if(lastBubbleSpeech){ const was=Voice.enabled; Voice.enabled=true; Voice.say(lastBubbleSpeech); Voice.enabled=was; } });
+el.bubble.addEventListener('click', e=>e.stopPropagation());
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+$('#btn-home').addEventListener('click', showLevels);
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+window.addEventListener('resize', ()=>{ if(T){ layout(); if(!T.busy) el.cable.style.height='0px'; } });
+
+/* ---------- boot ---------- */
+function boot(data){
+  if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle();
+}
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+// debug / test hooks
+window.__game = {
+  startLevel, addBlock, removeTop, solve, levels: LEVELS,
+  get state(){
+    if(!G) return null;
+    return { level:G.n, tower:G.idx, targets:G.targets.slice(), presets:G.presets?G.presets.slice():null, sessionLevels, target:T?T.target:null, stacked:T?T.stacked.map(b=>b.size):[], preset:T?T.stacked.filter(b=>b.preset).map(b=>b.size):[],
+      supply:G.cfg.sizes.slice(), solved:T?T.solved:false, busy:T?T.busy:true, total:total(), misses:T?T.misses:0, hint:T?T.hint:0, exact:T?T.exact:null, placed:placed(), done:G.done, stats:Object.assign({},G.stats), unit:T?T.unit:0 };
+  },
+  set fast(v){ fast = !!v; }, get fast(){ return fast; }
+};
+})();
+</script>
+
+</body>
+</html>

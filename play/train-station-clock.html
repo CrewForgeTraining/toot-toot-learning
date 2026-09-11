@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Train Station Clock · Toot Toot Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --floor-a:#FBE3BF; --floor-b:#F3C89A; --white:#FFFDF8;
+  --sun:#FFC83D; --grass:#8BD36F; --minute:#2A7BFF; --minute-dark:#1B5FCC;
+  --platform:#EDE6D6; --gravel:#D3C8B4; --rail:#6B6257; --sleeper:#9A7550;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#app,#overlay{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{max-width:1280px;margin:0 auto;padding-block:10px 20px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo .brand{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--cocoa-soft);font-weight:700;white-space:nowrap}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+#progwrap{flex:1 1 180px;min-width:150px;display:flex;align-items:center;gap:10px}
+#progwrap label{font-family:var(--display);font-weight:700;white-space:nowrap;font-size:.95rem}
+#prog{flex:1;display:flex;gap:4px;height:22px;background:#fff;border-radius:999px;box-shadow:inset 0 0 0 3px rgba(59,42,31,.15);padding:4px 5px}
+#prog .seg{flex:1;border-radius:999px;background:rgba(59,42,31,.08);transition:background .4s,transform .3s}
+#prog .seg.done{background:var(--mint);animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn[hidden]{display:none}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#stage.shake{animation:shake .5s}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-6px,3px)}50%{transform:translate(6px,-3px)}75%{transform:translate(-4px,2px)}}
+@media (max-width:900px){#stage{grid-template-columns:1fr}}
+@media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.chip{padding:4px 10px;font-size:.85rem}#progwrap label{font-size:.85rem}.iconbtn{width:40px;height:40px}}
+
+#scene{position:relative;width:min(100%,calc(60vh * 16 / 9));max-width:100%;margin:0 auto;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:linear-gradient(#A9DFFF,#E4F5FF 62%,#E4F5FF);box-shadow:var(--shadow);user-select:none;-webkit-user-select:none}
+@media (max-width:600px){#scene{aspect-ratio:2/1}}
+.sun{position:absolute;right:7%;top:7%;width:9cqw;height:9cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 3cqw rgba(255,200,61,.8)}
+.cloud{position:absolute;font-size:6cqw;line-height:1;opacity:.95;animation:drift 38s linear infinite}
+.cloud.c2{animation-duration:52s;animation-delay:-20s;font-size:4.5cqw}
+@keyframes drift{from{transform:translateX(-20cqw)}to{transform:translateX(110cqw)}}
+.hill{position:absolute;left:-10%;right:-10%;top:40%;height:20%;background:var(--grass);border-radius:50% 50% 0 0/100% 100% 0 0}
+.station{position:absolute;left:4%;top:11%;width:42%;height:45%;background:var(--butter);border-radius:2cqw 2cqw 0 0;box-shadow:inset 0 0 0 .6cqw #E8C46A}
+.station .roof{position:absolute;left:-4%;right:-4%;top:-1.2cqw;height:5cqw;background:repeating-linear-gradient(90deg,var(--ketchup) 0 4cqw,#fff 4cqw 8cqw);border-radius:1cqw;box-shadow:0 .5cqw 0 var(--ketchup-dark)}
+.station .sign{position:absolute;left:50%;top:5cqw;transform:translateX(-50%);background:var(--cocoa);color:#fff;font-family:var(--display);font-weight:700;font-size:clamp(8px,2cqw,16px);padding:.3cqw 1.4cqw;border-radius:999px;letter-spacing:.08em;white-space:nowrap}
+.station .door{position:absolute;left:8%;bottom:0;width:18%;height:50%;background:#8E4415;border-radius:3cqw 3cqw 0 0}
+.station .door::after{content:"";position:absolute;right:16%;top:50%;width:1.2cqw;height:1.2cqw;border-radius:50%;background:var(--sun)}
+.station .win{position:absolute;right:9%;top:44%;width:20%;height:32%;background:linear-gradient(#9FDBFF,#DFF3FF);border:.6cqw solid #fff;border-radius:1.2cqw;box-shadow:0 .3cqw 0 rgba(59,42,31,.12)}
+.miniclock{position:absolute;left:50%;top:42%;transform:translateX(-50%);width:12cqw;height:12cqw;border-radius:50%;background:#fff;box-shadow:0 0 0 .7cqw var(--cocoa),0 .5cqw 0 rgba(59,42,31,.2)}
+.miniclock i{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;border-radius:999px;background:var(--ketchup);width:1.1cqw;height:32%;margin-left:-.55cqw;transition:transform .3s}
+.miniclock i.mm{background:var(--minute);width:.7cqw;height:44%;margin-left:-.35cqw}
+.miniclock::before{content:"";position:absolute;inset:8%;border-radius:50%;background:repeating-conic-gradient(var(--cocoa) 0 1.2deg,transparent 1.2deg 30deg);-webkit-mask:radial-gradient(circle,transparent 78%,#000 79%);mask:radial-gradient(circle,transparent 78%,#000 79%)}
+.miniclock::after{content:"";position:absolute;left:50%;top:50%;width:1.6cqw;height:1.6cqw;border-radius:50%;background:var(--cocoa);transform:translate(-50%,-50%)}
+.platform{position:absolute;left:0;right:0;top:56%;height:15%;background:var(--platform);box-shadow:inset 0 -1cqw 0 #F7C948,inset 0 .5cqw 0 rgba(59,42,31,.06)}
+.platform .bench{position:absolute;left:88%;bottom:1.5cqw;font-size:5cqw;line-height:1}
+.track{position:absolute;left:0;right:0;top:71%;bottom:0;background:var(--gravel)}
+.track .sleepers{position:absolute;left:0;right:0;top:18%;height:64%;background:repeating-linear-gradient(90deg,var(--sleeper) 0 2.4cqw,transparent 2.4cqw 6.5cqw)}
+.track .rail{position:absolute;left:0;right:0;height:1cqw;background:var(--rail);box-shadow:0 .3cqw 0 rgba(0,0,0,.18)}
+.track .rail.r1{top:30%}.track .rail.r2{top:64%}
+
+.train{position:absolute;left:10%;bottom:9%;font-size:11cqw;line-height:1;white-space:nowrap;letter-spacing:-.18em;z-index:4;transition:left 2s cubic-bezier(.55,0,.85,.35);filter:drop-shadow(0 .6cqw 0 rgba(59,42,31,.18))}
+.train.arrive{transition:left 1.8s cubic-bezier(.2,.7,.3,1)}
+.train.zoom{transition:left 1s cubic-bezier(.6,0,.9,.4)}
+.train.instant{transition:none}
+.train span{display:inline-block}
+.train.rock span{animation:rock .22s infinite alternate}
+.train.rock span:nth-child(2){animation-delay:.07s}
+.train.rock span:nth-child(3){animation-delay:.14s}
+@keyframes rock{from{transform:translateY(0) rotate(-1deg)}to{transform:translateY(-.5cqw) rotate(1deg)}}
+
+.passenger{position:absolute;left:110%;bottom:31%;width:13%;font-size:10cqw;line-height:1;text-align:center;transition:left 1.9s cubic-bezier(.4,.1,.5,1),opacity .6s,transform .8s;z-index:5;will-change:left}
+.passenger .body{display:inline-block;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.passenger.walking .body{animation:walk .32s infinite alternate}
+@keyframes walk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-1.4cqw) rotate(3deg)}}
+.passenger.happy .body{animation:happy .5s 2}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1cqw)}75%{transform:rotate(8deg) translateY(-1cqw)}}
+.passenger.board{transition:left .7s cubic-bezier(.4,.1,.5,1),opacity .4s .3s,transform .7s;opacity:0;transform:scale(.4) translateY(4cqw)}
+.passenger .wave{position:absolute;left:78%;top:-10%;font-size:.5em;opacity:0;transition:opacity .2s}
+.passenger.happy .wave{opacity:1;animation:wave .4s 4 alternate}
+@keyframes wave{from{transform:rotate(-20deg)}to{transform:rotate(25deg)}}
+
+.bubble{position:absolute;left:-6%;bottom:96%;width:max-content;min-width:14cqw;max-width:36cqw;background:#fff;border-radius:2cqw;padding:1.2cqw 1.6cqw;font-size:clamp(11px,2.3cqw,20px);font-weight:800;line-height:1.25;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:100% 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:left;pointer-events:auto;cursor:pointer;z-index:6;transform-origin:0 100%}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:1.6cqw;bottom:-1.3cqw;border:1.4cqw solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble .big{font-size:1.5em;line-height:1.15;display:block;margin-top:.2em;color:var(--ketchup-dark);font-family:var(--display);font-variant-numeric:tabular-nums}
+.bubble .big small{display:block;font-size:.55em;color:var(--cocoa-soft);font-family:var(--body)}
+
+.goat{position:absolute;left:112%;bottom:12%;font-size:9cqw;line-height:1;z-index:5;transition:left .55s cubic-bezier(.3,0,.6,1)}
+.goat.running{animation:walk .18s infinite alternate}
+.goat.bonk{animation:bonk .4s}
+@keyframes bonk{0%{transform:rotate(0)}40%{transform:translateX(-3cqw) rotate(-25deg)}100%{transform:rotate(0)}}
+.goat.leave{transition:left 1.2s ease-in}
+
+.puff{position:absolute;width:7cqw;height:7cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.98),rgba(235,235,240,.7) 55%,rgba(220,220,230,0) 75%);animation:puff 1.4s forwards;z-index:3;pointer-events:none}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(3cqw,-9cqw) scale(1.8)}}
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+
+.toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:280px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3;cursor:pointer}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.view{display:none;flex-direction:column;gap:12px}
+.view.on{display:flex}
+
+.clockwrap{display:none;flex-direction:column;align-items:center;gap:6px}
+.clockwrap.on{display:flex}
+#clock{width:min(100%,300px);max-width:100%;height:auto;display:block;touch-action:none;filter:drop-shadow(0 5px 0 rgba(59,42,31,.14))}
+#clock.grab{cursor:grab}
+#clock.dragging{cursor:grabbing}
+#clock .hand,#clock .ghost{transform-origin:100px 100px;transform-box:view-box;transition:transform .25s}
+#clock.dragging .hand{transition:none}
+#clock .ghost{display:none;opacity:.6;stroke-dasharray:6 5}
+#clock .ghost.on{display:block;animation:ghost 1s infinite alternate}
+@keyframes ghost{from{opacity:.45}to{opacity:.9}}
+#clock .numhi{opacity:0;transition:opacity .3s}
+#clock .numhi.on{opacity:1}
+.legend{display:none;gap:14px;flex-wrap:wrap;justify-content:center;font-size:.85rem;font-weight:800;color:var(--cocoa-soft)}
+.legend.on{display:flex}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;border-radius:4px}
+.legend .lh i{background:var(--ketchup);width:16px;height:10px}
+.legend .lm i{background:var(--minute);width:28px;height:6px}
+.qline{text-align:center;font-family:var(--display);font-weight:700;font-size:1.15rem;background:#F3FBFF;border-radius:14px;padding:8px 10px}
+
+.setters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.setter{background:#fff;border-radius:16px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 0 0 2px rgba(59,42,31,.08)}
+.setter small{text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;font-weight:800;color:var(--cocoa-soft)}
+.setter .row{display:flex;align-items:center;gap:6px}
+.pm{width:48px;height:48px;border-radius:14px;background:var(--butter);font-size:1.6rem;font-weight:700;box-shadow:0 4px 0 #D9B24F;display:grid;place-items:center;line-height:1}
+.pm:active{transform:translateY(3px);box-shadow:0 1px 0 #D9B24F}
+.setter .val{font-family:var(--display);font-weight:700;font-size:1.7rem;min-width:2.2ch;text-align:center;font-variant-numeric:tabular-nums}
+.setter.hours .val{color:var(--ketchup)}
+.setter.mins .val{color:var(--minute)}
+
+.choices{display:grid;gap:10px}
+.choice{background:#fff;border-radius:18px;padding:12px 10px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .15s,opacity .3s}
+.choice:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.choice .dt{font-family:var(--display);font-weight:700;font-size:2rem;font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1.1}
+.choice small{font-weight:800;color:var(--cocoa-soft);font-size:.85rem}
+.choice.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.choice.dim{opacity:.3;pointer-events:none}
+.choice.hint-hour .hh{background:var(--butter);border-radius:8px;padding:0 6px;box-shadow:0 0 0 3px var(--sun)}
+.choice.reveal{box-shadow:0 4px 0 var(--mint-dark),0 0 0 4px var(--mint);background:#E4FBF5;animation:bob 1s infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.numpad{display:flex;flex-direction:column;gap:8px}
+.paddisp{text-align:center;font-family:var(--display);font-weight:700;font-size:2.4rem;font-variant-numeric:tabular-nums;letter-spacing:.06em;background:var(--butter);border-radius:14px;padding:4px 10px;color:var(--ketchup-dark);line-height:1.2}
+.paddisp.reveal{background:#E4FBF5;color:var(--mint-dark)}
+.paddisp .ph{display:block;font-size:.85rem;font-family:var(--body);font-weight:800;color:var(--cocoa-soft);letter-spacing:0}
+.pad-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.key{height:54px;border-radius:16px;background:#fff;font-size:1.5rem;font-weight:700;box-shadow:0 4px 0 rgba(59,42,31,.16),0 0 0 2px rgba(59,42,31,.06);font-variant-numeric:tabular-nums}
+.key:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.16),0 0 0 2px rgba(59,42,31,.06)}
+.key.del{background:#FFE7E0;color:var(--ketchup-dark)}
+.key.colon{background:#E8F1FF;color:var(--minute-dark)}
+.hint{display:none;background:#F3FBFF;border-radius:14px;padding:10px 12px;font-weight:800;font-size:.95rem;line-height:1.4}
+.hint.on{display:block}
+.hint b{color:var(--ketchup)}
+.hint .m{color:var(--minute-dark)}
+.hops{display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:1.1rem;margin-top:4px}
+.hops span{background:#fff;border-radius:8px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.hops span.from{background:var(--butter)}
+.hops span.to{background:#E4FBF5;color:var(--mint-dark)}
+.hops i{font-style:normal;color:var(--ketchup)}
+
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.bigbtn.pulse{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.nudge{animation:nudge .5s ease-in-out 3!important;outline:4px solid var(--mint);outline-offset:4px;border-radius:20px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.grown{ text-align:left;font-size:.95rem;font-weight:700;color:var(--cocoa);display:flex;flex-direction:column;gap:8px}
+.grown ol{margin:0;padding-left:1.3em}
+.grown li{margin:2px 0}
+.grown h3{font-size:1.1rem;margin-top:4px}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.subbtn[hidden]{display:none}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wait{text-align:center;font-weight:800;color:var(--cocoa-soft);padding:14px 0;font-size:1.05rem}
+.wait .em{display:block;font-size:2.6rem;margin-bottom:6px;animation:bob 1.2s infinite ease-in-out}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
+.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 8px;font-size:.9rem;font-variant-numeric:tabular-nums}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+
+/* ---------- compact layouts (phones) ---------- */
+@media (max-width:600px), (max-height:520px){
+  #app{gap:8px;padding-block:6px 10px}
+  #stage{gap:8px}
+  #topbar{gap:8px}
+  .logo .brand{display:none}
+  .logo .sign{font-size:1rem;padding:3px 10px}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:40px;height:40px}
+  #progwrap{flex:1 1 120px;min-width:120px}#progwrap label .lt{display:none}
+  #panel{padding:10px;gap:8px;min-height:0}
+  .coach{padding:6px 10px;gap:8px}.coach .face{font-size:1.4rem}.coach p{font-size:.92rem}.coach .say{width:34px;height:34px}
+  .view{gap:8px}
+  .clockwrap{gap:4px}
+  .legend{font-size:.75rem;gap:8px}
+  .setters{gap:8px}.setter{padding:6px}.pm{width:44px;height:44px;font-size:1.4rem;border-radius:12px}.setter .val{font-size:1.4rem}
+  .bigbtn{padding:10px 14px;font-size:1.15rem;border-radius:16px}
+  .choice{padding:8px 6px}.choice .dt{font-size:1.5rem}.choice small{font-size:.72rem}
+  .key{height:44px;font-size:1.3rem;border-radius:12px}.paddisp{font-size:1.8rem;padding:2px 8px}.paddisp .ph{font-size:.72rem}
+  .qline{font-size:1rem;padding:6px 8px}
+  .wait{padding:8px 0}.wait .em{font-size:2rem}
+  .hint{padding:8px 10px;font-size:.88rem}
+}
+/* portrait phone: one column, everything compact so it fits ~800px tall */
+@media (max-width:600px){
+  #clock{width:min(100%,26vh)}
+  .choices{grid-template-columns:repeat(3,1fr)}
+  .pad-keys{grid-template-columns:repeat(6,1fr)}
+}
+/* landscape phone: scene left (capped by height), controls right, clock beside controls */
+@media (max-height:520px) and (min-width:600px){
+  #stage{grid-template-columns:auto minmax(0,1fr);gap:10px}
+  #scene{width:calc(45vh * 16 / 9);aspect-ratio:16/9}
+  .panel-body{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}
+  .clockwrap{grid-column:1}
+  .view.on{grid-column:2}
+  .coach p{font-size:.88rem}
+  .clockwrap{width:38vh}
+  #clock{width:38vh;max-width:none}
+  .legend{font-size:.7rem;gap:4px 8px;max-width:38vh}
+  .pad-keys{grid-template-columns:repeat(4,1fr)}
+  .choices{grid-template-columns:repeat(3,1fr)}
+  #qline-pad{display:none}.paddisp .ph{display:none}.paddisp{font-size:1.6rem}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="brand">Toot Toot Learning</span><span class="sign">Train Station Clock</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Passenger</small><span id="pass-chip">0/5</span></div>
+    <div id="progwrap"><label for="prog">🚉<span class="lt"> Trains caught</span></label><div id="prog" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Train station scene">
+      <div class="sun"></div>
+      <span class="cloud" style="left:10%;top:6%">☁️</span>
+      <span class="cloud c2" style="left:50%;top:14%">☁️</span>
+      <div class="hill"></div>
+      <div class="station">
+        <div class="roof"></div>
+        <span class="sign">TOOT TOOT STATION</span>
+        <div class="miniclock" id="miniclock" aria-hidden="true"><i class="mh" id="mini-h"></i><i class="mm" id="mini-m"></i></div>
+        <div class="door"></div>
+        <div class="win"></div>
+      </div>
+      <div class="platform"><span class="bench">🪑</span></div>
+      <div class="track"><div class="sleepers"></div><div class="rail r1"></div><div class="rail r2"></div></div>
+      <div class="train" id="train"><span>🚂</span><span>🚃</span><span>🚃</span></div>
+      <div class="passenger" id="passenger">
+        <span class="body" id="pass-body">🐻</span><span class="wave">👋</span>
+        <div class="bubble" id="bubble"></div>
+      </div>
+      <div class="goat" id="goat">🐐</div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🧑‍✈️</span><p id="coach-text">Welcome to the station!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+
+      <div class="panel-body">
+      <div class="clockwrap" id="clockwrap">
+        <svg id="clock" viewBox="0 0 200 200" role="img" aria-label="Station clock"></svg>
+        <div class="legend" id="legend"><span class="lh"><i></i>short hand = hours</span><span class="lm"><i></i>long hand = minutes</span></div>
+      </div>
+
+      <div class="view" id="v-wait"><div class="wait"><span class="em" id="wait-em">🚉</span><span id="wait-text">A passenger is coming…</span></div></div>
+
+      <div class="view" id="v-set">
+        <div class="setters">
+          <div class="setter hours"><small>Hour · short hand</small><div class="row"><button class="pm" id="h-minus" aria-label="Hour back one">−</button><span class="val" id="h-val">12</span><button class="pm" id="h-plus" aria-label="Hour forward one">+</button></div></div>
+          <div class="setter mins"><small>Minutes · long hand</small><div class="row"><button class="pm" id="m-minus" aria-label="Minutes back">−</button><span class="val" id="m-val">00</span><button class="pm" id="m-plus" aria-label="Minutes forward">+</button></div></div>
+        </div>
+        <div class="hint" id="hint-set"></div>
+        <button class="bigbtn mint" id="btn-ready">Ready! ✅</button>
+        <div class="rowbtns"><button class="subbtn" id="btn-magic" hidden>🪄 Help me set it</button></div>
+      </div>
+
+      <div class="view" id="v-choice">
+        <div class="qline" id="qline"></div>
+        <div class="choices" id="choices"></div>
+        <div class="hint" id="hint-choice"></div>
+      </div>
+
+      <div class="view" id="v-pad">
+        <div class="qline" id="qline-pad">What time is it?</div>
+        <div class="numpad" id="numpad"></div>
+        <div class="hint" id="hint-pad"></div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+const PASSENGERS_PER_LEVEL = 5;
+
+/* ---------- data ---------- */
+const CUSTOMERS = [
+  {em:'🐻',name:'Benny Bear'},{em:'🐰',name:'Rosie Rabbit'},{em:'🦊',name:'Felix Fox'},{em:'🐸',name:'Freddy Frog'},
+  {em:'🐷',name:'Penny Pig'},{em:'🐵',name:'Momo Monkey'},{em:'🐨',name:'Kiki Koala'},{em:'🐯',name:'Toby Tiger'},
+  {em:'🦁',name:'Leo Lion'},{em:'🐮',name:'Clara Cow'},{em:'🐼',name:'Pip Panda'},{em:'🐶',name:'Daisy Dog'},
+  {em:'🐱',name:'Milo Cat'},{em:'🐭',name:'Minnie Mouse'},{em:'🦄',name:'Uma Unicorn'},{em:'🐙',name:'Ollie Octopus'}
+];
+const LEVELS = [
+  {title:"O'clock", teach:"o'clock times: the short hand points at the hour, the long hand points straight up at 12",            mins:[0],          modes:['read','set'],           input:'choice', legend:true, words:true,  tags:["3:00","o'clock"]},
+  {title:'Half Past', teach:'half past: the long hand points down at the 6',          mins:[0,30],       modes:['read','set'],           input:'choice', legend:true, words:true,  tags:['half past','6:30']},
+  {title:'Quarter Past & To', teach:'quarter past (long hand at 3) and quarter to (long hand at 9)',  mins:[0,15,30,45], modes:['read','set'],           input:'choice', legend:true, words:true,  tags:['quarter past','quarter to']},
+  {title:'Five Minutes', teach:'counting minutes in fives around the clock',       step:5,            modes:['read','set'],           input:'choice', legend:true, words:true,  tags:['3:05','3:25']},
+  {title:'Read the Clock', teach:'reading any five-minute time and matching it to digital time',     step:5,            modes:['read'],                 input:'choice', words:true,  tags:['read','pick the time']},
+  {title:'Set the Clock', teach:'setting the hands to a spoken five-minute time',      step:5,            modes:['set'],                  input:'pad',    words:true,  tags:['set','drag the hands']},
+  {title:'Every Minute', teach:'reading and setting times to the exact minute',       step:1,            modes:['read','set'],           input:'pad',    tags:['3:07','3:52']},
+  {title:'Digital ↔ Analog', teach:'switching between digital (3:41) and the round clock, both ways',   step:1,            modes:['read','set'],           input:'pad',    digital:true, tags:['3:41','both ways']},
+  {title:'How Long Until?', teach:'simple elapsed time: counting whole hours until the train leaves',    mins:[0],          modes:['elapsed'],              input:'choice', tags:['2 → 5','hours']},
+  {title:'Mix It All Up', teach:'everything mixed together',      step:1,            modes:['read','set','elapsed'], input:'pad',    tags:['everything!']}
+];
+const PRAISE = ['Toot toot! All aboard!','Right on time!','Super job, station master!','Perfect timing! ⭐','You did it!','Choo choo! Brilliant!','High five! 🙌','Wow, clock champion!'];
+const TRY_AGAIN = ['Almost! Let’s look again.','Good try! Check the hands.','So close! One more look.','Nice thinking! Let’s check the clock.'];
+const THANKS = ['Thank you! I’ll catch my train!','Yay! Right on time!','Thanks! See you soon!','Hooray! Off I go!'];
+
+/* ---------- spoken numbers and times ---------- */
+const ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS = ['','','twenty','thirty','forty','fifty'];
+function numWord(n){ return n<20 ? ONES[n] : TENS[Math.floor(n/10)] + (n%10 ? ' '+ONES[n%10] : ''); }
+function spokenDigital(h,m){ return m===0 ? `${numWord(h)} o'clock` : `${numWord(h)} ${m<10 ? 'oh '+numWord(m) : numWord(m)}`; }
+function spokenWords(h,m){
+  const nh = h%12+1;
+  if(m===0) return `${numWord(h)} o'clock`;
+  if(m===15) return `quarter past ${numWord(h)}`;
+  if(m===30) return `half past ${numWord(h)}`;
+  if(m===45) return `quarter to ${numWord(nh)}`;
+  if(m%5===0) return m<30 ? `${numWord(m)} past ${numWord(h)}` : `${numWord(60-m)} to ${numWord(nh)}`;
+  return spokenDigital(h,m);
+}
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  function toot(delay, dur){
+    const c = ensure(); if(!c || !enabled) return;
+    const t = c.currentTime + delay;
+    const lfo = c.createOscillator(); lfo.frequency.value = 5.5; const lg = c.createGain(); lg.gain.value = 6;
+    [311, 415, 523].forEach(f => {
+      const o = c.createOscillator(), g = c.createGain(), fl = c.createBiquadFilter();
+      o.type='sawtooth'; o.frequency.setValueAtTime(f*0.92, t); o.frequency.exponentialRampToValueAtTime(f, t+0.12);
+      lfo.connect(lg).connect(o.frequency);
+      fl.type='lowpass'; fl.frequency.value = 1600;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t+0.06); g.gain.setValueAtTime(0.07, t+dur-0.15); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+      o.connect(fl).connect(g).connect(c.destination); o.start(t); o.stop(t+dur+0.05);
+    });
+    lfo.start(t); lfo.stop(t+dur+0.05);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    tick(){ tone(1200,0.04,{type:'square',gain:0.04}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    boom(){ noise(1.5,{gain:0.6,from:4000,to:60}); tone(70,1,{type:'sine',gain:0.5,slide:30}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    whistle(){ toot(0, 0.32); toot(0.42, 0.75); },
+    chuff(){ noise(0.14,{gain:0.14,from:1800,to:250}); },
+    bonk(){ tone(190,0.16,{type:'square',gain:0.14,slide:60}); noise(0.12,{gain:0.2,from:2200,to:200}); },
+    bleat(){ [0,0.14,0.28].forEach(d=>tone(520,0.12,{type:'sawtooth',gain:0.05,slide:440,delay:d})); }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  // digital times are always spoken naturally ("three fifteen"), never as digits with a colon
+  function prep(text){ return clean(String(text).replace(/\b(\d{1,2}):(\d{2})\b/g, (_,h,m)=>spokenDigital(+h,+m))); }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    prep,
+    say(text, force){
+      if((!enabled && !force) || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(prep(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootTrainClock')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootTrainClock', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), stage:$('#stage'), fx:$('#fx'), train:$('#train'), passenger:$('#passenger'), passBody:$('#pass-body'), bubble:$('#bubble'), goat:$('#goat'),
+  miniH:$('#mini-h'), miniM:$('#mini-m'), clock:$('#clock'), clockwrap:$('#clockwrap'), legend:$('#legend'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), hVal:$('#h-val'), mVal:$('#m-val'), hintSet:$('#hint-set'), hintChoice:$('#hint-choice'), hintPad:$('#hint-pad'),
+  choices:$('#choices'), qline:$('#qline'), qlinePad:$('#qline-pad'), numpad:$('#numpad'), btnMagic:$('#btn-magic'),
+  lvlChip:$('#lvl-chip'), passChip:$('#pass-chip'), prog:$('#prog'), overlay:$('#overlay'), card:$('#card'), waitText:$('#wait-text'), waitEm:$('#wait-em')
+};
+
+/* ---------- time helpers ---------- */
+const pad2 = n => String(n).padStart(2,'0');
+const digital = (h,m) => `${h}:${pad2(m)}`;
+function timeWords(h,m){
+  const nh = h%12+1;
+  if(m===0) return `${h} o'clock`;
+  if(m===15) return `quarter past ${h}`;
+  if(m===30) return `half past ${h}`;
+  if(m===45) return `quarter to ${nh}`;
+  if(m%5===0) return m<30 ? `${m} past ${h}` : `${60-m} to ${nh}`;
+  return digital(h,m);
+}
+function allowedMins(cfg){ return cfg.mins || Array.from({length:60/cfg.step},(_,i)=>i*cfg.step); }
+function snapMin(m, cfg){
+  const list = allowedMins(cfg); let best = list[0], bd = 99;
+  for(const x of list){ const d = Math.min(Math.abs(x-m), 60-Math.abs(x-m)); if(d<bd){ bd=d; best=x; } }
+  return best;
+}
+
+/* ---------- clock ---------- */
+const Clock = (() => {
+  let h = 12, m = 0, cfg = null, interactive = false, degH = 0, degM = 0;
+  function build(){
+    let s = `<circle cx="100" cy="100" r="96" fill="#fff" stroke="#3B2A1F" stroke-width="5"/>`;
+    for(let i=0;i<60;i++){
+      const a=i*6*Math.PI/180, big=i%5===0, r1=big?82:87, r2=92;
+      s += `<line x1="${(100+r1*Math.sin(a)).toFixed(1)}" y1="${(100-r1*Math.cos(a)).toFixed(1)}" x2="${(100+r2*Math.sin(a)).toFixed(1)}" y2="${(100-r2*Math.cos(a)).toFixed(1)}" stroke="${big?'#3B2A1F':'#B8A898'}" stroke-width="${big?3:1.5}" stroke-linecap="round"/>`;
+    }
+    for(let n=1;n<=12;n++){
+      const a=n*30*Math.PI/180, x=(100+67*Math.sin(a)).toFixed(1), y=(100-67*Math.cos(a)).toFixed(1);
+      s += `<circle class="numhi" data-n="${n}" cx="${x}" cy="${y}" r="13" fill="#FFE29A" stroke="#FFC83D" stroke-width="3"/><text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Fredoka, Nunito, system-ui, sans-serif" font-weight="700" font-size="18" fill="#3B2A1F">${n}</text>`;
+    }
+    s += `<line id="ghost-h" class="ghost" x1="100" y1="106" x2="100" y2="52" stroke="#F4552F" stroke-width="9" stroke-linecap="round"/>`;
+    s += `<line id="ghost-m" class="ghost" x1="100" y1="108" x2="100" y2="30" stroke="#2A7BFF" stroke-width="5" stroke-linecap="round"/>`;
+    s += `<line id="hand-h" class="hand hour" x1="100" y1="106" x2="100" y2="52" stroke="#F4552F" stroke-width="9" stroke-linecap="round"/>`;
+    s += `<line id="hand-m" class="hand minute" x1="100" y1="108" x2="100" y2="30" stroke="#2A7BFF" stroke-width="5" stroke-linecap="round"/>`;
+    s += `<circle cx="100" cy="100" r="6.5" fill="#3B2A1F"/><circle cx="100" cy="100" r="2.5" fill="#fff"/>`;
+    el.clock.innerHTML = s;
+  }
+  const nearest = (prev, target) => prev + (((target - prev) % 360 + 540) % 360 - 180);
+  function render(){
+    degH = nearest(degH, (h%12)*30 + m*0.5); degM = nearest(degM, m*6);
+    $('#hand-h').style.transform = `rotate(${degH}deg)`; $('#hand-m').style.transform = `rotate(${degM}deg)`;
+    el.miniH.style.transform = `rotate(${degH}deg)`; el.miniM.style.transform = `rotate(${degM}deg)`;
+    el.hVal.textContent = h; el.mVal.textContent = pad2(m);
+    el.clock.setAttribute('aria-label', `Station clock showing ${digital(h,m)}`);
+  }
+  function set(nh, nm, silent){
+    nh = ((nh-1)%12+12)%12+1; nm = ((nm%60)+60)%60;
+    const changed = nh!==h || nm!==m; h = nh; m = nm; render();
+    if(changed && !silent){ Sound.tick(); if(activeQ && activeQ.input==='hands'){ activeQ.changed = true; $('#btn-ready').classList.add('pulse'); } }
+  }
+  function ghost(showH, showM, t){
+    const gh = $('#ghost-h'), gm = $('#ghost-m');
+    gh.classList.toggle('on', !!showH); gm.classList.toggle('on', !!showM);
+    if(t){ gh.style.transform = `rotate(${(t.h%12)*30 + t.m*0.5}deg)`; gm.style.transform = `rotate(${t.m*6}deg)`; }
+  }
+  function highlight(n){ el.clock.querySelectorAll('.numhi').forEach(c => c.classList.toggle('on', n!=null && +c.dataset.n===n)); }
+  // drag
+  let drag = null;
+  function angleAt(e){
+    const r = el.clock.getBoundingClientRect(); const x = (e.clientX-r.left)/r.width*200 - 100, y = (e.clientY-r.top)/r.height*200 - 100;
+    return {a:(Math.atan2(x, -y)*180/Math.PI + 360) % 360, r:Math.hypot(x,y)/96};
+  }
+  const angDist = (a,b) => { const d = Math.abs(a-b)%360; return d>180 ? 360-d : d; };
+  el.clock.addEventListener('pointerdown', e => {
+    if(!interactive) return; e.preventDefault();
+    const {a, r} = angleAt(e); if(r > 1.08) return;
+    const dh = angDist(a, ((h%12)*30 + m*0.5)), dm = angDist(a, m*6);
+    let hand;
+    if(dh < 28 && dm < 28) hand = r < 0.55 ? 'h' : 'm';
+    else if(dh < 28) hand = 'h'; else if(dm < 28) hand = 'm';
+    else hand = r < 0.5 ? 'h' : 'm';
+    drag = {id:e.pointerId, hand}; el.clock.setPointerCapture(e.pointerId); el.clock.classList.add('dragging'); Sound.pop();
+  });
+  el.clock.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId!==drag.id) return;
+    const {a} = angleAt(e);
+    if(drag.hand==='m'){ set(h, snapMin(Math.round(a/6)%60, cfg)); }
+    else { let nh = Math.round((a - m*0.5)/30); nh = ((nh%12)+12)%12; set(nh===0?12:nh, m); }
+  });
+  function end(e){ if(!drag || e.pointerId!==drag.id) return; drag = null; el.clock.classList.remove('dragging'); }
+  el.clock.addEventListener('pointerup', end); el.clock.addEventListener('pointercancel', end);
+  build();
+  return {
+    get h(){ return h; }, get m(){ return m; }, set, ghost, highlight, render,
+    get interactive(){ return interactive; }, set interactive(v){ interactive = v; el.clock.classList.toggle('grab', v); },
+    set cfg(c){ cfg = c; }, get cfg(){ return cfg; }
+  };
+})();
+
+/* ---------- number pad (h:mm) ---------- */
+const Pad = (() => {
+  let v = '', reveal = '';
+  function display(){
+    const [hs, ms=''] = v.split(':'); const hasColon = v.includes(':');
+    const d = $('#pad-val'); if(!d) return;
+    d.textContent = `${hs || '_'}:${hasColon ? (ms+'__').slice(0,2) : '__'}`;
+    const ph = $('#pad-ph'); if(ph) ph.textContent = reveal ? `Type ${reveal}` : 'Type the hour, then the minutes';
+  }
+  function key(k){
+    if(!activeQ || activeQ.input!=='pad') return;
+    if(k==='ok'){ submit(); return; }
+    if(k==='del'){ v = v.slice(0,-1); if(v.endsWith(':')) v = v.slice(0,-1); Sound.pop(); }
+    else if(k===':'){ if(!v.includes(':') && v.length) v += ':'; Sound.pop(); }
+    else if(/^\d$/.test(k)){
+      if(v.includes(':')){ if(v.split(':')[1].length < 2) v += k; else return; }
+      else if(v.length===0){ if(k==='0') return; v = k + (k>='2' ? ':' : ''); }
+      else if(v==='1'){ v = (k<='2') ? '1'+k+':' : '1:'+k; }
+      else return;
+      Sound.pop();
+    }
+    display(); $('#btn-check').classList.toggle('pulse', value()!==null);
+  }
+  function value(){ const [hs, ms] = v.split(':'); if(!hs || !ms || ms.length<2) return null; return `${parseInt(hs,10)}:${ms}`; }
+  function reset(){ v=''; reveal=''; const d=$('#pad-disp'); if(d) d.classList.remove('reveal'); display(); $('#btn-check').classList.remove('pulse'); }
+  function setValue(s){ v = s; display(); $('#btn-check').classList.toggle('pulse', value()!==null); }
+  function showReveal(ans){ reveal = ans; const d=$('#pad-disp'); if(d) d.classList.add('reveal'); display(); }
+  el.numpad.innerHTML = `<div class="paddisp" id="pad-disp"><span id="pad-val">_:__</span><span class="ph" id="pad-ph">Type the hour, then the minutes</span></div>
+    <div class="pad-keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="key" data-k="${n}" aria-label="${n}">${n}</button>`).join('')}<button class="key del" data-k="del" aria-label="Delete">⌫</button><button class="key" data-k="0" aria-label="0">0</button><button class="key colon" data-k=":" aria-label="Colon, now type the minutes">:</button></div>
+    <button class="bigbtn mint" data-k="ok" id="btn-check">Check ✓</button>`;
+  el.numpad.addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if(b) key(b.dataset.k); });
+  document.addEventListener('keydown', e => {
+    if(!activeQ || activeQ.input!=='pad' || el.overlay.classList.contains('on')) return;
+    if(/^\d$/.test(e.key)) key(e.key); else if(e.key==='Backspace') key('del'); else if(e.key==='Enter') key('ok'); else if(e.key===':') key(':');
+  });
+  return {key, value, reset, setValue, showReveal, get raw(){ return v; }};
+})();
+
+/* ---------- game state ---------- */
+let G = null;        // current level run
+let run = 0;         // token so abandoned runs stop
+let coachLine = '';
+let activeQ = null;  // question currently accepting answers
+let sitting = 0;     // levels finished this sitting (memory only, never saved)
+
+function levelConfig(n){ return Object.assign({n}, LEVELS[Math.min(n, LEVELS.length)-1]); }
+function modeOrder(cfg){
+  const base = shuffle(cfg.modes);
+  return shuffle(Array.from({length:PASSENGERS_PER_LEVEL}, (_,i)=>base[i%base.length]));
+}
+function distractors(h, m, cfg){
+  const allowed = allowedMins(cfg), cands = [];
+  const swapH = m/5, swapM = (h*5)%60;
+  if(Number.isInteger(swapH) && swapH>=1 && swapH<=12 && allowed.includes(swapM)) cands.push({h:swapH, m:swapM});
+  cands.push({h:h%12+1, m}); cands.push({h:(h+10)%12+1, m});
+  const others = allowed.filter(x=>x!==m);
+  if(others.length){ cands.push({h, m:pick(others)}); cands.push({h, m:pick(others)}); }
+  const seen = new Set([digital(h,m)]), out = [];
+  for(const c of shuffle(cands)){ const k = digital(c.h,c.m); if(!seen.has(k)){ seen.add(k); out.push(c); } }
+  while(out.length < 2){ const c = {h:rnd(1,12), m:pick(allowed)}; const k = digital(c.h,c.m); if(!seen.has(k)){ seen.add(k); out.push(c); } }
+  return shuffle([{h,m}, ...out.slice(0,2)]).map(t => ({val:digital(t.h,t.m), h:t.h, m:t.m, label:digital(t.h,t.m), sub: cfg.words ? timeWords(t.h,t.m) : ''}));
+}
+function makeQuestion(cfg, mode){
+  const base = {mode, attempts:0, hinted:false, revealed:false, resolve:null, t0:0};
+  if(mode==='elapsed'){
+    const now = rnd(1,7), d = rnd(1,5), dep = now + d;
+    const others = shuffle([1,2,3,4,5,6].filter(x=>x!==d)).slice(0,2);
+    const choices = shuffle([d, ...others]).map(v=>({val:String(v), label:`${v} hour${v>1?'s':''}`, sub:''}));
+    return Object.assign(base, {input:'choice', now:{h:now,m:0}, target:{h:dep,m:0}, answer:String(d), choices});
+  }
+  const h = rnd(1,12), m = pick(allowedMins(cfg));
+  if(mode==='set'){
+    let sh; do{ sh = rnd(1,12); }while(sh===h);
+    return Object.assign(base, {input:'hands', target:{h,m}, start:{h:sh,m:0}, answer:digital(h,m)});
+  }
+  const input = cfg.input;
+  return Object.assign(base, {input, target:{h,m}, answer:digital(h,m), choices: input==='choice' ? distractors(h,m,cfg) : null});
+}
+
+/* ---------- helpers: UI ---------- */
+function show(viewId){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===viewId)); }
+function coach(text, face, speak=true, spokenText){
+  coachLine = spokenText || text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
+  if(speak) Voice.say(coachLine);
+}
+function toast(text){
+  const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600);
+}
+function bubble(html, speakText){
+  el.bubble.innerHTML = html; el.bubble.classList.add('show'); el.bubble.dataset.say = speakText || '';
+  if(speakText) Voice.say(speakText);
+}
+// wording for little ones: "short hand" / "long hand" until level 4
+function handName(which){ const early = !G || G.cfg.n < 4; return which==='h' ? (early ? 'short hand' : 'short hour hand') : (early ? 'long hand' : 'long minute hand'); }
+function cap(str){ return str.charAt(0).toUpperCase()+str.slice(1); }
+function minuteSpot(m){ return m%5===0 ? `the ${m/5 || 12}` : `${m} minutes`; }
+
+/* ---------- idle nudge: after 14 s of nothing, repeat the instruction and wiggle the thing to tap ---------- */
+const Idle = (() => {
+  let timer = null, ms = 14000;
+  function target(){
+    const q = activeQ; if(!q) return null;
+    if(q.input==='hands') return q.changed ? $('#btn-ready') : el.clock;
+    if(q.input==='choice') return el.choices.querySelector('.choice.reveal') || el.choices;
+    return Pad.value()!==null ? $('#btn-check') : el.numpad.querySelector('.pad-keys');
+  }
+  function clearNudges(){ document.querySelectorAll('.nudge').forEach(e=>e.classList.remove('nudge')); }
+  function fire(){
+    if(!activeQ || el.overlay.classList.contains('on')) return;
+    Voice.say(coachLine);
+    const t = target(); clearNudges();
+    if(t){ void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2000); }
+    reset();
+  }
+  function reset(){ clearTimeout(timer); timer = null; if(activeQ && !el.overlay.classList.contains('on')) timer = setTimeout(fire, ms); }
+  function stop(){ clearTimeout(timer); timer = null; clearNudges(); }
+  ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ if(timer) reset(); }, {passive:true}));
+  return {reset, stop, fire, get ms(){ return ms; }, set ms(v){ ms = v; }};
+})();
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function pct(x){ return x+'%'; }
+function puff(xPct, yPct){
+  const p = document.createElement('div'); p.className='puff'; p.style.left=pct(xPct); p.style.top=pct(yPct);
+  el.fx.appendChild(p); setTimeout(()=>p.remove(), 1500);
+}
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=pct(xPct); s.style.top=pct(yPct);
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1500);
+}
+function updateChips(){
+  el.lvlChip.textContent = G.n; el.passChip.textContent = `${G.idx}/${PASSENGERS_PER_LEVEL}`;
+  el.prog.setAttribute('aria-valuenow', G.idx);
+  [...el.prog.children].forEach((s,i)=>s.classList.toggle('done', i < G.idx));
+}
+function trainPos(){ // left % and right % of the train within the scene
+  const t = el.train.getBoundingClientRect(), s = el.scene.getBoundingClientRect();
+  return {left:(t.left-s.left)/s.width*100, right:(t.right-s.left)/s.width*100, top:(t.top-s.top)/s.height*100};
+}
+function hintBoxFor(q){ return q.input==='hands' ? el.hintSet : q.input==='pad' ? el.hintPad : el.hintChoice; }
+function setHint(q, html){ const b = hintBoxFor(q); b.innerHTML = html; b.classList.toggle('on', !!html); }
+
+/* ---------- questions ---------- */
+function pose(q, who){
+  const {cfg} = G; const t = q.target;
+  q.t0 = performance.now(); activeQ = q;
+  el.clockwrap.classList.add('on'); el.legend.classList.toggle('on', !!cfg.legend);
+  Clock.cfg = cfg; Clock.ghost(false,false); Clock.highlight(null); el.btnMagic.hidden = true;
+  [el.hintSet, el.hintChoice, el.hintPad].forEach(h=>{ h.classList.remove('on'); h.innerHTML=''; });
+  const words = timeWords(t.h, t.m), dig = digital(t.h, t.m);
+  const spoken = cfg.digital ? spokenDigital(t.h, t.m) : spokenWords(t.h, t.m);
+  $('#btn-ready').classList.remove('pulse');
+  if(q.mode==='set'){
+    Clock.set(q.start.h, q.start.m, true); Clock.interactive = true;
+    const big = cfg.digital ? dig : (cfg.words && t.m%5===0 ? (cfg.n>=4 ? `${dig}<small>${words}</small>` : words) : dig);
+    const shown = cfg.digital ? dig : (t.m%5===0 ? words : dig);
+    bubble(`My train leaves at<span class="big">${big}</span>`, `Hi! My train leaves at ${spoken}!`);
+    coach(`Make the clock say ${shown}. Then press Ready!`, '🧑‍✈️', false, `Make the clock say ${spoken}. Then press Ready!`);
+    show('v-set');
+  } else if(q.mode==='read'){
+    Clock.set(t.h, t.m, true); Clock.interactive = false;
+    bubble(`Is it time for my train?<span class="big">What time is it?</span>`, `Hi! Is it time for my train? What time is it?`);
+    if(q.input==='choice'){
+      el.qline.textContent = 'What time is it?';
+      el.choices.innerHTML = q.choices.map(c=>`<button class="choice" data-val="${c.val}" aria-label="${spokenWords(c.h,c.m)}"><span class="dt"><span class="hh">${c.h}</span>:${pad2(c.m)}</span>${c.sub?`<small>${c.sub}</small>`:''}</button>`).join('');
+      coach(`Look at the clock. Tap the time it says.`, '🧑‍✈️', false);
+      show('v-choice');
+    } else {
+      Pad.reset(); el.qlinePad.textContent = 'What time is it?';
+      coach(`Look at the clock. Type the time. Then press Check.`, '🧑‍✈️', false);
+      show('v-pad');
+    }
+  } else { // elapsed
+    Clock.set(q.now.h, q.now.m, true); Clock.interactive = false;
+    bubble(`It is ${q.now.h} o’clock now.<span class="big">My train leaves at ${t.h} o’clock.<small>How many hours until my train?</small></span>`, `It is ${numWord(q.now.h)} o'clock now. My train leaves at ${numWord(t.h)} o'clock. How many hours until my train?`);
+    el.qline.textContent = `${q.now.h} o’clock → ${t.h} o’clock. How many hours?`;
+    el.choices.innerHTML = q.choices.map(c=>`<button class="choice" data-val="${c.val}" aria-label="${c.label}"><span class="dt">${c.label}</span></button>`).join('');
+    coach(`It is ${q.now.h} o'clock now. The train leaves at ${t.h} o'clock. How many hours is that? Tap the answer.`, '🧑‍✈️', false);
+    show('v-choice');
+  }
+  Idle.reset();
+}
+function answer(ok, chosenBtn){
+  const q = activeQ; if(!q) return;
+  if(ok){
+    const firstTry = q.attempts===0;
+    G.stats.questions++; if(firstTry) G.stats.firstTry++;
+    activeQ = null; Idle.stop(); Clock.interactive = false; Clock.ghost(false,false); Clock.highlight(null); $('#btn-ready').classList.remove('pulse'); $('#btn-check').classList.remove('pulse');
+    if(chosenBtn){ chosenBtn.classList.add('reveal'); [...el.choices.children].forEach(b=>{ if(b!==chosenBtn) b.classList.add('dim'); }); }
+    if(q.mode==='set') Clock.set(q.target.h, q.target.m, true);
+    Sound.yay();
+    const r = q.resolve; q.resolve = null; r({firstTry, secs:(performance.now()-q.t0)/1000});
+    return;
+  }
+  q.attempts++; Sound.oops(); G.stats.wrong++;
+  if(chosenBtn){ chosenBtn.classList.remove('nope'); void chosenBtn.offsetWidth; chosenBtn.classList.add('nope'); chosenBtn.classList.add('dim'); }
+  if(q.attempts===1) hintOne(q); else if(q.attempts===2) reveal(q); else assist(q);
+}
+function hintOne(q){
+  const t = q.target, words = timeWords(t.h,t.m), dig = digital(t.h,t.m);
+  q.hinted = true; G.stats.hints++;
+  const sh = handName('h'), lh = handName('l');
+  if(q.mode==='set'){
+    Clock.ghost(true, false, t); Clock.highlight(t.h);
+    coach(`${pick(TRY_AGAIN)} Move the ${sh} to the ${t.h}. See the dotted hand? Then check the ${lh}.`, '🤗');
+    setHint(q, `<b>${cap(sh)}</b> → the <b>${t.h}</b>. <span class="m">${cap(lh)}</span> → <span class="m">${minuteSpot(t.m)}</span>.`);
+  } else if(q.mode==='read'){
+    Clock.highlight(t.h);
+    const correct = q.input==='choice' ? el.choices.querySelector(`[data-val="${q.answer}"]`) : null;
+    if(correct) correct.classList.add('hint-hour');
+    coach(`${pick(TRY_AGAIN)} The ${sh} is at the ${t.h}. So the hour is ${t.h}. Now look at the ${lh}.`, '🤗');
+    setHint(q, `<b>${cap(sh)}</b> is at the <b>${t.h}</b>. The hour is <b>${t.h}</b>. Now count the minutes with the <span class="m">${lh}</span>. Count by 5s from the 12.`);
+  } else {
+    let hops = `<span class="from">${q.now.h}</span>`; for(let x=q.now.h+1;x<=t.h;x++) hops += `<i>→</i><span class="${x===t.h?'to':''}">${x}</span>`;
+    coach(`${pick(TRY_AGAIN)} Start at ${q.now.h}. Count up to ${t.h}. How many hops?`, '🤗');
+    setHint(q, `Count the hops from <b>${q.now.h}</b> to <b>${t.h}</b>:<div class="hops">${hops}</div>`);
+  }
+}
+function reveal(q){
+  const t = q.target, words = timeWords(t.h,t.m), dig = digital(t.h,t.m);
+  q.revealed = true;
+  const spoken = spokenWords(t.h, t.m);
+  if(q.mode==='set'){
+    Clock.ghost(true, true, t);
+    coach(`It is ${words}. Match the dotted hands. Then press Ready!`, '💛', true, `It is ${spoken}. Match the dotted hands. Then press Ready!`);
+    setHint(q, `The time is <b>${dig}</b> — ${words}. Move the <b>${handName('h')}</b> to the <b>${t.h}</b>. Move the <span class="m">${handName('l')}</span> to <span class="m">${minuteSpot(t.m)}</span>.`);
+  } else if(q.mode==='read'){
+    Clock.highlight(t.h);
+    if(q.input==='choice'){
+      [...el.choices.children].forEach(b=>{ const ok = b.dataset.val===q.answer; b.classList.toggle('reveal', ok); b.classList.toggle('dim', !ok); b.classList.remove('hint-hour'); });
+      coach(`It is ${words}. Tap the green one!`, '💛', true, `It is ${spoken}. Tap the green one!`);
+      setHint(q, `The clock says <b>${dig}</b>. Tap the green button!`);
+    } else {
+      Pad.reset(); Pad.showReveal(dig);
+      coach(`It is ${dig}. Type ${dig}. Then press Check!`, '💛');
+      setHint(q, `The clock says <b>${dig}</b>. Type <b>${t.h}</b>, then <b>${pad2(t.m)}</b>.`);
+    }
+  } else {
+    [...el.choices.children].forEach(b=>{ const ok = b.dataset.val===q.answer; b.classList.toggle('reveal', ok); b.classList.toggle('dim', !ok); });
+    coach(`${q.now.h} to ${t.h} is ${q.answer} hour${q.answer==='1'?'':'s'}. Tap it!`, '💛');
+  }
+}
+function assist(q){
+  if(q.mode==='set'){ Clock.set(q.target.h, q.target.m, true); coach('I moved the hands for you. Press Ready!', '💛'); }
+  else if(q.input==='pad'){ Pad.setValue(q.answer); coach(`I typed ${q.answer} for you. Press Check!`, '💛'); }
+}
+function submit(){
+  const q = activeQ; if(!q) return false;
+  if(q.input==='hands'){ answer(Clock.h===q.target.h && Clock.m===q.target.m); return true; }
+  if(q.input==='pad'){
+    const v = Pad.value();
+    if(v===null){ coach('Type the hour. Then type two minute numbers, like 3:05. Then press Check.', '🤔'); return false; }
+    answer(v===q.answer); return true;
+  }
+  return false;
+}
+function choose(val, btn){
+  const q = activeQ; if(!q) return false;
+  if(q.input==='choice'){
+    const b = btn || [...el.choices.children].find(x=>x.dataset.val===String(val) || x.textContent.trim()===String(val));
+    if(!b || b.classList.contains('dim')) return false;
+    answer(b.dataset.val===q.answer, b); return true;
+  }
+  if(q.input==='pad'){ const m = String(val).match(/^(\d{1,2}):?(\d{2})$/); if(!m) return false; Pad.setValue(`${parseInt(m[1],10)}:${m[2]}`); return true; }
+  return false;
+}
+el.choices.addEventListener('click', e => { const b = e.target.closest('.choice'); if(b) choose(b.dataset.val, b); });
+$('#btn-ready').addEventListener('click', submit);
+$('#h-plus').addEventListener('click', ()=>{ if(Clock.interactive) Clock.set(Clock.h+1, Clock.m); });
+$('#h-minus').addEventListener('click', ()=>{ if(Clock.interactive) Clock.set(Clock.h-1, Clock.m); });
+$('#m-plus').addEventListener('click', ()=>{ if(!Clock.interactive) return; const step = Clock.cfg.step || null; const list = allowedMins(Clock.cfg); const i = list.indexOf(Clock.m); Clock.set(Clock.h, step ? Clock.m+step : list[(i+1)%list.length]); });
+$('#m-minus').addEventListener('click', ()=>{ if(!Clock.interactive) return; const step = Clock.cfg.step || null; const list = allowedMins(Clock.cfg); const i = list.indexOf(Clock.m); Clock.set(Clock.h, step ? Clock.m-step : list[(i-1+list.length)%list.length]); });
+el.btnMagic.addEventListener('click', ()=>{ if(activeQ) assist(activeQ); });
+
+/* ---------- scene helpers ---------- */
+async function trainArrive(alive){
+  el.train.classList.add('instant'); el.train.style.left = '110%'; void el.train.offsetWidth;
+  el.train.classList.remove('instant','zoom'); el.train.classList.add('arrive','rock'); el.train.style.left = '10%';
+  const t0 = performance.now(); const dur = reduced ? 100 : 1800;
+  while(performance.now()-t0 < dur){ const p = trainPos(); puff(p.left+2, p.top-2); Sound.chuff(); await wait(260); if(!alive()) return; }
+  el.train.classList.remove('arrive','rock');
+}
+async function trainDepart(alive, fast){
+  el.train.classList.toggle('zoom', !!fast); el.train.classList.add('rock'); el.train.style.left = '-70%';
+  const t0 = performance.now(); const dur = reduced ? 150 : (fast ? 1000 : 1800);
+  while(performance.now()-t0 < dur){ const p = trainPos(); if(p.right > 0) puff(p.left+3, p.top-2); Sound.chuff(); await wait(fast?140:230); if(!alive()) return; }
+  el.train.classList.remove('rock','zoom');
+}
+async function goatBonk(alive){
+  const p = trainPos();
+  el.goat.classList.remove('leave','bonk'); el.goat.classList.add('running'); el.goat.style.left = pct(Math.min(96, p.right + 1)); Sound.bleat();
+  await wait(600); if(!alive()) return;
+  el.goat.classList.remove('running'); el.goat.classList.add('bonk'); Sound.bonk(); toast('BONK! 🐐');
+  const q = trainPos(); for(let i=0;i<6;i++) spark(q.right-2, q.top+4, pick(['💫','⭐','✨']), 10);
+  el.stage.classList.add('shake'); setTimeout(()=>el.stage.classList.remove('shake'), 600);
+  coach('Silly Gus the goat gives the train a push!', '🐐', false);
+  await wait(300);
+}
+function goatLeave(){ el.goat.classList.remove('bonk','running'); el.goat.classList.add('leave'); el.goat.style.left = '112%'; }
+
+/* ---------- main level flow ---------- */
+function startLevel(n){
+  n = Math.max(1, Math.min(LEVELS.length, n));
+  run++; const myRun = run;
+  const cfg = levelConfig(n);
+  G = {cfg, n, idx:0, order:modeOrder(cfg), q:null, phase:'idle', trainIn:false, stats:{questions:0,firstTry:0,wrong:0,hints:0}};
+  activeQ = null; updateChips();
+  el.fx.innerHTML=''; hideBubble(); el.passenger.classList.remove('walking','happy','board'); el.passenger.style.left='110%';
+  el.goat.classList.remove('bonk','running','leave'); el.goat.style.left='112%';
+  el.clockwrap.classList.remove('on'); Clock.set(12,0,true); Clock.ghost(false,false); Clock.highlight(null);
+  hideOverlay();
+  coach(`Level ${n}: ${cfg.title}. Help the passengers catch their trains!`, '🧑‍✈️');
+  Idle.stop();
+  loop(myRun);
+}
+async function loop(myRun){
+  while(run === myRun && G.idx < PASSENGERS_PER_LEVEL){
+    await passengerVisit(myRun);
+    if(run !== myRun) return;
+    await wait(500);
+  }
+  if(run === myRun) finishLevel();
+}
+async function passengerVisit(myRun){
+  const alive = () => run === myRun;
+  const {cfg} = G; const who = pick(CUSTOMERS);
+  const q = makeQuestion(cfg, G.order[G.idx]); G.q = q;
+  G.phase = 'enter'; show('v-wait'); el.waitEm.textContent='🚉'; el.waitText.textContent = `${who.name} is coming to the platform…`;
+  coach(`Here comes ${who.name}!`, '🧑‍✈️');
+  if(!G.trainIn){ await trainArrive(alive); if(!alive()) return; G.trainIn = true; }
+  el.passBody.textContent = who.em; el.passenger.classList.remove('board','happy'); el.passenger.style.left='110%';
+  await wait(60); if(!alive()) return;
+  el.passenger.classList.add('walking'); el.passenger.style.left = '58%'; Sound.pop();
+  await wait(1900); if(!alive()) return;
+  el.passenger.classList.remove('walking');
+
+  // ---- QUESTION ----
+  G.phase = 'answer';
+  pose(q, who);
+  const res = await new Promise(r => { q.resolve = r; }); if(!alive()) return;
+
+  // ---- SUCCESS ----
+  G.phase = 'depart';
+  const t = q.target;
+  Sound.ding(); toast(pick(['Toot toot!','All aboard!','Right on time!']));
+  const th = pick(THANKS); bubble(`${th} 👋`, th);
+  el.passenger.classList.add('happy');
+  coach(`${pick(PRAISE)} ${q.mode==='elapsed' ? `${q.answer} hour${q.answer==='1'?'':'s'} until the train.` : `It is ${timeWords(t.h,t.m)}${t.m%5===0?` — ${digital(t.h,t.m)}`:''}.`}`, '🎉', true,
+    `${pick(PRAISE)} ${q.mode==='elapsed' ? `${q.answer} hour${q.answer==='1'?'':'s'} until the train.` : `It is ${spokenWords(t.h,t.m)}.`}`);
+  await wait(1000); if(!alive()) return;
+  hideBubble(); el.passenger.classList.remove('happy'); el.passenger.classList.add('board'); el.passenger.style.left = '18%'; Sound.pop();
+  await wait(700); if(!alive()) return;
+  show('v-wait'); el.waitEm.textContent='🚂'; el.waitText.textContent='All aboard! Toot toot!';
+  // silly bonus only: first-try answers sometimes get a goat push. No timer or score is ever shown.
+  const quick = res.firstTry && (res.secs < 12 || Math.random() < 0.35);
+  if(quick){ await goatBonk(alive); if(!alive()) return; }
+  Sound.whistle();
+  await trainDepart(alive, quick); if(!alive()) return;
+  if(quick) goatLeave();
+  el.passenger.classList.remove('board'); el.passenger.style.left='110%';
+  G.idx++; G.trainIn = false; updateChips();
+  G.phase = 'between';
+}
+function finishLevel(){
+  G.phase = 'complete'; activeQ = null; Idle.stop(); el.clockwrap.classList.remove('on');
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;   // deterministic: accuracy only
+  progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, G.n+1));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  sitting++;
+  const msg = stars===3 ? 'Nearly every answer right on the first try. You’re a clock superstar!' : stars===2 ? 'Great work! Your clock reading is getting stronger every time.' : 'You helped every passenger catch their train! Practice makes you stronger.';
+  Sound.fanfare();
+  const last = G.n >= LEVELS.length, n = G.n;
+  const breakTime = sitting >= 3;
+  const lead = breakTime ? `<div class="hero">🚂🧃</div><h1>You’ve done ${sitting} levels!</h1><h2>Time for a break?</h2>` : `<div class="hero">🚂💨</div><h1>All aboard!</h1><h2>Level ${n} done!</h2>`;
+  const nextLabel = last ? 'Choose level' : 'Next level ▶';
+  const buttons = breakTime
+    ? `<button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns"><button class="subbtn" id="btn-next">${nextLabel}</button><button class="subbtn" id="btn-replay">Play it again</button></div>`
+    : `<button class="bigbtn" id="btn-next">${nextLabel}</button><div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay(`${lead}
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.2}s">⭐</span>`).join('')}</div>
+    <p>${breakTime ? `Level ${n} done. ` : ''}${msg}</p>
+    <div class="fact"><b>${PASSENGERS_PER_LEVEL}</b> passengers caught their train · <b>${s.firstTry}</b> of <b>${s.questions}</b> right first time</div>
+    ${buttons}`);
+  Voice.say(breakTime ? `You've done ${sitting} levels! Time for a break? Level ${n} done. ${msg}` : `All aboard! Level ${n} done! ${msg}`);
+  $('#btn-next').addEventListener('click', ()=>{ if(last) showLevels(); else startLevel(n+1); });
+  $('#btn-replay').addEventListener('click', ()=>startLevel(n));
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; activeQ = null;
+  showOverlay(`<div class="hero">👋🚂</div><h1>Great work today!</h1>
+    <p>Stretch, drink some water, go look at a real clock. See you next time.</p>
+    <button class="bigbtn" id="btn-title">Back to start</button>`);
+  Voice.say('Great work today! Stretch, drink some water, go look at a real clock. See you next time.');
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); Idle.stop(); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null; activeQ = null;
+  showOverlay(`<div class="hero">🚂🕒🐐</div><h1>Train Station Clock</h1>
+    <p>Passengers need to catch their trains! Set the station clock, read the time, and send every train off with a toot toot.</p>
+    <div class="fact">Learn <b>o’clock</b> · <b>half past</b> · <b>quarter past</b> · <b>minutes</b> · <b>digital</b> time</div>
+    <button class="bigbtn" id="btn-play">Play! 🚂</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Tip: tap any speech bubble or 🔊 to hear it read out loud.</p>`);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  run++; G = null; activeQ = null;
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="grown">
+      <p>Train Station Clock teaches telling the time on a round (analog) clock and a digital clock, for ages 5 and up. Each level has 5 passengers. Play with your child and let them drag the hands or press the big + and − buttons.</p>
+      <h3>What each level teaches</h3>
+      <ol>${LEVELS.map(l=>`<li><b>${l.title}</b> — ${l.teach}</li>`).join('')}</ol>
+      <h3>How hints work</h3>
+      <p>A wrong answer is never a failure. First miss: the game shows where the short hand belongs (or highlights the hour on the right button). Second miss: it shows the answer and asks your child to set or tap it. Third miss: it does it for them so they can press Ready. Stars are for first-try answers (3 stars at 80% or more, 2 at 50%, else 1), and every level can be replayed.</p>
+      <h3>Tips</h3>
+      <p>Levels 1–3 say “short hand” and “long hand” and use colour: the short hand is red, the long hand is blue. Tap any speech bubble or message to hear it again. The 🗣️ button turns read-aloud off, 🔊 turns sound effects off, ⛶ goes full screen.</p>
+      <h3>Wholesome, not addictive</h3>
+      <p>No timers, streaks, countdowns, daily rewards or notifications. Stars come only from accuracy, never from luck, and there are no chests or collectibles. The goat is just being silly — it is never a score. The game never moves to the next level by itself, and after three levels in one sitting it suggests a break.</p>
+      <h3>Privacy</h3>
+      <p>Nothing leaves the device. Progress, stars and your sound settings are stored only in this browser (localStorage). No accounts, no ads, no tracking.</p>
+    </div>
+    <div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null; activeQ = null;
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${c.tags.map(t=>`<span>${t}</span>`).join('')}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level starts easy and gets a little trickier. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar ---------- */
+function applyToggles(){
+  Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false;
+  $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇';
+  $('#btn-voice').classList.toggle('off', !Voice.enabled);
+}
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applyToggles(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applyToggles(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>Voice.say(coachLine, true));
+el.coachText.addEventListener('click', ()=>Voice.say(coachLine, true));
+el.bubble.addEventListener('click', ()=>{ if(el.bubble.dataset.say) Voice.say(el.bubble.dataset.say, true); });
+(function fullscreen(){
+  const b = $('#btn-full');
+  if(!document.fullscreenEnabled || !document.documentElement.requestFullscreen){ b.hidden = true; return; }
+  b.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); else document.documentElement.requestFullscreen().catch(()=>{}); });
+  document.addEventListener('fullscreenchange', ()=>{ b.textContent = document.fullscreenElement ? '🡼' : '⛶'; b.setAttribute('aria-label', document.fullscreenElement ? 'Exit full screen' : 'Full screen'); });
+})();
+applyToggles();
+
+/* ---------- boot ---------- */
+function boot(data){
+  if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle();
+}
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+/* ---------- test hooks ---------- */
+window.__game = {
+  startLevel(n){ startLevel(n); },
+  get state(){
+    if(!G) return {phase:'idle', level:null, overlay:el.overlay.classList.contains('on')};
+    const q = G.q;
+    return {
+      level:G.n, phase:G.phase, index:G.idx, passengers:PASSENGERS_PER_LEVEL,
+      mode:q?q.mode:null, input:q?q.input:null, target:q?Object.assign({},q.target):null, now:q&&q.now?Object.assign({},q.now):null,
+      answer:q?q.answer:null, choices:q&&q.choices?q.choices.map(c=>c.val):null,
+      current:{h:Clock.h, m:Clock.m}, attempts:q?q.attempts:0, hinted:!!(q&&q.hinted), revealed:!!(q&&q.revealed),
+      accepting:!!activeQ, padValue:Pad.raw, stats:Object.assign({}, G.stats), overlay:el.overlay.classList.contains('on')
+    };
+  },
+  setTime(h,m){ if(activeQ && activeQ.mode==='set'){ Clock.set(h,m,true); return true; } return false; },
+  choose(text){ return choose(text); },
+  submit(){ return submit(); },
+  get levels(){ return LEVELS.map(l=>l.title); },
+  spoken(text){ return Voice.prep(text); },
+  get idleMs(){ return Idle.ms; }, set idleMs(v){ Idle.ms = v; Idle.reset(); },
+  get progress(){ return Object.assign({}, progress); }
+};
+})();
+</script>
+
+</body>
+</html>

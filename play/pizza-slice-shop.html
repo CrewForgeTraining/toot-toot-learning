@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pizza Slice Shop · Toot Toot Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --floor-a:#FBE3BF; --floor-b:#F3C89A; --white:#FFFDF8;
+  --sun:#FFC83D; --crust:#E9B36B; --crust-dark:#C8853E; --sauce:#D63A1E; --cheese:#FFD65A;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{max-width:1280px;margin:0 auto;padding-block:10px 20px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.logo small{font-family:var(--body);font-weight:800;font-size:.7rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.08em}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#scene{position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:#F9E7C8;box-shadow:var(--shadow)}
+@media (max-width:900px) and (orientation:portrait){#stage{grid-template-columns:1fr}#scene{width:min(100%,calc(36vh*16/9));margin-inline:auto}}
+@media (max-width:900px) and (orientation:landscape){#stage{grid-template-columns:minmax(0,1fr) 270px;gap:10px}}
+@media (orientation:landscape) and (max-height:560px){#app{padding-block:6px 8px;gap:6px}#topbar{gap:6px}.logo .sign{font-size:.95rem;padding:2px 10px}.logo small{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:36px;height:36px;font-size:1.05rem}#scene{width:min(100%,calc((100vh - 62px)*16/9));margin-inline:auto}#panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 62px);overflow:auto}.coach{padding:5px 8px}.coach p{font-size:.85rem}.coach .face{font-size:1.2rem}.coach .say{width:32px;height:32px}.cutbtn{min-height:48px;padding:4px 2px}.cutbtn .n{font-size:1.15rem}.cutbtn svg{width:26px;height:26px}.fcard{min-height:56px;padding:4px}.fcard .frac{font-size:1.15rem}.fcard svg{width:30px;height:30px}.bigbtn{padding:9px 12px;font-size:1.05rem}.readout{font-size:1rem;padding:4px 8px}.hint{padding:5px 8px;font-size:.82rem}.wait{padding:4px 0;font-size:.9rem}.wait .em{font-size:1.6rem;margin-bottom:2px}.sentence{font-size:1.15rem}}
+@media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.logo small{display:none}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:40px;height:40px}}
+@media (max-width:600px) and (orientation:portrait){#app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}#panel{padding:10px;gap:8px;min-height:0}.coach{padding:7px 10px}.coach p{font-size:.92rem}.coach .face{font-size:1.4rem}.coach .say{width:34px;height:34px}.cutbtn{min-height:56px}.fcard{min-height:64px}.bigbtn{padding:12px 14px;font-size:1.15rem}.wait{padding:6px 0}.wait .em{font-size:2rem}.hint{padding:6px 10px;font-size:.85rem}}
+
+.wall{position:absolute;inset:0 0 25% 0;background:repeating-linear-gradient(90deg,#FFE9BC 0 6cqw,#FFF2D6 6cqw 12cqw)}
+.floor{position:absolute;left:0;right:0;top:75%;bottom:0;background:repeating-conic-gradient(var(--floor-a) 0 25%,var(--floor-b) 0 50%) 0 0/10cqw 10cqw}
+.trim{position:absolute;left:0;right:0;top:73%;height:2.2%;background:var(--wood-dark)}
+.door{position:absolute;left:2%;top:18%;width:11%;height:57%;background:#D2742E;border:.7cqw solid #8E4415;border-bottom:0;border-radius:5cqw 5cqw 0 0}
+.door::after{content:"";position:absolute;right:14%;top:52%;width:1.6cqw;height:1.6cqw;border-radius:50%;background:var(--sun)}
+.door .sign{position:absolute;left:50%;top:-1.6cqw;transform:translate(-50%,-100%);background:#fff;border-radius:1cqw;padding:.2cqw 1cqw;font-family:var(--display);font-weight:700;font-size:clamp(8px,1.8cqw,14px);white-space:nowrap;color:var(--ketchup)}
+.counter{position:absolute;left:14%;right:16%;top:71%;height:11%;background:var(--wood);border-radius:1.5cqw;box-shadow:0 .7cqw 0 var(--wood-dark)}
+.counter::before{content:"";position:absolute;left:4%;right:4%;top:-1.2cqw;height:1.4cqw;border-radius:1cqw;background:#F3C98F}
+
+.oven{position:absolute;left:80%;top:5%;width:19%;height:46%;background:#5A3A2A;border-radius:3cqw 3cqw 1.5cqw 1.5cqw;padding:1.4cqw;display:flex;flex-direction:column;gap:1cqw;z-index:2}
+.oven .mouth{flex:1;background:radial-gradient(circle at 50% 80%,#FF9A3C,#B33A10 60%,#3A1E12);border-radius:2cqw 2cqw 1cqw 1cqw;position:relative;overflow:hidden;display:grid;place-items:center;font-size:5cqw;line-height:1}
+.oven .mouth .fire{position:absolute;bottom:-.5cqw;font-size:3.6cqw;animation:flicker .35s infinite alternate}
+.oven .mouth .pie{position:absolute;font-size:5cqw;transform:translateY(8cqw);transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
+.oven.baking .mouth .pie{transform:translateY(0)}
+@keyframes flicker{from{transform:scale(.9) rotate(-4deg)}to{transform:scale(1.1) rotate(5deg)}}
+.oven .label{background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;font-size:clamp(8px,1.8cqw,14px);text-align:center;border-radius:999px;padding:.2cqw 0;letter-spacing:.06em}
+.robot{position:absolute;left:82%;top:56%;width:14%;font-size:8cqw;line-height:1;text-align:center;z-index:4}
+.robot .bot{display:inline-block;position:relative;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
+.robot .wheels{font-size:.32em;letter-spacing:-.4em;display:block;margin-top:-.3em;opacity:.8}
+.robot.ding .bot{animation:ding .5s 2}
+@keyframes ding{0%,100%{transform:rotate(0)}30%{transform:rotate(-10deg) translateY(-1cqw)}70%{transform:rotate(10deg) translateY(-1cqw)}}
+.robot.burp .bot{animation:burp .6s}
+@keyframes burp{0%{transform:scale(1)}30%{transform:scale(1.25,.85)}60%{transform:scale(.9,1.15)}100%{transform:scale(1)}}
+.smoke{position:absolute;width:5cqw;height:5cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(200,200,200,.95),rgba(150,150,150,.6) 55%,rgba(120,120,120,0) 75%);animation:puff 1.4s forwards;z-index:5;pointer-events:none}
+.puff{position:absolute;width:6cqw;height:6cqw;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(214,232,120,.95),rgba(170,200,80,.6) 55%,rgba(150,180,60,0) 75%);animation:puff 1.3s forwards;z-index:4;pointer-events:none}
+@keyframes puff{0%{opacity:0;transform:translate(0,0) scale(.3)}15%{opacity:1}100%{opacity:0;transform:translate(3cqw,-7cqw) scale(1.7)}}
+.spark{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.4s cubic-bezier(.2,.8,.3,1) forwards;z-index:9;pointer-events:none}
+@keyframes spark{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(720deg);opacity:0}}
+
+.customer{position:absolute;left:-18%;top:42%;width:13%;font-size:10cqw;line-height:1;text-align:center;transition:left 1.6s cubic-bezier(.4,.1,.5,1);z-index:6;will-change:left}
+.customer .body{display:inline-block;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18))}
+.customer.walking .body{animation:walk .32s infinite alternate}
+@keyframes walk{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-1.4cqw) rotate(3deg)}}
+.customer.happy .body{animation:happy .5s 2}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1cqw)}75%{transform:rotate(8deg) translateY(-1cqw)}}
+.customer.pout .body{animation:pout .9s;filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.18)) hue-rotate(-20deg) saturate(1.4)}
+@keyframes pout{0%,100%{transform:rotate(0) scale(1)}20%{transform:rotate(-12deg) scale(1.1,.9)}40%{transform:rotate(12deg) scale(.9,1.1)}60%{transform:rotate(-8deg)}80%{transform:rotate(8deg)}}
+.customer.laugh .body{animation:laugh .25s 6 alternate}
+@keyframes laugh{from{transform:translateY(0) scale(1)}to{transform:translateY(-1.5cqw) scale(1.06,.94)}}
+.customer.leaving{transition:left 2.4s linear}
+.customer .box{position:absolute;left:60%;top:45%;font-size:.55em;display:none}
+.customer.hasbox .box{display:block}
+.customer .friends{position:absolute;left:92%;bottom:6%;font-size:5cqw;white-space:nowrap;line-height:1;z-index:-1}
+.customer .friends span{display:inline-block;margin-left:-1.4cqw}
+.bubble{position:absolute;left:-4%;bottom:104%;width:max-content;min-width:12cqw;max-width:22cqw;background:#fff;border-radius:2cqw;padding:1cqw 1.4cqw;font-size:clamp(10px,2.2cqw,18px);font-weight:800;line-height:1.2;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:20% 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:center;pointer-events:auto;cursor:pointer;z-index:7}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:3cqw;bottom:-1.3cqw;border:1.4cqw solid transparent;border-top-color:#fff;border-bottom:0}
+.bubble .frac{font-size:1.5em}
+
+/* ---------- pizza board ---------- */
+.board{position:absolute;left:16%;width:66%;top:4%;height:70%;display:flex;align-items:center;justify-content:center;gap:3cqw;z-index:3}
+.pizza{position:relative;width:36cqw;height:36cqw;flex:none;border-radius:50%;transition:transform .3s}
+.pizza svg{width:100%;height:100%;display:block;overflow:visible}
+.pizza.small{width:27cqw;height:27cqw}
+.pizza.mid{width:30cqw;height:30cqw}
+.pizza.pickable{cursor:pointer}
+.pizza.pickable:active{transform:scale(.96)}
+.pizza .tag{position:absolute;left:50%;bottom:-2.6cqw;transform:translateX(-50%);background:#fff;border-radius:999px;padding:.2cqw 1.4cqw;font-family:var(--display);font-weight:700;font-size:clamp(10px,2.4cqw,20px);white-space:nowrap;box-shadow:0 .4cqw 0 rgba(59,42,31,.12)}
+.pizza .tag .frac{font-size:1em}
+.pizza.reveal{animation:nudge .55s infinite;outline:.8cqw solid var(--mint);outline-offset:.6cqw}
+.pizza.nope{animation:nope .4s}
+.pizza.cutting .cutline{stroke-dasharray:200;stroke-dashoffset:200;animation:draw .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.slice{cursor:pointer;transition:transform .2s,opacity .2s;transform-box:fill-box;transform-origin:center}
+.slice.given{opacity:.12}
+.slice.hot .fill{fill:rgba(47,191,166,.55)}
+.slice.hi .fill{fill:rgba(214,50,28,.68)}
+.slice.hi2 .fill{fill:rgba(42,123,255,.5)}
+.slice.pop{animation:slicepop .3s}
+@keyframes slicepop{50%{transform:scale(1.08)}}
+.slice.reveal .fill{animation:revealfill 1s infinite}
+@keyframes revealfill{50%{fill:rgba(47,191,166,.5)}}
+.ghost{pointer-events:none}
+.ghost .gfill{fill:rgba(47,191,166,.28);stroke:var(--mint-dark);stroke-width:2.5;stroke-dasharray:6 5}
+.ghost .gline{stroke:var(--mint-dark);stroke-width:4;stroke-dasharray:8 6;stroke-linecap:round}
+.ghost text{font-family:var(--display);font-weight:700;font-size:22px;fill:var(--cocoa);paint-order:stroke;stroke:#fff;stroke-width:5;text-anchor:middle;dominant-baseline:central}
+.flyslice{position:absolute;z-index:20;pointer-events:none;transition:left .55s cubic-bezier(.3,1.2,.5,1),top .55s cubic-bezier(.3,1.2,.5,1),width .55s,height .55s}
+.flyslice svg{width:100%;height:100%;overflow:visible}
+.dragslice{position:absolute;z-index:30;pointer-events:none;width:12cqw;height:12cqw;transform:translate(-50%,-50%) rotate(-8deg);filter:drop-shadow(0 .8cqw 0 rgba(59,42,31,.25))}
+.dragslice svg{width:100%;height:100%;overflow:visible}
+.plate{position:relative;width:20cqw;height:20cqw;flex:none;background:#fff;border-radius:50%;box-shadow:inset 0 0 0 1.2cqw #E9EEF3,0 .6cqw 0 rgba(59,42,31,.18);display:grid;place-items:center;transition:transform .2s,box-shadow .2s}
+.plate svg{width:76%;height:76%;overflow:visible}
+.plate .who{position:absolute;left:50%;top:-1.8cqw;transform:translateX(-50%);font-size:4cqw;line-height:1}
+.plate .cnt{position:absolute;right:-.6cqw;bottom:-.6cqw;background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;border-radius:999px;padding:.1cqw 1.2cqw;font-size:clamp(9px,2.2cqw,16px);min-width:3.4cqw;text-align:center}
+.plate.hot{transform:scale(1.08);box-shadow:inset 0 0 0 1.2cqw #E9EEF3,0 0 0 1cqw rgba(47,191,166,.55),0 .6cqw 0 rgba(59,42,31,.18)}
+.plate.sad .who{animation:pout .9s}
+.plates{display:grid;grid-template-columns:repeat(2,13cqw);gap:2.6cqw 1.4cqw;flex:none}
+.plates .plate{width:13cqw;height:13cqw}
+.plates.one{grid-template-columns:13cqw}
+.plates .plate .who{font-size:3.4cqw;top:-1.6cqw}
+
+.toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:240px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.view{display:none;flex-direction:column;gap:10px}
+.view.on{display:flex}
+.frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;font-family:var(--display);font-weight:700;vertical-align:middle;margin:0 .15em}
+.frac b{font-weight:700;display:block;padding:0 .2em}
+.frac i{font-style:normal;display:block;border-top:.12em solid currentColor;padding:.08em .2em 0}
+.mixed{display:inline-flex;align-items:center;gap:.1em;font-family:var(--display);font-weight:700}
+.mixed .frac{font-size:.62em}
+.cuts{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cutbtn{background:#fff;border-radius:16px;min-height:74px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);transition:transform .15s}
+.cutbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.cutbtn svg{width:34px;height:34px}
+.cutbtn .n{font-family:var(--display);font-weight:700;font-size:1.3rem;line-height:1}
+.cutbtn .lb{font-size:.68rem;font-weight:800;color:var(--cocoa-soft)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fcard{background:#fff;border-radius:18px;min-height:88px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);transition:transform .15s}
+.fcard:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.fcard .frac,.fcard .mixed{font-size:1.5rem;color:var(--ketchup-dark)}
+.fcard .lb{font-family:var(--display);font-weight:700;font-size:1.05rem;color:var(--ketchup-dark)}
+.fcard svg{width:40px;height:40px}
+.fcard.nope,.cutbtn.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.fcard.reveal,.cutbtn.reveal,.bigbtn.reveal{animation:nudge .6s infinite;outline:4px solid var(--mint);outline-offset:3px}
+.fcard.dim,.cutbtn.dim{opacity:.35}
+.readout{text-align:center;font-family:var(--display);font-weight:700;font-size:1.25rem;background:var(--butter);border-radius:14px;padding:6px 10px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.readout .frac{font-size:1.2em;color:var(--ketchup-dark)}
+.readout.good{background:#E4FBF5;color:var(--mint-dark)}
+.sentence{text-align:center;font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,3vw,1.8rem);letter-spacing:.02em;line-height:1.2;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;min-height:1.4em}
+.sentence .q{display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;border-radius:.4em;background:var(--butter);color:var(--ketchup-dark);padding:0 .2em}
+.sentence .q.reveal{background:#E4FBF5;color:var(--mint-dark);animation:pop .4s}
+.sentence .frac{font-size:.9em}
+.hint{display:none;background:#F3FBFF;border-radius:14px;padding:10px 12px;font-weight:800;font-size:.95rem;line-height:1.4;text-align:center}
+.hint.on{display:block}
+.hint b{color:var(--mint-dark)}
+.bigbtn{width:100%;padding:14px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.25rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wait{text-align:center;font-weight:800;color:var(--cocoa-soft);padding:12px 0;font-size:1.05rem}
+.wait .em{display:block;font-size:2.4rem;margin-bottom:6px;animation:bob 1.2s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.tapnote{text-align:center;font-weight:800;color:var(--cocoa-soft);font-size:.9rem}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
+.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 8px;font-size:.9rem}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+.fact .frac{font-size:1.1em}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">🍕 Pizza Slice Shop</span><small>Toot Toot Learning</small></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Served</small><span id="served-chip">0</span></div>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Pizza shop scene">
+      <div class="wall"></div>
+      <div class="trim"></div>
+      <div class="floor"></div>
+      <div class="door"><span class="sign">OPEN</span></div>
+      <div class="counter"></div>
+      <div class="oven" id="oven"><span class="label">ROBO OVEN</span><div class="mouth"><span class="fire">🔥</span><span class="pie" id="pie">🍕</span></div></div>
+      <div class="robot" id="robot"><span class="bot">🤖</span><span class="wheels">⚫⚫</span></div>
+      <div class="board" id="board"></div>
+      <div class="customer" id="customer">
+        <span class="body" id="cust-body">🐻</span><span class="box">📦</span>
+        <span class="friends" id="friends"></span>
+        <div class="bubble" id="bubble"></div>
+      </div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Welcome to the pizza shop!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="hint" id="hint"></div>
+
+      <div class="view" id="v-wait"><div class="wait"><span class="em" id="wait-em">🔔</span><span id="wait-text">A customer is coming…</span></div></div>
+
+      <div class="view" id="v-cut">
+        <div class="cuts" id="cuts"></div>
+        <div class="tapnote">Tap a cutter to cut the pizza</div>
+      </div>
+
+      <div class="view" id="v-cards">
+        <div class="sentence" id="sentence"></div>
+        <div class="cards" id="cards"></div>
+      </div>
+
+      <div class="view" id="v-pick"><div class="cards two" id="pickcards"></div><div class="tapnote" id="picknote">Or tap the pizza</div></div>
+
+      <div class="view" id="v-make">
+        <div class="readout" id="readout"></div>
+        <button class="bigbtn" id="btn-give">Give it! 🍽️</button>
+        <div class="tapnote" id="makenote">Tap slices to put them on the plate</div>
+      </div>
+
+      <div class="view" id="v-share">
+        <div class="readout" id="shareout"></div>
+        <div class="sentence" id="sharesentence"></div>
+        <button class="bigbtn" id="btn-share">All shared! ✓</button>
+        <div class="tapnote">Tap a slice, or drag it onto a plate</div>
+      </div>
+
+      <div class="view" id="v-leave"><div class="wait"><span class="em" id="leave-em">💨</span><span id="leave-text">Bye bye! …toot toot…</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+const gcd = (a,b) => b ? gcd(b, a%b) : a;
+
+/* ---------- cast ---------- */
+const CUSTOMERS = [
+  {em:'🐻',name:'Benny Bear'},{em:'🐰',name:'Rosie Rabbit'},{em:'🦊',name:'Felix Fox'},{em:'🐸',name:'Freddy Frog'},
+  {em:'🐷',name:'Penny Pig'},{em:'🐵',name:'Momo Monkey'},{em:'🐨',name:'Kiki Koala'},{em:'🐯',name:'Toby Tiger'},
+  {em:'🦁',name:'Leo Lion'},{em:'🐮',name:'Clara Cow'},{em:'🐼',name:'Pip Panda'},{em:'🐶',name:'Daisy Dog'}
+];
+const TOPPINGS = ['🍄','🫑','🍅','🫒','🌶️','🥓','🍍','🧅'];
+const PRAISE = ['Yum! You got it!','Super slicing!','Perfect pizza!','Wow, fraction star! ⭐','You did it!','High five! 🙌','Brilliant!','Delicious work!'];
+const TRY_AGAIN = ['Almost! Try again.','Good try! Let’s look again.','So close! One more time.','Nice try! Look at the pieces.'];
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    slide(){ tone(400,0.18,{type:'triangle',gain:0.08,slide:800}); },
+    cut(){ noise(0.12,{gain:0.12,from:5000,to:800}); tone(900,0.08,{type:'square',gain:0.03,slide:300}); },
+    steam(){ noise(0.4,{gain:0.06,from:5000,to:1500}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    burp(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.35;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(70, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 28; const lg = c.createGain(); lg.gain.value = 40; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 500; f.Q.value = 5;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.04); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootPizzaSliceShop')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootPizzaSliceShop', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- fractions: glyphs and spoken words (never "3/4") ---------- */
+const NUM = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+const DEN = {1:['whole','wholes'],2:['half','halves'],3:['third','thirds'],4:['quarter','quarters'],5:['fifth','fifths'],6:['sixth','sixths'],8:['eighth','eighths']};
+const PIECE = {2:'halves',3:'thirds',4:'quarters',6:'sixths',8:'eighths'};
+function fracWords(k, n){
+  if(n === 1) return k === 1 ? 'one whole' : NUM[k]+' wholes';
+  if(k === n) return 'one whole';
+  if(k > n){ const w = Math.floor(k/n), r = k % n; if(r === 0) return NUM[w]+' wholes'; return NUM[w]+' and '+(r===1 && n===2 ? 'a half' : fracWords(r, n)); }
+  return NUM[k]+' '+DEN[n][k===1?0:1];
+}
+function fracHTML(k, n){
+  if(n === 1 || k === n) return `<span class="lb">${k===n?1:k} whole</span>`;
+  if(k > n){ const w = Math.floor(k/n), r = k % n; return r ? `<span class="mixed">${w}<span class="frac"><b>${r}</b><i>${n}</i></span></span>` : `<span class="lb">${w} wholes</span>`; }
+  return `<span class="frac"><b>${k}</b><i>${n}</i></span>`;
+}
+const fkey = (k,n) => k+'/'+n;
+function sameValue(a, b){ return a.k*b.n === b.k*a.n; }
+
+/* ---------- levels: 6 customers each ---------- */
+const LEVELS = [
+  {title:'Cut it up',       teaches:'equal parts: halves, quarters, thirds', ops:['✂️','½','¼'], build: () => shuffle([2,4,2,3,4,6]).map(n => ({mode:'cut', n}))},
+  {title:'Name the slice',  teaches:'naming halves, quarters and thirds; fair cuts', ops:['½','¾','⅓'], build: () => {
+      const qs = [{mode:'fair', n:pick([2,4])}, {mode:'fair', n:pick([3,4,6])}];
+      const opts = shuffle([[1,2],[1,4],[3,4],[2,4],[1,3],[2,3]]).slice(0,4);
+      opts.forEach(([k,n]) => qs.push({mode:'name', k, n}));
+      return shuffle(qs); }},
+  {title:'Make the slice',  teaches:'making a fraction: 3 of 4 slices', ops:['¾','⅔','⅚'], build: () => shuffle([[1,2],[3,4],[1,4],[2,3],[5,6],[1,3]]).map(([k,n]) => ({mode:'make', k, n}))},
+  {title:'Share fairly',    teaches:'sharing slices equally between friends', ops:['÷','🍽️'], build: () => shuffle([[2,4],[3,6],[2,6],[4,8],[3,3],[2,8]]).map(([m,s]) => ({mode:'share', m, s}))},
+  {title:'Which is more?',  teaches:'comparing fractions with pictures', ops:['½ > ¼','⅓ > ⅙'], build: () => shuffle([[[1,2],[1,4]],[[1,3],[1,6]],[[1,4],[1,8]],[[3,4],[1,4]],[[2,6],[5,6]],[[1,2],[1,3]]]).map(p => ({mode:'compare', a:{k:p[0][0],n:p[0][1]}, b:{k:p[1][0],n:p[1][1]}}))},
+  {title:'Same amount',     teaches:'equivalent fractions: two quarters is one half', ops:['²⁄₄ = ½','⁴⁄₈ = ½'], build: () => shuffle([[1,2,8],[1,2,4],[1,4,8],[1,3,6],[1,2,6],[3,4,8]]).map(([k,n,slices]) => ({mode:'equiv', k, n, slices}))},
+  {title:'Add slices',      teaches:'adding fractions with the same bottom number', ops:['¼ + ¼','⅓ + ⅓'], build: () => shuffle([[1,1,4],[1,2,4],[1,1,3],[2,1,6],[3,2,8],[1,1,2]]).map(([a,b,n]) => ({mode:'add', a, b, n}))},
+  {title:'Whole pizzas',    teaches:'one whole and more than a whole', ops:['1','1½','⁴⁄₄'], build: () => shuffle([{mode:'name', k:4, n:4}, {mode:'name', k:6, n:4, two:true}, {mode:'add', a:2, b:2, n:4}, {mode:'name', k:5, n:4, two:true}, {mode:'compare', a:{k:1,n:1}, b:{k:3,n:4}}, {mode:'name', k:3, n:2, two:true}])}
+];
+function levelConfig(n){ return Object.assign({n}, LEVELS[Math.min(n, LEVELS.length)-1]); }
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), board:$('#board'), customer:$('#customer'), custBody:$('#cust-body'), friends:$('#friends'), bubble:$('#bubble'),
+  robot:$('#robot'), oven:$('#oven'), coachText:$('#coach-text'), coachFace:$('#coach-face'), hint:$('#hint'), cuts:$('#cuts'), cards:$('#cards'), sentence:$('#sentence'),
+  pickcards:$('#pickcards'), picknote:$('#picknote'), readout:$('#readout'), btnGive:$('#btn-give'), makenote:$('#makenote'), shareout:$('#shareout'), sharesentence:$('#sharesentence'), btnShare:$('#btn-share'),
+  lvlChip:$('#lvl-chip'), servedChip:$('#served-chip'), overlay:$('#overlay'), card:$('#card'), waitText:$('#wait-text'), waitEm:$('#wait-em'), leaveText:$('#leave-text'), leaveEm:$('#leave-em')
+};
+
+/* ---------- pizza drawing (SVG, viewBox 0 0 200 200) ---------- */
+const CX = 100, CY = 100, R = 96;
+function pt(r, deg){ const a = deg*Math.PI/180; return [CX + r*Math.cos(a), CY + r*Math.sin(a)]; }
+function sectorPath(a0, a1, r){
+  if(a1 - a0 >= 359.9) return `M${CX-r},${CY} a${r},${r} 0 1,0 ${2*r},0 a${r},${r} 0 1,0 ${-2*r},0 Z`;
+  const [x0,y0] = pt(r,a0), [x1,y1] = pt(r,a1), large = a1-a0 > 180 ? 1 : 0;
+  return `M${CX},${CY} L${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} Z`;
+}
+function equalAngles(n){ const a=[]; for(let i=0;i<=n;i++) a.push(-90 + 360*i/n); return a; }
+function unequalAngles(n){
+  for(let t=0;t<200;t++){
+    const w = []; for(let i=0;i<n;i++) w.push(0.45 + Math.random()*1.6);
+    const sum = w.reduce((s,x)=>s+x,0), parts = w.map(x=>x/sum*360);
+    if(Math.max(...parts)/Math.min(...parts) < 1.9 || Math.min(...parts) < 22) continue;
+    const a=[-90]; parts.forEach(p=>a.push(a[a.length-1]+p)); a[n] = 270; return a;
+  }
+  const a=[-90]; for(let i=1;i<n;i++) a.push(-90 + 360*(i*i)/(n*n)); a.push(270); return a;
+}
+function sliceSVG(a0, a1, topping, i){
+  const mid = (a0+a1)/2, [tx,ty] = pt(a1-a0 >= 359.9 ? 0 : 52, mid);
+  const tops = a1-a0 >= 359.9 ? [[70,-40],[130,-40],[100,70],[60,120],[140,120],[100,150]] : null;
+  const topText = tops ? tops.map(([x,y])=>`<text x="${x}" y="${y}" font-size="26" text-anchor="middle" dominant-baseline="central">${topping}</text>`).join('')
+                       : `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" font-size="${a1-a0 < 50 ? 18 : 26}" text-anchor="middle" dominant-baseline="central">${topping}</text>`;
+  return `<g class="slice" data-i="${i}"><path d="${sectorPath(a0,a1,R)}" fill="var(--crust)" stroke="var(--crust-dark)" stroke-width="3" stroke-linejoin="round"/><path d="${sectorPath(a0,a1,84)}" fill="var(--sauce)"/><path d="${sectorPath(a0,a1,79)}" fill="var(--cheese)"/>${topText}<path class="fill" d="${sectorPath(a0,a1,R)}" fill="rgba(0,0,0,0)"/></g>`;
+}
+function cutLinesSVG(angles, cls='cutline'){
+  if(angles.length <= 2) return '';
+  let s=''; for(let i=0;i<angles.length-1;i++){ const [x,y] = pt(R+2, angles[i]); s += `<line class="${cls}" x1="${CX}" y1="${CY}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#FFF4DC" stroke-width="4" stroke-linecap="round"/>`; }
+  return s;
+}
+function pizzaSVG(angles, topping){
+  let s = `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="${CX}" cy="${CY}" r="${R+3}" fill="rgba(59,42,31,.18)" transform="translate(0,4)"/>`;
+  for(let i=0;i<angles.length-1;i++) s += sliceSVG(angles[i], angles[i+1], topping, i);
+  s += `<g class="lines">${cutLinesSVG(angles)}</g><g class="ghost"></g></svg>`;
+  return s;
+}
+function makePizza(o){
+  const d = document.createElement('div'); d.className = 'pizza'+(o.size?' '+o.size:''); d.dataset.id = o.id || 'p';
+  d.angles = o.angles || equalAngles(o.n || 1); d.topping = o.topping || pick(TOPPINGS);
+  d.innerHTML = pizzaSVG(d.angles, d.topping) + (o.tag ? `<span class="tag">${o.tag}</span>` : '');
+  (o.hi||[]).forEach(i => d.querySelector(`.slice[data-i="${i}"]`)?.classList.add('hi'));
+  (o.hi2||[]).forEach(i => d.querySelector(`.slice[data-i="${i}"]`)?.classList.add('hi2'));
+  return d;
+}
+function recut(pizza, angles){ pizza.angles = angles; pizza.innerHTML = pizzaSVG(angles, pizza.topping); pizza.classList.remove('cutting'); void pizza.offsetWidth; pizza.classList.add('cutting'); }
+function miniSVG(n, k, o={}){ // small icon: n slices, first k tinted
+  const angles = o.angles || equalAngles(n), hi = o.hi || [...Array(Math.min(k,n)).keys()];
+  let s = `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="var(--crust)" stroke="var(--crust-dark)" stroke-width="4"/><circle cx="100" cy="100" r="80" fill="var(--cheese)"/>`;
+  for(let i=0;i<angles.length-1;i++) if(hi.includes(i)) s += `<path d="${sectorPath(angles[i],angles[i+1],96)}" fill="${o.color||'rgba(244,85,47,.8)'}"/>`;
+  s += cutLinesSVG(angles).replace(/stroke-width="4"/g,'stroke-width="8"') + '</svg>';
+  return s;
+}
+function pizzaGhost(pizza, o){ // o: {angles, k, numbers}
+  const g = pizza.querySelector('.ghost'); if(!g) return;
+  const angles = o.angles || pizza.angles; let s = '';
+  for(let i=0;i<angles.length-1;i++){
+    if(i < (o.k||0)) s += `<path class="gfill" d="${sectorPath(angles[i],angles[i+1],R)}"/>`;
+    if(o.numbers !== false){ const [x,y] = pt(angles.length-1 === 1 ? 0 : 60, (angles[i]+angles[i+1])/2); s += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}">${i+1}</text>`; }
+  }
+  for(let i=0;i<angles.length-1;i++){ if(angles.length-1 < 2) break; const [x,y] = pt(R, angles[i]); s += `<line class="gline" x1="${CX}" y1="${CY}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }
+  g.innerHTML = s;
+}
+function clearGhosts(){ el.board.querySelectorAll('.ghost').forEach(g => g.innerHTML = ''); }
+function slicesOf(pizza){ return [...pizza.querySelectorAll('.slice')]; }
+
+/* plates */
+function makePlate(who, n, angles, cls=''){
+  const d = document.createElement('div'); d.className = 'plate'+(cls?' '+cls:''); d.given = []; d.n = n; d.angles = angles; d.who = who;
+  d.innerHTML = `<span class="who">${who}</span><svg viewBox="0 0 200 200" aria-hidden="true"></svg><span class="cnt">0</span>`;
+  return d;
+}
+function renderPlate(p, topping){
+  const svg = p.querySelector('svg'); let s = '';
+  p.given.forEach(i => { s += sliceSVG(p.angles[i], p.angles[i+1], topping, i); });
+  svg.innerHTML = s; p.querySelector('.cnt').textContent = p.given.length;
+}
+function flySlice(pizza, i, target, topping){
+  const sr = el.scene.getBoundingClientRect(), pr = pizza.getBoundingClientRect(), tr = target.getBoundingClientRect();
+  const f = document.createElement('div'); f.className = 'flyslice';
+  f.innerHTML = `<svg viewBox="0 0 200 200">${sliceSVG(pizza.angles[i], pizza.angles[i+1], topping, i)}</svg>`;
+  Object.assign(f.style, {left:(pr.left-sr.left)+'px', top:(pr.top-sr.top)+'px', width:pr.width+'px', height:pr.height+'px'});
+  el.fx.appendChild(f);
+  const tw = tr.width*0.76, th = tr.height*0.76;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>Object.assign(f.style, {left:(tr.left-sr.left+(tr.width-tw)/2)+'px', top:(tr.top-sr.top+(tr.height-th)/2)+'px', width:tw+'px', height:th+'px'})));
+  setTimeout(()=>f.remove(), reduced ? 30 : 600);
+}
+
+/* ---------- scene helpers ---------- */
+let coachLine = '', lastBubbleSpeech = '';
+function coach(text, face, speak=true){ coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face; if(speak) Voice.say(text); }
+function bubble(html, speakText){ el.bubble.innerHTML = html; el.bubble.classList.add('show'); if(speakText){ lastBubbleSpeech = speakText; Voice.say(speakText); } }
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function toast(text){ const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function pct(v){ return v+'%'; }
+function puff(x, y, cls='puff'){ const p = document.createElement('div'); p.className=cls; p.style.left=pct(x); p.style.top=pct(y); el.fx.appendChild(p); setTimeout(()=>p.remove(),1500); }
+function spark(x, y, em, spread=25){ const s = document.createElement('span'); s.className='spark'; s.textContent=em; s.style.left=pct(x); s.style.top=pct(y); s.style.setProperty('--dx',(Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy',(-Math.random()*spread-5)+'cqw'); el.fx.appendChild(s); setTimeout(()=>s.remove(),1500); }
+function showView(id){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===id)); }
+function setHint(html){ el.hint.innerHTML = html || ''; el.hint.classList.toggle('on', !!html); }
+function celebrate(){ for(let i=0;i<10;i++) spark(45+Math.random()*10, 40, pick(['⭐','✨','🍕','🎉'])); }
+async function robotBakes(myRun){
+  el.oven.classList.add('baking'); Sound.steam(); await wait(650); if(run!==myRun) return;
+  el.robot.classList.add('ding'); Sound.ding(); await wait(500); if(run!==myRun) return;
+  el.robot.classList.remove('ding'); el.robot.classList.add('burp'); Sound.burp();
+  for(let i=0;i<4;i++) setTimeout(()=>puff(86+Math.random()*6, 48+Math.random()*6, 'smoke'), i*120);
+  await wait(500); el.robot.classList.remove('burp'); el.oven.classList.remove('baking');
+}
+function customerPout(text, spoken){ el.customer.classList.remove('pout','laugh','happy'); void el.customer.offsetWidth; el.customer.classList.add('pout'); if(text) bubble(text, spoken); }
+function customerLaugh(){ el.customer.classList.remove('pout','happy'); void el.customer.offsetWidth; el.customer.classList.add('laugh'); setTimeout(()=>el.customer.classList.remove('laugh'), 1600); }
+
+/* ---------- idle nudge: after 14s with no taps, say the instruction again and wiggle the target ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- game state ---------- */
+let G = null;   // current level run
+let run = 0;    // token so abandoned runs stop
+let levelsThisSitting = 0; // in memory only, never saved: used to suggest a break, never to block
+let busy = false;
+
+function startLevel(n){
+  run++; const myRun = run; hideOverlay(); busy = false;
+  const cfg = levelConfig(n);
+  G = {n, cfg, queue: cfg.build(), i:0, served:0, stats:{questions:0, firstTry:0, wrong:0}, cast: shuffle(CUSTOMERS), q:null, complete:false, step:'wait'};
+  el.lvlChip.textContent = n; el.servedChip.textContent = 0;
+  el.board.innerHTML = ''; setHint(''); hideBubble(); el.customer.style.left = '-18%'; el.customer.className = 'customer';
+  serveNext(myRun);
+}
+const alive = r => G && run === r;
+
+async function serveNext(myRun){
+  if(!alive(myRun)) return;
+  if(G.i >= G.queue.length){ finishLevel(); return; }
+  const spec = G.queue[G.i], cust = G.cast[G.i % G.cast.length];
+  G.q = Object.assign({}, spec, {cust, solved:false, wrong:0, hint:0, revealed:false, given:[], plates:[], options:[], sliceCount:0});
+  G.step = 'wait'; busy = true;
+  el.board.innerHTML = ''; setHint(''); hideBubble(); clearReveals();
+  el.custBody.textContent = cust.em; el.friends.innerHTML = ''; el.customer.className = 'customer';
+  showView('v-wait'); el.waitEm.textContent = '🍕'; el.waitText.textContent = 'Robo is baking a pizza…';
+  coach('Robo is baking a pizza!', '🤖', false);
+  await robotBakes(myRun); if(!alive(myRun)) return;
+  el.waitEm.textContent = '🔔'; el.waitText.textContent = cust.name + ' is coming…';
+  el.customer.classList.add('walking'); el.customer.style.left = '3%';
+  await wait(1500); if(!alive(myRun)) return;
+  el.customer.classList.remove('walking');
+  G.stats.questions++;
+  SETUP[spec.mode](G.q, myRun);
+  G.step = 'play'; busy = false;
+}
+
+/* answer bookkeeping shared by every mode */
+function clearReveals(){ document.querySelectorAll('.reveal').forEach(e=>e.classList.remove('reveal')); document.querySelectorAll('.dim').forEach(e=>e.classList.remove('dim')); }
+async function solved(myRun, extra){
+  const q = G.q; if(q.solved) return; q.solved = true; busy = true; setNudge(null); clearReveals(); clearGhosts(); setHint('');
+  if(q.wrong === 0) G.stats.firstTry++;
+  Sound.yay(); celebrate();
+  if(q.wrong) customerLaugh(); else { el.customer.classList.add('happy'); setTimeout(()=>el.customer.classList.remove('happy'),1200); }
+  const line = extra && extra.say ? extra.say : pick(PRAISE);
+  coach(line, '🎉'); bubble(extra && extra.bubble ? extra.bubble : 'Yay! Thank you! 😋', '');
+  toast(pick(['Yum!','Perfect!','Nice slice!','Wow!']));
+  await wait(extra && extra.say ? 2600 : 1600); if(!alive(myRun)) return;
+  await leave(myRun);
+}
+function wrongAnswer(myRun, o){ // o: {pout, spoken, hint(html,text), reveal()}
+  const q = G.q; q.wrong++; G.stats.wrong++; Sound.oops();
+  customerPout(o.pout || 'Hey! That’s not it! 😾', o.spoken || 'Hey! That is not it!');
+  if(q.wrong === 1){ q.hint = 1; coach(pick(TRY_AGAIN), '🤔', false); setTimeout(()=>{ if(alive(myRun) && !q.solved){ o.ghost && o.ghost(); setHint(o.hintHTML); Voice.say(o.hintSpoken || Voice.clean(el.hint.textContent)); } }, 900); }
+  else { q.hint = 2; q.revealed = true; coach('Here it is! Tap the one that wiggles.', '💡', false); setTimeout(()=>{ if(alive(myRun) && !q.solved){ o.ghost && o.ghost(); setHint(o.hintHTML); o.reveal && o.reveal(); Voice.say('Here it is! ' + (o.hintSpoken || '') + ' Tap the one that wiggles.'); } }, 900); }
+}
+async function leave(myRun){
+  const q = G.q, last = G.i === G.queue.length-1;
+  G.step = 'leave'; showView('v-leave'); setNudge(null); hideBubble(); clearGhosts();
+  el.board.querySelectorAll('.pizza').forEach(p => { p.style.transition='transform .4s'; p.style.transform='scale(0)'; });
+  if(last){
+    el.customer.classList.add('hasbox'); el.leaveEm.textContent='📦'; el.leaveText.textContent='Taking the pizza box… toot toot!'; coach('…toot… toot… 💨', '🙈', false); Sound.pop();
+  } else { el.leaveEm.textContent='👋'; el.leaveText.textContent='Bye bye!'; coach('Bye bye! Next customer!', '👋', false); }
+  await wait(500); if(!alive(myRun)) return;
+  el.customer.classList.add('leaving','walking'); el.customer.style.left='-20%';
+  const t0 = performance.now();
+  while(performance.now() - t0 < (last ? 2300 : 1600)){
+    if(last){ const cx = parseFloat(getComputedStyle(el.customer).left)/el.scene.clientWidth*100; puff(cx + 8 + Math.random()*4, 48 + Math.random()*10); if(Math.random() < 0.75) Sound.fart(); }
+    await wait(rnd(180,320)); if(!alive(myRun)) return;
+  }
+  el.customer.className = 'customer';
+  G.served++; el.servedChip.textContent = G.served; G.i++;
+  serveNext(myRun);
+}
+
+/* ---------- mode setups ---------- */
+const SETUP = {};
+const cutIcon = n => `<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="92" fill="var(--crust)" stroke="var(--crust-dark)" stroke-width="6"/><circle cx="100" cy="100" r="74" fill="var(--cheese)"/>${cutLinesSVG(equalAngles(n)).replace(/stroke="#FFF4DC" stroke-width="4"/g,'stroke="var(--cocoa)" stroke-width="10"')}</svg>`;
+
+SETUP.cut = (q, myRun) => {
+  const n = q.n; q.target = {n, text: n===2 ? 'in half' : `into ${n} equal pieces`, spoken: n===2 ? 'in half' : `into ${NUM[n]} equal pieces`};
+  const pizza = makePizza({n:1, id:'main'}); el.board.appendChild(pizza); q.pizza = pizza;
+  el.cuts.innerHTML = [2,3,4,6,8].map(c => `<button class="cutbtn" data-n="${c}" aria-label="Cut into ${c} pieces">${cutIcon(c)}<span class="n">${c}</span><span class="lb">pieces</span></button>`).join('');
+  el.cuts.querySelectorAll('.cutbtn').forEach(b => b.addEventListener('click', ()=>doCut(+b.dataset.n)));
+  showView('v-cut');
+  const line = n===2 ? 'Cut it in half!' : `Cut it into ${n} equal pieces!`;
+  bubble(n===2 ? 'Half, please! 🍕' : `${n} pieces, please! 🍕`, '');
+  coach(`${q.cust.name} says: ${line} Tap a cutter.`, q.cust.em);
+  setNudge(()=>[el.cuts], `${line} Tap a cutter under the pizza.`);
+};
+async function doCut(c){
+  if(!G || G.step!=='play' || G.q.mode!=='cut' || G.q.solved || busy) return false; const q = G.q;
+  const myRun = run; busy = true; Sound.cut(); q.sliceCount = c;
+  recut(q.pizza, equalAngles(c));
+  await wait(650); if(!alive(myRun)) return false; busy = false;
+  if(c === q.target.n){ solved(myRun, {say:`${NUM[c]} equal pieces. ${c===2?'Two halves!':c===4?'Four quarters!':c===3?'Three thirds!':c===6?'Six sixths!':'Eight eighths!'}`}); return true; }
+  const n = q.target.n;
+  q.pizza.classList.add('nope');
+  wrongAnswer(myRun, {
+    pout: c < n ? 'Too big! 😾' : 'Too many! 😾', spoken: c < n ? `Too big! I asked for ${q.target.spoken}.` : `Too many pieces! I asked for ${q.target.spoken}.`,
+    hintHTML: `Count the pieces: <b>${n}</b> the same size. Tap the <b>${n}</b> cutter.`, hintSpoken: `Cut it ${q.target.spoken}. That is ${NUM[n]} pieces the same size.`,
+    ghost: ()=>{ recut(q.pizza, equalAngles(1)); q.pizza.classList.remove('nope','cutting'); pizzaGhost(q.pizza, {angles:equalAngles(n), k:0}); },
+    reveal: ()=>{ el.cuts.querySelectorAll('.cutbtn').forEach(b => b.classList.toggle('reveal', +b.dataset.n===n) || b.classList.toggle('dim', +b.dataset.n!==n)); }
+  });
+  return false;
+}
+
+SETUP.fair = (q, myRun) => {
+  const n = q.n, fairFirst = Math.random() < .5; q.target = {n, fair: fairFirst ? 'left' : 'right', text:'the fair pizza', spoken:'the pizza cut into equal pieces'};
+  const top = pick(TOPPINGS);
+  const good = makePizza({n, id:'fair', size:'small', topping:top, tag:'A'}), bad = makePizza({angles:unequalAngles(n), id:'unfair', size:'small', topping:top, tag:'B'});
+  const [L, Rr] = fairFirst ? [good, bad] : [bad, good]; L.querySelector('.tag').textContent='A'; Rr.querySelector('.tag').textContent='B';
+  el.board.append(L, Rr); q.pizzas = {left:L, right:Rr}; q.good = good;
+  [L,Rr].forEach(p => { p.classList.add('pickable'); p.addEventListener('pointerdown', ()=>choose(p===L?'left':'right')); });
+  el.pickcards.innerHTML = `<button class="fcard" data-v="left"><span class="lb">A</span>${miniSVG(n,0,{angles:L.angles})}</button><button class="fcard" data-v="right"><span class="lb">B</span>${miniSVG(n,0,{angles:Rr.angles})}</button>`;
+  el.pickcards.querySelectorAll('.fcard').forEach(b => b.addEventListener('click', ()=>choose(b.dataset.v)));
+  el.picknote.textContent = 'Tap the pizza that is cut fairly';
+  showView('v-pick');
+  bubble(`Which is fair? 🤔`, '');
+  coach(`Which pizza is cut fairly, A or B? Tap it.`, q.cust.em);
+  setNudge(()=>[L, Rr], 'Which pizza has pieces all the same size? Tap it.');
+};
+SETUP.name = (q, myRun) => {
+  const {k, n} = q; q.target = {k, n, key:fkey(k,n), text: fracHTML(k,n), spoken: fracWords(k,n)};
+  const top = pick(TOPPINGS);
+  if(q.two){
+    const p1 = makePizza({n, id:'p1', size:'small', topping:top, hi:[...Array(n).keys()]}), p2 = makePizza({n, id:'p2', size:'small', topping:top, hi:[...Array(k-n).keys()]});
+    el.board.append(p1, p2); q.pizza = p2; q.pizzas = {left:p1, right:p2};
+  } else { const p = makePizza({n, id:'main', hi:[...Array(k).keys()]}); el.board.appendChild(p); q.pizza = p; }
+  // options: correct + 2 distractors
+  const pool = [];
+  if(k > n){ pool.push([k-n+ (k-n===n?0:0), n]); pool.push([k+1,n],[k-1,n],[2*n,n],[k, n===2?4:2]); }
+  else if(k === n){ pool.push([1,2],[1,n],[n-1,n],[n,n+n]); }
+  else { pool.push([n-k,n],[k,k+n],[k===1?2:1,n],[k, n===2?4:(n===4?2:4)],[n,k],[k+1,n]); }
+  const opts = []; const seen = new Set([fkey(k,n)]);
+  for(const [a,b] of shuffle(pool)){ if(a<1||b<1||!DEN[b]||seen.has(fkey(a,b))||(b===1&&a>2)) continue; seen.add(fkey(a,b)); opts.push({k:a,n:b}); if(opts.length===2) break; }
+  while(opts.length<2){ const b = pick([2,3,4,6,8]), a = rnd(1,b); if(!seen.has(fkey(a,b))){ seen.add(fkey(a,b)); opts.push({k:a,n:b}); } }
+  opts.push({k,n}); q.options = shuffle(opts).map(o => ({key:fkey(o.k,o.n), spoken:fracWords(o.k,o.n)}));
+  el.sentence.innerHTML = '';
+  el.cards.innerHTML = q.options.map(o => { const [a,b] = o.key.split('/').map(Number); return `<button class="fcard" data-v="${o.key}" aria-label="${o.spoken}">${fracHTML(a,b)}${a>b ? miniSVG(b,b)+'' : miniSVG(b,a)}</button>`; }).join('');
+  el.cards.querySelectorAll('.fcard').forEach(b => b.addEventListener('click', ()=>choose(b.dataset.v)));
+  showView('v-cards');
+  const line = q.two ? 'How many pizzas are red? Tap the card.' : k===n ? 'How much pizza is red? Tap the card.' : 'How much of the pizza is red? Tap the card.';
+  bubble('How much? 🤔', '');
+  coach(line, q.cust.em);
+  setNudge(()=>[el.cards], line + ' Count the red slices.');
+};
+
+/* choose(): cards and pizza picks (fair, name, compare, add) */
+function choose(v){
+  if(!G || G.step!=='play' || busy) return false; const q = G.q, myRun = run; if(q.solved) return false;
+  v = String(v).trim();
+  if(q.mode === 'fair'){
+    const side = v==='A' ? 'left' : v==='B' ? 'right' : v;
+    if(side !== 'left' && side !== 'right') return false;
+    if(side === q.target.fair){ solved(myRun, {say:'Yes! All the pieces are the same size. That is fair!'}); return true; }
+    q.pizzas[side].classList.add('nope'); setTimeout(()=>q.pizzas[side].classList.remove('nope'),500);
+    wrongAnswer(myRun, { pout:'Not fair! 😾', spoken:'Hey! Those pieces are not the same size!', hintHTML:`Fair means every piece is the <b>same size</b>. Look for <b>${q.n}</b> pieces that match.`, hintSpoken:`Fair means every piece is the same size. Look for ${NUM[q.n]} pieces that match.`,
+      ghost: ()=>pizzaGhost(q.good, {k:0}), reveal: ()=>{ q.good.classList.add('reveal'); el.pickcards.querySelectorAll('.fcard').forEach(b => b.classList.toggle('reveal', b.dataset.v===q.target.fair) || b.classList.toggle('dim', b.dataset.v!==q.target.fair)); } });
+    return false;
+  }
+  if(q.mode === 'compare'){
+    let side = v==='left'||v==='right' ? v : (v===q.left.key ? 'left' : v===q.right.key ? 'right' : (v===q.left.spoken ? 'left' : v===q.right.spoken ? 'right' : null));
+    if(!side) return false;
+    if(side === q.target.side){ solved(myRun, {say:`Yes! ${q.target.spokenBig} is more than ${q.target.spokenSmall}.`}); return true; }
+    q.pizzas[side].classList.add('nope'); setTimeout(()=>q.pizzas[side].classList.remove('nope'),500);
+    const big = q.pizzas[q.target.side];
+    wrongAnswer(myRun, { pout:'Too small! 😾', spoken:'Hmm, that one is smaller!', hintHTML:`Look at the <b>red</b> parts. Which pizza has <b>more red</b>?`, hintSpoken:'Look at the red parts. Which pizza has more red?',
+      ghost: ()=>pizzaGhost(big, {k:big.hiCount, numbers:false}), reveal: ()=>{ big.classList.add('reveal'); el.pickcards.querySelectorAll('.fcard').forEach(b => b.classList.toggle('reveal', b.dataset.v===q.target.side) || b.classList.toggle('dim', b.dataset.v!==q.target.side)); } });
+    return false;
+  }
+  if(q.mode === 'name' || q.mode === 'add'){
+    const opt = q.options.find(o => o.key===v || o.spoken===v.toLowerCase()); if(!opt) return false;
+    const btn = el.cards.querySelector(`.fcard[data-v="${opt.key}"]`);
+    const [a,b] = opt.key.split('/').map(Number);
+    if(a*q.target.n === q.target.k*b){
+      if(q.mode==='add'){ el.sentence.querySelector('.q').innerHTML = fracHTML(q.target.k,q.target.n); el.sentence.querySelector('.q').classList.add('reveal'); slicesOf(q.pizza).forEach(s => { if(s.classList.contains('hi2')){ s.classList.remove('hi2'); s.classList.add('hi','pop'); } }); }
+      const extra = q.mode==='add' ? `${q.target.spokenSum} makes ${q.target.spoken}.${q.target.alsoSpoken ? ' That is the same as '+q.target.alsoSpoken+'!' : ''}` : (q.two ? `Yes! ${q.target.spoken}.` : `Yes! ${q.target.spoken} of the pizza is red.`);
+      solved(myRun, {say: extra}); return true;
+    }
+    btn && btn.classList.add('nope'); setTimeout(()=>btn && btn.classList.remove('nope'),500);
+    const t = q.target;
+    const hintHTML = q.mode==='add' ? `Count <b>all</b> the coloured slices. ${t.a} red + ${t.b} blue = <b>${t.k}</b> slices out of ${t.n}.`
+      : t.k > t.n ? `One whole pizza is <b>${t.n}</b> slices. Then count the extra red slices.` : t.k===t.n ? `All <b>${t.n}</b> slices are red. That is the <b>whole</b> pizza.` : `Count the red slices: <b>${t.k}</b>. Count all the slices: <b>${t.n}</b>. That is ${t.k} out of ${t.n}.`;
+    const hintSpoken = q.mode==='add' ? `Count all the coloured slices. ${NUM[t.a]} red and ${NUM[t.b]} blue. That is ${NUM[t.k]} slices out of ${NUM[t.n]}.`
+      : t.k > t.n ? `One whole pizza is ${NUM[t.n]} slices. Then count the extra red slices.` : t.k===t.n ? `All ${NUM[t.n]} slices are red. That is the whole pizza.` : `Count the red slices. ${NUM[t.k]}. Count all the slices. ${NUM[t.n]}. That is ${NUM[t.k]} out of ${NUM[t.n]}.`;
+    wrongAnswer(myRun, { pout:'Hmm, no! 😾', spoken:'Hmm, that is not it!', hintHTML, hintSpoken,
+      ghost: ()=>{ if(q.pizzas){ pizzaGhost(q.pizzas.left,{k:0}); pizzaGhost(q.pizzas.right,{k:0}); } else pizzaGhost(q.pizza, {k:0}); },
+      reveal: ()=>{ el.cards.querySelectorAll('.fcard').forEach(b => { const [x,y]=b.dataset.v.split('/').map(Number); const ok = x*t.n===t.k*y; b.classList.toggle('reveal', ok); b.classList.toggle('dim', !ok); }); } });
+    return false;
+  }
+  return false;
+}
+
+/* make + equiv: tap slices, then Give */
+function readoutMake(q){
+  const g = q.given.length, n = q.sliceCount;
+  el.readout.innerHTML = `<span>${g} of ${n} slices</span> ${g ? fracHTML(g, n) : ''}`;
+  el.readout.classList.toggle('good', g === q.needed);
+}
+SETUP.make = (q, myRun) => {
+  const {k, n} = q; q.target = {k, n, key:fkey(k,n), text:fracHTML(k,n), spoken:fracWords(k,n)}; q.sliceCount = n; q.needed = k;
+  const pizza = makePizza({n, id:'main', size:'mid'}); q.pizza = pizza;
+  const plate = makePlate(q.cust.em, n, pizza.angles); q.plate = plate;
+  el.board.append(pizza, plate);
+  attachSliceTaps(pizza);
+  el.btnGive.textContent = `Give it to ${q.cust.name.split(' ')[0]}! 🍽️`; el.makenote.textContent = 'Tap slices to put them on the plate';
+  readoutMake(q); showView('v-make');
+  bubble(`I want ${fracHTML(k,n)} please!`, '');
+  coach(`${q.cust.name} wants ${fracWords(k,n)} of the pizza. Tap the slices.`, q.cust.em);
+  setNudge(()=>[pizza, el.btnGive], `${q.cust.name} wants ${fracWords(k,n)}. Tap slices to put them on the plate, then tap Give it.`);
+};
+SETUP.equiv = (q, myRun) => {
+  const {k, n, slices} = q; const need = k*slices/n;
+  q.target = {k, n, slices, need, key:fkey(need,slices), text:fracHTML(need,slices), spoken:fracWords(need,slices), wantSpoken:fracWords(k,n)}; q.sliceCount = slices; q.needed = need;
+  const ref = makePizza({n, id:'ref', size:'small', hi:[...Array(k).keys()], tag:fracHTML(k,n)});
+  const pizza = makePizza({n:slices, id:'main', size:'mid'}); q.pizza = pizza;
+  el.board.append(ref, pizza);
+  attachSliceTaps(pizza);
+  el.btnGive.textContent = 'That’s the same! ✓'; el.makenote.textContent = `Tap slices on the big pizza to show ${fracWords(k,n)}`;
+  readoutMake(q); showView('v-make');
+  bubble(`Show me ${fracHTML(k,n)} another way!`, '');
+  coach(`Show ${fracWords(k,n)} another way. Tap slices on the big pizza.`, q.cust.em);
+  setNudge(()=>[pizza, el.btnGive], `Make ${fracWords(k,n)} with the small slices. Tap them, then tap the green button.`);
+};
+function attachSliceTaps(pizza){
+  slicesOf(pizza).forEach(s => s.addEventListener('pointerdown', e => { e.preventDefault(); startSlicePointer(e, +s.dataset.i); }));
+}
+function tapSlice(i){
+  if(!G || G.step!=='play' || busy) return false; const q = G.q; if(q.solved) return false;
+  if(q.mode === 'make' || q.mode === 'equiv'){
+    const s = q.pizza.querySelector(`.slice[data-i="${i}"]`); if(!s) return false;
+    const idx = q.given.indexOf(i);
+    if(idx >= 0){ q.given.splice(idx,1); if(q.mode==='make'){ s.classList.remove('given'); q.plate.given = q.given.slice(); renderPlate(q.plate, q.pizza.topping); } else s.classList.remove('hi'); Sound.pop(); }
+    else {
+      q.given.push(i); Sound.slide();
+      if(q.mode==='make'){ flySlice(q.pizza, i, q.plate, q.pizza.topping); s.classList.add('given'); setTimeout(()=>{ q.plate.given = q.given.slice(); renderPlate(q.plate, q.pizza.topping); }, reduced?30:550); }
+      else { s.classList.add('hi','pop'); setTimeout(()=>s.classList.remove('pop'),350); }
+    }
+    readoutMake(q);
+    if(q.given.length === q.needed) Voice.say(`${NUM[q.given.length]} of ${NUM[q.sliceCount]} slices. Tap the button!`);
+    return true;
+  }
+  if(q.mode === 'share'){
+    const s = q.pizza.querySelector(`.slice[data-i="${i}"]`); if(!s || q.given.includes(i)) return false;
+    const load = p => p.given.length + (p.pending||0); let target = q.plates[0]; q.plates.forEach(p => { if(load(p) < load(target)) target = p; });
+    return putOnPlate(i, target);
+  }
+  return false;
+}
+function putOnPlate(i, plate){
+  const q = G.q, s = q.pizza.querySelector(`.slice[data-i="${i}"]`); if(!s || q.given.includes(i)) return false;
+  q.given.push(i); Sound.slide(); flySlice(q.pizza, i, plate, q.pizza.topping); s.classList.add('given'); plate.pending = (plate.pending||0)+1;
+  setTimeout(()=>{ plate.pending--; plate.given.push(i); renderPlate(plate, q.pizza.topping); readoutShare(q); }, reduced?30:550);
+  readoutShare(q, true);
+  return true;
+}
+function submit(){
+  if(!G || G.step!=='play' || busy) return false; const q = G.q, myRun = run; if(q.solved) return false;
+  if(q.mode === 'make' || q.mode === 'equiv'){
+    const g = q.given.length, t = q.target;
+    if(g === q.needed){
+      const say = q.mode==='make' ? `${NUM[g]} of ${NUM[q.sliceCount]} slices. That is ${t.spoken}!` : `${t.spoken} is the same as ${t.wantSpoken}!`;
+      if(q.mode==='equiv') el.readout.innerHTML = `${fracHTML(t.need,t.slices)} = ${fracHTML(t.k,t.n)}`;
+      solved(myRun, {say}); return true;
+    }
+    el.readout.classList.add('nope'); setTimeout(()=>el.readout.classList.remove('nope'),500);
+    const few = g < q.needed;
+    const want = q.mode==='make' ? t.spoken : t.wantSpoken;
+    wrongAnswer(myRun, { pout: few ? 'Too little! 😾' : 'Too much! 😾', spoken: few ? `That is not enough! I want ${want}.` : `That is too much! I want ${want}.`,
+      hintHTML: `${want.charAt(0).toUpperCase()+want.slice(1)} is <b>${q.needed}</b> of <b>${q.sliceCount}</b> slices.`, hintSpoken: `${want} is ${NUM[q.needed]} of ${NUM[q.sliceCount]} slices.`,
+      ghost: ()=>pizzaGhost(q.pizza, {k:q.needed}),
+      reveal: ()=>{ autoFill(q); el.btnGive.classList.add('reveal'); } });
+    return false;
+  }
+  if(q.mode === 'share'){
+    if(q.given.length < q.s){ coach('Share out all the slices first!', '🤔'); setNudge(()=>[q.pizza], 'Tap the slices to share them out.'); return false; }
+    const counts = q.plates.map(p => p.given.length), each = q.s/q.m;
+    if(counts.every(c => c === each)){
+      el.sharesentence.innerHTML = `<span>${q.s}</span> ÷ <span>${q.m}</span> = <span class="q reveal">${each}</span> each`;
+      solved(myRun, {say:`${NUM[q.s]} slices shared by ${NUM[q.m]} friends. ${NUM[each]} each. That is fair!`}); return true;
+    }
+    const min = Math.min(...counts);
+    q.plates.forEach(p => { if(p.given.length === min){ p.classList.remove('sad'); void p.offsetWidth; p.classList.add('sad'); } });
+    wrongAnswer(myRun, { pout:'Not fair! 😾', spoken:'Hey! That is not fair. Someone has less!', hintHTML:`Everyone gets the <b>same</b>. ${q.s} slices for ${q.m} friends is <b>${each}</b> each.`, hintSpoken:`Everyone gets the same. ${NUM[q.s]} slices for ${NUM[q.m]} friends is ${NUM[each]} each.`,
+      ghost: ()=>{ q.plates.forEach(p => p.querySelector('.cnt').textContent = p.given.length+' / '+each); },
+      reveal: ()=>{ autoShare(q); el.btnShare.classList.add('reveal'); } });
+    return false;
+  }
+  return false;
+}
+function autoFill(q){ // reveal: arrange exactly the needed slices
+  const want = [...Array(q.needed).keys()];
+  q.given.slice().forEach(i => { if(!want.includes(i)) tapSlice(i); });
+  want.forEach((i,j) => { if(!q.given.includes(i)) setTimeout(()=>{ if(G && G.q===q && !q.solved && !q.given.includes(i)) tapSlice(i); }, j*160); });
+}
+function autoShare(q){
+  const each = q.s/q.m;
+  q.plates.forEach(p => { while(p.given.length > each){ const i = p.given.pop(); q.given.splice(q.given.indexOf(i),1); q.pizza.querySelector(`.slice[data-i="${i}"]`).classList.remove('given'); } renderPlate(p, q.pizza.topping); });
+  let delay = 0;
+  q.plates.forEach(p => { for(let c=p.given.length+(p.pending||0); c<each; c++){ const i = [...Array(q.s).keys()].find(x => !q.given.includes(x) && !pendingIdx.has(x)); if(i===undefined) break; pendingIdx.add(i); setTimeout(()=>{ pendingIdx.delete(i); if(G && G.q===q && !q.solved) putOnPlate(i, p); }, delay); delay += 160; } });
+  readoutShare(q);
+}
+const pendingIdx = new Set();
+
+/* share: tap or drag slices onto plates */
+function readoutShare(q, pending){
+  const placed = q.given.length;
+  el.shareout.innerHTML = `<span>${placed} of ${q.s} slices shared</span>`;
+  el.shareout.classList.toggle('good', placed === q.s);
+  if(!pending && placed === q.s){ const counts = q.plates.map(p=>p.given.length); if(counts.every(c=>c===counts[0])) Voice.say(`${NUM[counts[0]]} each! Tap the button.`); }
+}
+SETUP.share = (q, myRun) => {
+  const {m, s} = q; q.target = {m, s, each:s/m, text:`${s} ÷ ${m}`, spoken:`${NUM[s]} slices shared by ${NUM[m]} friends`}; q.sliceCount = s;
+  const pizza = makePizza({n:s, id:'main', size:'mid'}); q.pizza = pizza;
+  const friends = [q.cust].concat(shuffle(CUSTOMERS.filter(c => c !== q.cust)).slice(0, m-1));
+  el.friends.innerHTML = friends.slice(1).map(f => `<span>${f.em}</span>`).join('');
+  const wrap = document.createElement('div'); wrap.className = 'plates'+(m===1?' one':'');
+  q.plates = friends.map(f => { const p = makePlate(f.em, s, pizza.angles); wrap.appendChild(p); p.addEventListener('pointerdown', ()=>takeBack(p)); return p; });
+  el.board.append(pizza, wrap);
+  attachSliceTaps(pizza);
+  el.sharesentence.innerHTML = `<span>${s}</span> ÷ <span>${m}</span> = <span class="q">?</span>`;
+  readoutShare(q); showView('v-share');
+  bubble(`${m} friends, ${s} slices!`, '');
+  coach(`${m} friends share ${s} slices. Give everyone the same. Tap the slices.`, q.cust.em);
+  setNudge(()=>[pizza, el.btnShare], `${NUM[m]} friends share ${NUM[s]} slices. Tap a slice to put it on a plate.`);
+};
+function takeBack(p){
+  if(!G || G.step!=='play' || busy || G.q.mode!=='share' || G.q.solved || !p.given.length || dragging) return;
+  const q = G.q, i = p.given.pop(); q.given.splice(q.given.indexOf(i),1);
+  q.pizza.querySelector(`.slice[data-i="${i}"]`).classList.remove('given'); renderPlate(p, q.pizza.topping); readoutShare(q); Sound.pop();
+}
+let dragging = null;
+function startSlicePointer(e, i){
+  if(!G || G.step!=='play' || busy || G.q.solved) return;
+  const q = G.q;
+  if(q.mode !== 'share'){ tapSlice(i); return; }
+  if(q.given.includes(i)) return;
+  const sr = el.scene.getBoundingClientRect();
+  dragging = {i, x0:e.clientX, y0:e.clientY, moved:false, ghost:null, over:null, sr};
+  const onMove = ev => {
+    if(!dragging) return;
+    const dx = ev.clientX - dragging.x0, dy = ev.clientY - dragging.y0;
+    if(!dragging.moved && Math.hypot(dx,dy) < 8) return;
+    if(!dragging.moved){ dragging.moved = true; const g = document.createElement('div'); g.className='dragslice'; g.innerHTML = `<svg viewBox="0 0 200 200">${sliceSVG(q.pizza.angles[i], q.pizza.angles[i+1], q.pizza.topping, i)}</svg>`; el.fx.appendChild(g); dragging.ghost = g; }
+    dragging.ghost.style.left = (ev.clientX - sr.left)+'px'; dragging.ghost.style.top = (ev.clientY - sr.top)+'px';
+    let over = null; q.plates.forEach(p => { const r = p.getBoundingClientRect(); const hit = ev.clientX>r.left-8 && ev.clientX<r.right+8 && ev.clientY>r.top-8 && ev.clientY<r.bottom+8; p.classList.toggle('hot', hit); if(hit) over = p; });
+    dragging.over = over;
+  };
+  const onUp = ev => {
+    document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', onUp); document.removeEventListener('pointercancel', onUp);
+    const d = dragging; dragging = null; if(!d) return;
+    q.plates.forEach(p => p.classList.remove('hot'));
+    if(d.ghost) d.ghost.remove();
+    if(!d.moved){ tapSlice(i); return; }
+    if(d.over) putOnPlate(i, d.over);
+  };
+  document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp);
+}
+el.btnGive.addEventListener('click', submit);
+el.btnShare.addEventListener('click', submit);
+
+/* compare + add */
+SETUP.compare = (q, myRun) => {
+  const {a, b} = q, top = pick(TOPPINGS);
+  const bigger = a.k/a.n > b.k/b.n ? 'left' : 'right';
+  q.left = {key:fkey(a.k,a.n), spoken:fracWords(a.k,a.n)}; q.right = {key:fkey(b.k,b.n), spoken:fracWords(b.k,b.n)};
+  q.target = {side:bigger, key: bigger==='left'?q.left.key:q.right.key, spokenBig: bigger==='left'?q.left.spoken:q.right.spoken, spokenSmall: bigger==='left'?q.right.spoken:q.left.spoken, text: bigger==='left'?fracHTML(a.k,a.n):fracHTML(b.k,b.n)};
+  const L = makePizza({n:a.n, id:'left', size:'small', topping:top, hi:[...Array(a.k).keys()], tag:fracHTML(a.k,a.n)}), Rr = makePizza({n:b.n, id:'right', size:'small', topping:top, hi:[...Array(b.k).keys()], tag:fracHTML(b.k,b.n)});
+  L.hiCount = a.k; Rr.hiCount = b.k;
+  el.board.append(L, Rr); q.pizzas = {left:L, right:Rr};
+  [L,Rr].forEach(p => { p.classList.add('pickable'); p.addEventListener('pointerdown', ()=>choose(p===L?'left':'right')); });
+  el.pickcards.innerHTML = `<button class="fcard" data-v="left" aria-label="${q.left.spoken}">${fracHTML(a.k,a.n)}${miniSVG(a.n,a.k)}</button><button class="fcard" data-v="right" aria-label="${q.right.spoken}">${fracHTML(b.k,b.n)}${miniSVG(b.n,b.k)}</button>`;
+  el.pickcards.querySelectorAll('.fcard').forEach(btn => btn.addEventListener('click', ()=>choose(btn.dataset.v)));
+  el.picknote.textContent = 'Tap the pizza with more red';
+  showView('v-pick');
+  bubble('Which is more? 🤔', '');
+  coach(`Which is more, ${q.left.spoken} or ${q.right.spoken}? Tap the bigger one.`, q.cust.em);
+  setNudge(()=>[L, Rr], `Which is more, ${q.left.spoken} or ${q.right.spoken}? Tap the pizza with more red.`);
+};
+SETUP.add = (q, myRun) => {
+  const {a, b, n} = q, k = a+b;
+  q.target = {a, b, k, n, key:fkey(k,n), text:fracHTML(k,n), spoken:fracWords(k,n), spokenSum:`${fracWords(a,n)} plus ${fracWords(b,n)}`, alsoSpoken: (k<n && gcd(k,n)>1) ? fracWords(k/gcd(k,n), n/gcd(k,n)) : ''};
+  const pizza = makePizza({n, id:'main', hi:[...Array(a).keys()], hi2:[...Array(b).keys()].map(i=>i+a)}); q.pizza = pizza; el.board.appendChild(pizza);
+  const pool = [[k+1,n],[k-1,n],[k,n*2],[a*b||1,n],[k,n===2?4:2],[n,k]]; const seen = new Set([fkey(k,n)]); const opts=[];
+  for(const [x,y] of shuffle(pool)){ if(x<1||y<1||!DEN[y]||seen.has(fkey(x,y))||x*n===k*y) continue; seen.add(fkey(x,y)); opts.push({k:x,n:y}); if(opts.length===2) break; }
+  while(opts.length<2){ const y = pick([2,3,4,6,8]), x = rnd(1,y); if(!seen.has(fkey(x,y)) && x*n!==k*y){ seen.add(fkey(x,y)); opts.push({k:x,n:y}); } }
+  opts.push({k,n}); q.options = shuffle(opts).map(o => ({key:fkey(o.k,o.n), spoken:fracWords(o.k,o.n)}));
+  el.sentence.innerHTML = `${fracHTML(a,n)} + ${fracHTML(b,n)} = <span class="q">?</span>`;
+  el.cards.innerHTML = q.options.map(o => { const [x,y] = o.key.split('/').map(Number); return `<button class="fcard" data-v="${o.key}" aria-label="${o.spoken}">${fracHTML(x,y)}${miniSVG(y,x)}</button>`; }).join('');
+  el.cards.querySelectorAll('.fcard').forEach(btn => btn.addEventListener('click', ()=>choose(btn.dataset.v)));
+  showView('v-cards');
+  bubble(`${fracHTML(a,n)} + ${fracHTML(b,n)} = ?`, '');
+  coach(`${fracWords(a,n)} plus ${fracWords(b,n)}. How much is that? Tap the card.`, q.cust.em);
+  setNudge(()=>[el.cards], `${fracWords(a,n)} plus ${fracWords(b,n)}. Count all the coloured slices, then tap the card.`);
+};
+
+/* ---------- level complete, goodbye ---------- */
+function finishLevel(){
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  G.complete = true; G.step = 'done'; busy = false; setNudge(null);
+  progress.unlocked = Math.max(progress.unlocked, Math.min(G.n+1, LEVELS.length));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'Every pizza right on the first try. You’re a fraction superstar!' : stars===2 ? 'Great work! Your slicing is getting stronger every time.' : 'You finished the whole level! Practice makes you stronger.';
+  Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3, hasNext = G.n < LEVELS.length;
+  const nextBtn = hasNext ? `<button class="${breakTime?'subbtn':'bigbtn'}" id="btn-next">Next level ▶</button>` : '';
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${nextBtn}<button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `${nextBtn}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay(`<div class="hero">🍕🤖</div><h1>Pizza party!</h1><h2>Level ${G.n} done!</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    <div class="fact">Served <b>${G.served}</b> customers · <b>${s.firstTry}</b> of <b>${s.questions}</b> pizzas right first time</div>
+    ${buttons}`);
+  Voice.say(`Pizza party! Level ${G.n} done! ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  if(hasNext) $('#btn-next').addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; levelsThisSitting = 0;
+  const idea = pick(['go cut a real sandwich in half','go fold a piece of paper into 4 equal parts','go share some fruit fairly with someone','go play outside for a bit','go get a drink of water and a stretch']);
+  showOverlay(`<div class="hero">👋🍕</div><h2>Great work today!</h2><p>The pizza shop is closed for now. Stretch your arms, ${idea}. Robo will be here when you come back.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say(`Great work today! The pizza shop is closed for now. Stretch your arms, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null;
+  showOverlay(`<div class="hero">🍕🤖🐻</div><h1>Pizza Slice Shop</h1>
+    <p>Cut the pizza into equal pieces, name the slices, share them fairly, and help Robo’s customers get exactly what they ordered!</p>
+    <div class="fact">Practise <span class="frac"><b>1</b><i>2</i></span> halves · <span class="frac"><b>1</b><i>4</i></span> quarters · <span class="frac"><b>1</b><i>3</i></span> thirds · sharing fairly</div>
+    <button class="bigbtn" id="btn-play">Play! 🍕</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap any speech bubble or 🔊 to hear it again.</p>`);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What it teaches</b><ul style="margin:6px 0 0;padding-left:18px">
+      ${LEVELS.map((l,i)=>`<li>Level ${i+1} <b>${l.title}</b>: ${l.teaches}</li>`).join('')}</ul>
+    <p style="margin:8px 0 0;font-size:.9rem;color:var(--cocoa)">The big idea in every level: a fraction is always about <b>equal parts</b>. Half means two pieces the <b>same size</b>, not just two pieces. The game says fractions in words (“three quarters”, “two sixths”) so the picture and the name stick together. Levels 1–4 suit ages 5+; levels 5–8 (comparing, equivalent fractions, adding, more than a whole) suit ages 7+.</p>
+    <b style="display:block;margin-top:10px">How it helps without nagging</b><ul style="margin:6px 0 0;padding-left:18px">
+      <li>First wrong answer: a ghost picture shows the target on the pizza with the pieces counted. Second: the answer wiggles, ready to tap. Nobody fails a level.</li>
+      <li>If your child stops for a while, the instruction is repeated and the right thing to tap wiggles.</li>
+      <li>Drag is never required: every slice can be tapped instead, and there is always a plain button.</li>
+      <li>No timers, no accounts, nothing leaves this device. Sound and read-aloud toggles are in the top bar. ⛶ makes it full screen on a tablet.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul style="margin:6px 0 0;padding-left:18px"><li>No streaks, daily rewards, countdowns or notifications. Nothing ever says “come back”.</li><li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li><li>Stars come only from accuracy. There is nothing random to chase.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null;
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${c.ops.map(o=>`<span>${o}</span>`).join('')}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level starts easy and gets a little trickier. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+el.bubble.addEventListener('pointerdown', e=>{ e.stopPropagation(); const was=Voice.enabled; Voice.enabled=true; Voice.say(lastBubbleSpeech || coachLine); Voice.enabled=was; });
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+
+/* ---------- boot ---------- */
+showTitle();
+
+// debug hooks for automated testing
+window.__game = {
+  startLevel, cut: doCut, choose, tapSlice, submit, showTitle, showLevels,
+  get sittingLevels(){ return levelsThisSitting; },
+  get data(){ return {LEVELS, CUSTOMERS}; },
+  get state(){
+    if(!G) return {level:null, complete:false, step:'title', mode:null, target:null, solved:false};
+    const q = G.q || {};
+    return {level:G.n, title:G.cfg.title, step:G.step, complete:G.complete, busy, served:G.served, total:G.queue.length, index:G.i, stats:Object.assign({}, G.stats),
+      mode:q.mode || null, target:q.target ? Object.assign({}, q.target) : null, solved:!!q.solved, wrong:q.wrong||0, hint:q.hint||0, revealed:!!q.revealed,
+      customer:q.cust ? q.cust.name : null, given:(q.given||[]).slice(), needed:q.needed, slices:q.sliceCount||0, plates:(q.plates||[]).map(p=>p.given.slice()),
+      options:(q.options||[]).map(o=>o.key), spec:{n:q.n, k:q.k, m:q.m, s:q.s, a:q.a, b:q.b, slices:q.slices, two:!!q.two}};
+  }
+};
+})();
+</script>
+
+</body>
+</html>

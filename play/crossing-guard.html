@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Crossing Guard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D; --grass:#8BD36F;
+  --road:#5C5C68; --walk:#E6DFD1; --walk-line:#CFC6B5;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+#app{max-width:1280px;margin:0 auto;padding-block:10px 16px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.3rem;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.logo small{font-family:var(--body);font-weight:800;color:var(--cocoa-soft);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.tools{display:flex;gap:10px;margin-left:auto}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+#dots{display:flex;gap:4px;align-items:center}
+#dots i{width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px rgba(59,42,31,.2);display:block}
+#dots i.done{background:var(--mint);box-shadow:none}
+#dots i.now{background:var(--butter);box-shadow:0 0 0 2px var(--sun)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+#scene{position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:var(--sky);box-shadow:var(--shadow)}
+.sky{position:absolute;inset:0 0 80% 0;background:linear-gradient(#A9DFFF,#DDF3FF)}
+.sun{position:absolute;left:4%;top:2%;font-size:7cqw;line-height:1}
+.bldg{position:absolute;bottom:80%;font-size:8cqw;line-height:1;letter-spacing:-.15em}
+.walk-top{position:absolute;left:0;right:0;top:18%;height:14%;background:var(--walk);background-image:repeating-linear-gradient(90deg,transparent 0 9cqw,var(--walk-line) 9cqw calc(9cqw + 2px))}
+.walk-bot{position:absolute;left:0;right:0;top:78%;height:22%;background:var(--walk);background-image:repeating-linear-gradient(90deg,transparent 0 9cqw,var(--walk-line) 9cqw calc(9cqw + 2px))}
+.curb{position:absolute;left:0;right:0;height:1.5%;background:#B8AF9C}
+.curb.top{top:32%}.curb.bot{top:76.5%}
+.road{position:absolute;left:0;right:0;top:32%;height:46%;background:var(--road)}
+.mid{position:absolute;left:0;right:0;top:54.4%;height:1.4%;background:repeating-linear-gradient(90deg,var(--sun) 0 5cqw,transparent 5cqw 9cqw)}
+.cross{position:absolute;left:41%;width:18%;top:32%;height:46%;background:repeating-linear-gradient(180deg,#fff 0 7%,transparent 7% 14.5%);opacity:.92}
+.cross.hot{box-shadow:0 0 0 .8cqw var(--mint);border-radius:1cqw}
+.light{position:absolute;left:64%;top:6%;width:4cqw;padding:.5cqw;border-radius:1cqw;background:#2F2F36;display:flex;flex-direction:column;gap:.5cqw;align-items:center}
+.light i{display:block;width:2.6cqw;height:2.6cqw;border-radius:50%;background:#444;opacity:.35}
+.light.red i.r{background:#FF3B3B;opacity:1;box-shadow:0 0 1.5cqw #FF3B3B}
+.light.amber i.a{background:var(--sun);opacity:1;box-shadow:0 0 1.5cqw var(--sun)}
+.light.green i.g{background:#4BDB6C;opacity:1;box-shadow:0 0 1.5cqw #4BDB6C}
+.light::after{content:"";position:absolute;left:50%;top:100%;width:.9cqw;height:5cqw;background:#555;transform:translateX(-50%)}
+.sig{position:absolute;left:61%;top:80%;width:9cqw;height:9cqw;border-radius:1.4cqw;background:#2F2F36;display:grid;place-items:center;font-size:6cqw;line-height:1;transition:background .3s}
+.sig::before{content:"✋";filter:grayscale(1) brightness(.5)}
+.sig.walk::before{content:"🚶";filter:none;text-shadow:0 0 1.5cqw #fff}
+.sig.walk{background:#1E8F7B;box-shadow:0 0 0 .6cqw rgba(75,219,108,.6)}
+.sig.stop::before{filter:none;text-shadow:0 0 1.5cqw #FF3B3B}
+.sig.stop{background:#8a1f1f}
+.sig.flash::before{filter:none;animation:flash .7s steps(1) infinite}
+.sig.flash{background:#8a1f1f}
+@keyframes flash{50%{opacity:.15}}
+.guard{position:absolute;left:28%;top:79%;font-size:10.5cqw;line-height:1;transform:translateX(-50%)}
+.guard .stopsign{position:absolute;right:-28%;top:-14%;font-size:.5em;transform:rotate(12deg)}
+.kid{position:absolute;left:50%;top:78%;font-size:11cqw;line-height:1;transform:translateX(-50%);transition:top 2.4s linear,transform .3s;z-index:6}
+.kid.look-left .face{transform:rotate(-18deg) translateX(-6%)}
+.kid.look-right .face{transform:rotate(18deg) translateX(6%)}
+.kid .face{display:inline-block;transition:transform .35s}
+.kid.crossing{top:15%}
+.kid.walkbob{animation:bob .35s infinite alternate}
+@keyframes bob{from{transform:translateX(-50%) translateY(0)}to{transform:translateX(-50%) translateY(-1.5cqw)}}
+.kid .name{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);font:700 2.6cqw var(--display);background:#fff;color:var(--cocoa);border-radius:2cqw;padding:.3cqw 1.4cqw;white-space:nowrap;margin-bottom:.4cqw}
+.car{position:absolute;font-size:10cqw;line-height:1;z-index:4;will-change:left;transform:translateX(-50%)}
+.car.flip{transform:translateX(-50%) scaleX(-1)}
+.car .honk{position:absolute;left:50%;bottom:95%;transform:translateX(-50%) scaleX(1);font:700 3.2cqw var(--display);background:#fff;border-radius:2cqw;padding:.3cqw 1.4cqw;opacity:0;white-space:nowrap}
+.car.flip .honk{transform:translateX(-50%) scaleX(-1)}
+.car.stopped .honk{opacity:1}
+.car.stopped{filter:brightness(.92)}
+.robo{position:absolute;left:-20%;top:57%;font-size:9cqw;line-height:1;z-index:5;display:none;transform:scaleX(-1)}
+.robo.on{display:block}
+.robo .bot{position:absolute;left:35%;top:-62%;font-size:.75em;transform:scaleX(-1)}
+.robo .dust{position:absolute;right:88%;top:20%;font-size:.6em;opacity:0}
+.robo.driving .dust{opacity:1;animation:puffs .5s infinite alternate}
+@keyframes puffs{from{transform:translate(0,0) scale(.8)}to{transform:translate(-1cqw,-1cqw) scale(1.1)}}
+.robo .say{position:absolute;left:50%;bottom:130%;transform:translateX(-50%) scaleX(-1);font:700 3.4cqw var(--display);background:#fff;border-radius:2cqw;padding:.4cqw 1.6cqw;opacity:0;white-space:nowrap;transition:opacity .2s}
+.robo.honking .say{opacity:1}
+.place{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1cqw;background:var(--sky);z-index:8}
+.place.on{display:flex}
+.place .art{font-size:15cqw;line-height:1.1;letter-spacing:-.05em;text-align:center}
+.place .art b{font-size:.6em;vertical-align:middle;letter-spacing:0}
+.place .cap{font:700 4.2cqw var(--display);background:#fff;border-radius:3cqw;padding:.8cqw 3cqw;color:var(--cocoa);max-width:90%;text-align:center}
+.place .ground{position:absolute;left:0;right:0;bottom:0;height:22%;background:var(--grass);z-index:-1}
+.place.store .ground{background:#DCD3C4}.place.home .ground{background:#F1C9A0}.place.dock .ground{background:#5CC8FF}.place.road .ground{background:var(--road)}
+.toast{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--ketchup-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--ketchup-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+.toast.mint{-webkit-text-stroke:.35cqw var(--mint-dark);text-shadow:0 .6cqw 0 var(--mint-dark)}
+@keyframes toast{10%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1;transform:translate(-50%,-60%) scale(1)}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+.spark{position:absolute;font-size:5cqw;animation:spark 1.3s forwards;pointer-events:none;z-index:20}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) rotate(200deg);opacity:0}}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:25}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);min-height:0}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:44px;height:44px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.hint{display:none;background:var(--sky);border-radius:16px;padding:8px 12px;font-weight:800;align-items:center;gap:10px}
+.hint.on{display:flex}
+.hint .cue{font-size:2rem;line-height:1;letter-spacing:-.05em;flex:none}
+.hint p{margin:0;font-size:.95rem}
+.view{display:none;flex-direction:column;gap:10px}
+.view.on{display:flex}
+.arrows{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.arrow{min-height:64px;border-radius:18px;background:#fff;box-shadow:0 5px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1}
+.arrow small{font-size:.8rem;font-weight:700;font-family:var(--display)}
+.arrow.done{background:var(--mint);color:#fff;box-shadow:0 5px 0 var(--mint-dark)}
+.arrow:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(59,42,31,.14)}
+.walkwait{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wbtn{min-height:60px;border-radius:18px;font-size:1.25rem;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
+.wbtn .em{font-size:1.5rem}
+#btn-wait{background:var(--ketchup);box-shadow:0 6px 0 var(--ketchup-dark)}
+#btn-walk{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.wbtn.dim{opacity:.45}
+.wbtn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{min-height:52px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1.05rem;font-weight:700;padding:8px 14px;text-align:left;display:flex;align-items:center;gap:10px;line-height:1.2}
+.choice .em{font-size:1.5rem;flex:none}
+.choice:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(59,42,31,.14)}
+.choice.nope{animation:wiggle .5s}
+.choice.reveal{background:var(--butter);box-shadow:0 4px 0 var(--sun),0 0 0 3px var(--sun);animation:nudge .6s infinite}
+.choice.reveal::after{content:"👆";margin-left:auto;font-size:1.3rem}
+.choice.yes{background:var(--mint);color:#fff;box-shadow:0 4px 0 var(--mint-dark)}
+@keyframes wiggle{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-2deg)}75%{transform:translateX(8px) rotate(2deg)}}
+.big{width:100%;min-height:56px;border-radius:18px;background:var(--mint);color:#fff;font-size:1.2rem;font-weight:700;box-shadow:0 6px 0 var(--mint-dark)}
+.big:active{transform:translateY(4px);box-shadow:0 2px 0 var(--mint-dark)}
+.big.red{background:var(--ketchup);box-shadow:0 6px 0 var(--ketchup-dark)}
+/* gear */
+.target{border-radius:18px;background:var(--sky);padding:8px 12px;display:flex;align-items:center;gap:10px;min-height:76px;position:relative;transition:box-shadow .2s}
+.target .art{font-size:2.6rem;line-height:1;letter-spacing:-.15em;flex:none;position:relative}
+.target .art .worn{position:absolute;left:-10%;top:-28%;font-size:.55em;letter-spacing:0;opacity:0;transform:scale(.4);transition:all .35s cubic-bezier(.2,1.6,.4,1)}
+.target.done .art .worn{opacity:1;transform:scale(1)}
+.target .lbl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.15}
+.target .lbl small{display:block;font-family:var(--body);font-weight:700;color:var(--cocoa-soft);font-size:.85rem}
+.target.hot{box-shadow:0 0 0 4px var(--mint)}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.item{min-height:72px;border-radius:16px;background:#fff;box-shadow:0 5px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 4px;touch-action:none;position:relative;line-height:1}
+.item .em{font-size:2rem;line-height:1}
+.item small{font-family:var(--display);font-weight:700;font-size:.8rem}
+.item.dragging{z-index:50;box-shadow:0 12px 20px rgba(59,42,31,.25);transition:none}
+.item.selected{box-shadow:0 5px 0 var(--mint-dark),0 0 0 4px var(--mint)}
+.item.back{animation:wiggle .5s}
+.item.used{opacity:.35;pointer-events:none}
+.item.reveal{background:var(--butter);box-shadow:0 5px 0 var(--sun),0 0 0 3px var(--sun);animation:nudge .6s infinite}
+.belt{width:34px;height:34px;border-radius:8px;background:#7DA9C7;position:relative;overflow:hidden}
+.belt::before{content:"";position:absolute;left:-10px;top:12px;width:60px;height:9px;background:#2F2F36;transform:rotate(-40deg)}
+.belt::after{content:"";position:absolute;right:4px;bottom:4px;width:12px;height:9px;background:#C9C9C9;border-radius:2px}
+/* phone */
+.phone{background:#2F2F36;border-radius:22px;padding:10px;display:flex;flex-direction:column;gap:8px;max-width:300px;margin-inline:auto;width:100%}
+.screen{background:#DFF6EC;border-radius:12px;min-height:46px;display:flex;align-items:center;justify-content:center;font:700 1.8rem var(--display);letter-spacing:.15em;color:var(--cocoa)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.key{min-height:44px;border-radius:12px;background:#fff;font-size:1.25rem;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.key:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.key.reveal{background:var(--butter);box-shadow:0 3px 0 var(--sun),0 0 0 3px var(--sun);animation:nudge .6s infinite}
+.key.call{grid-column:1/-1;background:var(--mint);color:#fff;box-shadow:0 3px 0 var(--mint-dark)}
+.saycard{background:var(--butter);border-radius:16px;padding:10px 14px;font-weight:800;line-height:1.5}
+.saycard div{display:flex;gap:8px;align-items:center}
+.speak{background:var(--sky);border-radius:16px;padding:12px;text-align:center;font-weight:800;font-size:1.1rem}
+.speak .big-em{font-size:2.6rem;display:block;line-height:1.1}
+
+/* ---------- buttons / overlay ---------- */
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;min-height:44px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .em{font-size:1.5rem;margin-top:auto}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}#grownups ul{margin:6px 0 0;padding-left:18px}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px) and (orientation:portrait){
+  #stage{grid-template-columns:1fr}
+  #scene{width:min(100%,calc(32vh*16/9));margin-inline:auto}
+}
+@media (max-width:600px) and (orientation:portrait){
+  #app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}.logo .sign{font-size:1rem;padding:3px 10px}.logo small{display:none}.chip{padding:4px 10px;font-size:.85rem}.chip small{display:none}.tools{flex-basis:100%;justify-content:flex-end;gap:8px}.iconbtn{width:44px;height:44px}
+  #scene{width:min(100%,calc(30vh*16/9))}
+  #panel{padding:10px;gap:8px}.coach{padding:8px 10px}.coach p{font-size:.98rem}
+  .arrow{min-height:56px;font-size:1.6rem}.wbtn{min-height:54px}.choice{min-height:48px;font-size:.98rem}
+  .item{min-height:64px}.item .em{font-size:1.7rem}.target{min-height:64px}.target .art{font-size:2.1rem}
+}
+@media (max-width:900px) and (orientation:landscape){
+  #stage{grid-template-columns:minmax(0,1fr) 320px;gap:10px}
+}
+@media (orientation:landscape) and (max-height:560px){
+  #app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.logo small{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:44px;height:44px;font-size:1.05rem}
+  #scene{width:min(100%,calc((100vh - 64px)*16/9));margin-inline:auto}
+  #panel{padding:8px;gap:6px;max-height:calc(100vh - 64px);overflow:auto}
+  .coach{padding:6px 10px}.coach p{font-size:.92rem}.coach .face{font-size:1.4rem}.coach .say{width:44px;height:44px}
+  .hint{padding:6px 10px}.hint .cue{font-size:1.5rem}.hint p{font-size:.85rem}
+  .arrow{min-height:48px;font-size:1.4rem}.wbtn{min-height:48px;font-size:1.1rem}.choice{min-height:44px;font-size:.92rem;padding:4px 10px}.choice .em{font-size:1.2rem}
+  .item{min-height:56px;padding:4px}.item .em{font-size:1.5rem}.target{min-height:56px;padding:6px 10px}.target .art{font-size:2rem}
+  .phone{padding:6px}.screen{min-height:38px;font-size:1.4rem}.key{min-height:44px;font-size:1.1rem}.keys{gap:4px}
+  .big{min-height:48px;font-size:1.05rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Crossing Guard</span><small>Toot Toot Learning</small></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Round</small><span id="dots"></span></div>
+    <div class="tools">
+      <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+      <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+      <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+      <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+    </div>
+  </div>
+  <div id="stage">
+    <div id="scene" aria-label="Street scene">
+      <div class="sky"></div>
+      <span class="sun">☀️</span>
+      <span class="bldg" style="left:18%">🏫</span>
+      <span class="bldg" style="left:44%">🏪🌳</span>
+      <span class="bldg" style="left:82%">🏠</span>
+      <div class="walk-top"></div>
+      <div class="road"></div>
+      <div class="mid"></div>
+      <div class="cross" id="cross"></div>
+      <div class="curb top"></div>
+      <div class="curb bot"></div>
+      <div class="walk-bot"></div>
+      <div class="light red" id="light"><i class="r"></i><i class="a"></i><i class="g"></i></div>
+      <div class="sig" id="sig" aria-label="Walk signal"></div>
+      <div class="guard" id="guard">👷<span class="stopsign">🛑</span></div>
+      <div class="kid" id="kid"><span class="name" id="kid-name">Benny</span><span class="face" id="kid-face">🐻</span></div>
+      <div id="cars"></div>
+      <div class="robo" id="robo"><span class="say" id="robo-say">Pfffrrt!</span><span class="bot">🤖</span><span class="dust">💨</span>🚜</div>
+      <div class="place" id="place"><div class="ground"></div><div class="art" id="place-art"></div><div class="cap" id="place-cap"></div></div>
+      <div id="fx"></div>
+    </div>
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🦺</span><p id="coach-text">Hi! I am the crossing guard.</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="hint" id="hint"><span class="cue" id="hint-cue"></span><p id="hint-text"></p></div>
+      <div class="view" id="v-look">
+        <div class="arrows" id="arrows">
+          <button class="arrow" data-dir="left" data-step="0" aria-label="Look left">⬅️<small>Left</small></button>
+          <button class="arrow" data-dir="right" data-step="1" aria-label="Look right">➡️<small>Right</small></button>
+          <button class="arrow" data-dir="left" data-step="2" aria-label="Look left again">⬅️<small>Left again</small></button>
+        </div>
+        <div class="walkwait">
+          <button class="wbtn" id="btn-wait" aria-label="Wait"><span class="em">✋</span>Wait</button>
+          <button class="wbtn dim" id="btn-walk" aria-label="Walk"><span class="em">🚶</span>Walk</button>
+        </div>
+      </div>
+      <div class="view" id="v-choice"><div class="choices" id="choices"></div></div>
+      <div class="view" id="v-gear">
+        <div class="target" id="target"><span class="art" id="target-art"></span><span class="lbl" id="target-lbl"></span></div>
+        <div class="items" id="items"></div>
+        <button class="subbtn" id="btn-puton">Put it on ▶</button>
+      </div>
+      <div class="view" id="v-phone">
+        <div class="phone"><div class="screen" id="screen">📞</div><div class="keys" id="keys"></div></div>
+        <div class="saycard" id="saycard" hidden></div>
+        <button class="big" id="btn-said" hidden>I said it! ✅</button>
+      </div>
+      <div class="view" id="v-speak">
+        <div class="speak"><span class="big-em" id="speak-em">🗣️</span><span id="speak-text"></span></div>
+        <button class="big" id="btn-said2">I said it! ✅</button>
+      </div>
+      <div class="view" id="v-next"><button class="big" id="btn-next-round">Next ▶</button></div>
+    </div>
+  </div>
+</div>
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+/* ---------- sound: all synthesized, no files ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    honk(){ tone(440,0.18,{type:'square',gain:0.08}); tone(440,0.18,{type:'square',gain:0.08,delay:0.24}); },
+    beep(){ tone(880,0.08,{type:'square',gain:0.06}); },
+    ring(){ [0,0.15].forEach(d=>{ tone(1200,0.1,{type:'triangle',gain:0.08,delay:d}); tone(1500,0.1,{type:'triangle',gain:0.08,delay:d+0.06}); }); },
+    step(){ noise(0.05,{gain:0.05,from:1500,to:400}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    whirr(dur){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type='square'; o.frequency.setValueAtTime(95,t);
+      const lfo = c.createOscillator(); lfo.frequency.value = 11; const lg = c.createGain(); lg.gain.value = 18; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 650;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05,t+0.1); g.gain.setValueAtTime(0.05,t+Math.max(0.2,dur-0.2)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur); lfo.stop(t+dur);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ try{ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }catch(e){} }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) try{ speechSynthesis.cancel(); }catch(e){} },
+    clean, last:'',
+    say(text){
+      this.last = String(text);
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootCrossingGuard')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootCrossingGuard', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- data ---------- */
+const KIDS = [
+  {em:'🐻',name:'Benny',full:'Benny Bear',grown:'Mama Bear'},{em:'🐰',name:'Rosie',full:'Rosie Rabbit',grown:'Papa Rabbit'},{em:'🦊',name:'Felix',full:'Felix Fox',grown:'Grandma Fox'},
+  {em:'🐸',name:'Freddy',full:'Freddy Frog',grown:'Daddy Frog'},{em:'🐷',name:'Penny',full:'Penny Pig',grown:'Mummy Pig'},{em:'🐵',name:'Momo',full:'Momo Monkey',grown:'Auntie Monkey'},
+  {em:'🐨',name:'Kiki',full:'Kiki Koala',grown:'Mama Koala'},{em:'🐯',name:'Toby',full:'Toby Tiger',grown:'Papa Tiger'},{em:'🦁',name:'Leo',full:'Leo Lion',grown:'Grandpa Lion'},
+  {em:'🐮',name:'Clara',full:'Clara Cow',grown:'Mama Cow'},{em:'🐼',name:'Pip',full:'Pip Panda',grown:'Daddy Panda'},{em:'🐶',name:'Daisy',full:'Daisy Dog',grown:'Mama Dog'}
+];
+const CAR_EMOJI = ['🚗','🚌','🚚','🚙','🚕'];
+const PRAISE = ['Great job!','Super safe!','You did it!','Nice looking!','Way to go!','High five!','Safe and sound!'];
+const TRY_AGAIN = ['Good try! Let’s look again.','Almost! Let’s think.','Nice try! Let’s learn it.'];
+
+/* Level definitions: 6 rounds each. Types: look, signal, gear, safe, lost, tricky, call, dial */
+const LEVELS = [
+  {title:'Look Both Ways', em:'👀', types:['look','look','look','look','look','look'], teaches:'Look left, right, left again; tap Walk only when the walking person is lit and no car is coming.'},
+  {title:'Signals', em:'🚦', types:['signal','signal','look','signal','signal','look'], teaches:'The walking person, the flashing hand and the red hand; what to do for each.'},
+  {title:'Gear Up', em:'⛑️', types:['gear','gear','gear','gear','gear','gear'], teaches:'Helmet for bikes, seatbelt in cars, life jacket on boats and docks.'},
+  {title:'Safe Places', em:'🚏', types:['safe','safe','safe','safe','safe','safe'], teaches:'Wait on the sidewalk, cross at the crosswalk, play in the park, ask a grown-up to get a ball from the road.'},
+  {title:'If You Get Lost', em:'🔍', types:['lost','lost','lost','say','lost','lost'], teaches:'Stay put, find a helper (a worker with a name tag, a parent with kids, a police officer), say your name and your grown-up’s name.'},
+  {title:'Tricky Grown-ups', em:'🙅', types:['tricky','tricky','tricky','tricky','tricky','tricky'], teaches:'Grown-ups don’t need a child’s help to find a puppy; you can say no and tell your grown-up; no secrets from your grown-up.'},
+  {title:'Call 9-1-1', em:'📞', types:['call','call','dial','call','call','dial'], teaches:'When to call 9-1-1 (very hurt, fire, won’t wake up) and when not to (lost toy); tap 9-1-1 and say your name, where you are and your grown-up’s name.'},
+  {title:'Big Review', em:'🎉', types:['look','signal','gear','safe','lost','tricky','call','dial'], mixed:true, teaches:'A little of everything, then a silly Robo sweeper parade.'}
+];
+
+const SIGNALS = [
+  {sig:'walk', light:'red', q:'The walking person is lit. What do you do?', choices:[['Look, then walk','👀🚶'],['Run across fast','🏃'],['Wait all day','😴']], correct:'Look, then walk', why:'The walking person means it is your turn. Look left, right, left, then walk.', cue:'🚶✅'},
+  {sig:'flash', light:'red', q:'The hand is flashing. What do you do?', choices:[['Wait on the sidewalk','✋'],['Start crossing','🏃'],['Hop into the road','🐸']], correct:'Wait on the sidewalk', why:'A flashing hand means do not start crossing. Wait for the next walking person.', cue:'✋⏳'},
+  {sig:'stop', light:'green', q:'The hand is red. What do you do?', choices:[['Stop and wait','🛑'],['Cross quickly','🏃'],['Close your eyes and go','🙈']], correct:'Stop and wait', why:'A red hand means stop. Cars have the green light. Wait on the sidewalk.', cue:'✋🛑'},
+  {sig:'walk', light:'red', q:'The walking person is lit, but a car is still coming. What now?', choices:[['Wait for the car to pass','🚗✋'],['Cross anyway','🏃'],['Wave and go','👋']], correct:'Wait for the car to pass', why:'Even with the walking person, wait until the cars stop. Then look and walk.', cue:'🚗🛑'},
+  {sig:'stop', light:'green', q:'The light is green for the cars. Can Felix cross?', choices:[['No, wait for the walking person','✋'],['Yes, run now','🏃'],['Yes, on the road line','🛣️']], correct:'No, wait for the walking person', why:'Green light for cars means cars go. Wait for the walking person to light up.', cue:'🚦🚗'},
+  {sig:'flash', light:'red', q:'The hand starts flashing while Rosie is already crossing. What now?', choices:[['Keep walking to the other side','🚶'],['Turn around and run back','🔙'],['Stop in the road','🛑']], correct:'Keep walking to the other side', why:'If you are already crossing, keep walking. Do not stop in the road.', cue:'🚶➡️'}
+];
+const GEAR = {
+  items:{helmet:{em:'⛑️',name:'Helmet'}, seatbelt:{html:'<span class="belt"></span>',name:'Seatbelt'}, lifejacket:{em:'🦺',name:'Life jacket'}},
+  targets:{
+    bike:{art:'🚲',label:'going for a bike ride',need:'helmet',place:'park',why:'A helmet keeps your head safe on a bike, a scooter or skates.',worn:'⛑️'},
+    car:{art:'🚗',label:'riding in the car',need:'seatbelt',place:'road',why:'A seatbelt keeps you in your seat if the car stops fast. Click it every time.',worn:'🔒'},
+    dock:{art:'⛵',label:'playing on the dock',need:'lifejacket',place:'dock',why:'A life jacket keeps you floating near water and on boats.',worn:'🦺'}
+  },
+  jokes:{
+    'helmet-car':'A helmet in the car? Silly! Helmets are for bikes.', 'helmet-dock':'A helmet on a boat? Silly! Helmets are for bikes.',
+    'seatbelt-bike':'A seatbelt on a bike? Silly! Seatbelts are for cars.', 'seatbelt-dock':'A seatbelt on a dock? Silly! Seatbelts are for cars.',
+    'lifejacket-bike':'A life jacket on a bike? Silly! Life jackets are for water.', 'lifejacket-car':'A life jacket in the car? Silly! Life jackets are for water.'
+  }
+};
+const SAFE = [
+  {q:'Where should {name} wait for the bus?', choices:[['On the sidewalk, back from the road','🚏'],['In the road','🛣️'],['Behind the bus','🚌']], correct:'On the sidewalk, back from the road', why:'Wait on the sidewalk, far back from the road, until the bus stops.', cue:'🚏🚶', place:'street'},
+  {q:'Where should {name} ride a bike?', choices:[['On the path or sidewalk','🚲'],['In the middle of the road','🛣️'],['Down the stairs','🪜']], correct:'On the path or sidewalk', why:'Little kids ride on the path or sidewalk with a grown-up, not in the road.', cue:'🚲🌳', place:'park'},
+  {q:'Where should {name} play ball?', choices:[['In the park or yard','🌳'],['In the road','🛣️'],['In the parking lot','🅿️']], correct:'In the park or yard', why:'Play in the park or the yard, away from cars.', cue:'⚽🌳', place:'park'},
+  {q:'The ball rolled into the road! What now?', choices:[['Ask a grown-up to get it','🙋'],['Run and get it','🏃'],['Chase it fast','⚽']], correct:'Ask a grown-up to get it', why:'Never run into the road. Stop at the curb and ask a grown-up to get the ball.', cue:'⚽🛑🙋', place:'street'},
+  {q:'Where do we cross the street?', choices:[['At the crosswalk','🦓'],['Between parked cars','🚗🚗'],['Anywhere is fine','🤷']], correct:'At the crosswalk', why:'Cross at the crosswalk or the corner, where drivers can see you.', cue:'🦓🚶', place:'street'},
+  {q:'How do we cross the parking lot?', choices:[['Hold a grown-up’s hand','🤝'],['Run ahead','🏃'],['Hide between cars','🙈']], correct:'Hold a grown-up’s hand', why:'Cars back up in parking lots. Hold a hand and walk.', cue:'🤝🅿️', place:'store'},
+  {q:'Where should {name} stand at the corner?', choices:[['Back from the curb','🚶'],['On the road','🛣️'],['On a parked car','🚗']], correct:'Back from the curb', why:'Stand back from the curb until it is time to cross.', cue:'🚶✋', place:'street'}
+];
+const LOST = [
+  {q:'{name} lost {grown} at the store. What first?', choices:[['Stay put and look for a helper','🧍'],['Run around looking','🏃'],['Go outside','🚪']], correct:'Stay put and look for a helper', why:'Stay where you are. Your grown-up will come back to find you. Then look for a helper.', cue:'🧍🏪', place:'store'},
+  {q:'Who is a good helper at the store?', choices:[['A worker with a name tag','🏷️'],['Someone in a hurry','🏃'],['Someone in a car','🚗']], correct:'A worker with a name tag', why:'A store worker with a name tag is a helper. Look for the name tag or uniform.', cue:'🏷️👩‍💼', place:'store'},
+  {q:'Who is a good helper at the park?', choices:[['A parent with kids','👨‍👧'],['Someone in a car','🚗'],['Nobody, just hide','🙈']], correct:'A parent with kids', why:'A parent with kids is a good helper. So is a police officer.', cue:'👨‍👧👮', place:'park'},
+  {q:'{name} sees a police officer. What can {name} say?', choices:[['I am lost. My name is {name}.','🗣️'],['Nothing','🤐'],['Boo!','👻']], correct:'I am lost. My name is {name}.', why:'Tell the helper: I am lost, my name is, and my grown-up’s name is.', cue:'👮🗣️', place:'park'},
+  {q:'What should you tell a helper?', choices:[['My name and my grown-up’s name','🗣️'],['A funny joke','🤡'],['My favourite colour','🎨']], correct:'My name and my grown-up’s name', why:'Say your name and your grown-up’s name. The helper can call for them.', cue:'🗣️📣', place:'store'},
+  {q:'Should {name} go look in the parking lot?', choices:[['No, stay put inside','🧍'],['Yes, run out','🏃'],['Yes, hide there','🙈']], correct:'No, stay put inside', why:'Stay put inside. Parking lots have cars, and your grown-up is looking inside.', cue:'🧍🏪', place:'store'}
+];
+const TRICKY = [
+  {q:'A grown-up you don’t know says, “Help me find my puppy.” What do you do?', choices:[['Say no and tell my grown-up','🙅'],['Go help look','🐶'],['Follow them','🚶']], correct:'Say no and tell my grown-up', why:'Grown-ups ask other grown-ups for help, not kids. You can say no and go tell your grown-up.', cue:'🙅🐶', place:'park'},
+  {q:'Someone offers candy to come see something. What do you do?', choices:[['Say no and go to my grown-up','🙅'],['Take the candy','🍬'],['Go and see','👀']], correct:'Say no and go to my grown-up', why:'You do not have to take anything. Say no, and go to your grown-up.', cue:'🙅🍬', place:'park'},
+  {q:'Someone you don’t know says, “Come with me.” What do you do?', choices:[['Say NO loudly and go to my grown-up','📣'],['Go with them','🚶'],['Stay quiet','🤐']], correct:'Say NO loudly and go to my grown-up', why:'It is okay to be loud. Say no, and go to your grown-up or a helper.', cue:'📣🙅', place:'store'},
+  {q:'A grown-up says, “This is a secret, don’t tell.” What do you do?', choices:[['Tell my grown-up anyway','🗣️'],['Keep the secret','🤫'],['Forget about it','😶']], correct:'Tell my grown-up anyway', why:'Safe grown-ups do not ask kids to keep secrets. You can always tell your grown-up.', cue:'🗣️💛', place:'home'},
+  {q:'Who is safe to go home with?', choices:[['The person my grown-up said','✅'],['Anyone who is nice','🙂'],['Anyone with candy','🍬']], correct:'The person my grown-up said', why:'Only go with the person your grown-up told you about.', cue:'✅👪', place:'store'},
+  {q:'Something feels wrong or funny. Who can you tell?', choices:[['My grown-up or teacher','👩‍🏫'],['Nobody','🤐'],['Only my toys','🧸']], correct:'My grown-up or teacher', why:'You can always tell your grown-up or your teacher. They want to know.', cue:'👩‍🏫💛', place:'home'},
+  {q:'Is it okay to say no to a grown-up who makes you feel funny?', choices:[['Yes! Say no and tell','🙅'],['No, always be polite','🤐'],['Only sometimes','🤷']], correct:'Yes! Say no and tell', why:'Yes. Your body is yours. You can say no, and then tell your grown-up.', cue:'🙅💛', place:'home'}
+];
+const CALL = [
+  {q:'Grandpa fell down and won’t wake up. What do you do?', choices:[['Call 9-1-1','📞'],['Wait and see','⏳'],['Go play','🧸']], correct:'Call 9-1-1', why:'If someone will not wake up, that is an emergency. Call 9-1-1.', cue:'📞🚑', place:'home'},
+  {q:'There is a fire in the kitchen. What do you do?', choices:[['Get out, then call 9-1-1','🚪📞'],['Hide in the closet','🙈'],['Get some water','💧']], correct:'Get out, then call 9-1-1', why:'Fire means get out first. Then call 9-1-1 from outside.', cue:'🔥🚪📞', place:'home'},
+  {q:'{name} lost a toy dinosaur. What do you do?', choices:[['Ask a grown-up to help look','🙋'],['Call 9-1-1','📞'],['Cry all day','😭']], correct:'Ask a grown-up to help look', why:'A lost toy is not an emergency. Ask a grown-up to help look.', cue:'🦖🙋', place:'home'},
+  {q:'A friend fell and is very hurt and bleeding. What do you do?', choices:[['Call 9-1-1','📞'],['Wait and see','⏳'],['Keep playing','⚽']], correct:'Call 9-1-1', why:'Someone very hurt is an emergency. Call 9-1-1 and stay with them.', cue:'📞🚑', place:'park'},
+  {q:'{name} wants a pizza. Call 9-1-1?', choices:[['No! 9-1-1 is only for emergencies','🙅'],['Yes, call now','📞'],['Maybe','🤷']], correct:'No! 9-1-1 is only for emergencies', why:'9-1-1 is only for big emergencies. Pizza is not one!', cue:'🍕🙅', place:'home'},
+  {q:'The cat is sleeping on the couch. Is that an emergency?', choices:[['No, that is fine','😺'],['Yes, call 9-1-1','📞'],['Yes, hide','🙈']], correct:'No, that is fine', why:'A sleeping cat is fine. Emergencies are fire, someone very hurt, or someone who will not wake up.', cue:'😺✅', place:'home'}
+];
+const PLACES = {
+  park:{cls:'park', art:'🌳🛝🌳', cap:'At the park'}, store:{cls:'store', art:'🏪🛒', cap:'At the store'}, home:{cls:'home', art:'🏠🛋️', cap:'At home'},
+  dock:{cls:'dock', art:'⛵🌊', cap:'At the dock'}, road:{cls:'road', art:'🚗💺', cap:'In the car'}
+};
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), kid:$('#kid'), kidFace:$('#kid-face'), kidName:$('#kid-name'), cars:$('#cars'), robo:$('#robo'), roboSay:$('#robo-say'),
+  light:$('#light'), sig:$('#sig'), cross:$('#cross'), guard:$('#guard'), place:$('#place'), placeArt:$('#place-art'), placeCap:$('#place-cap'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), hint:$('#hint'), hintCue:$('#hint-cue'), hintText:$('#hint-text'),
+  arrows:$('#arrows'), btnWait:$('#btn-wait'), btnWalk:$('#btn-walk'), choices:$('#choices'),
+  target:$('#target'), targetArt:$('#target-art'), targetLbl:$('#target-lbl'), items:$('#items'), btnPuton:$('#btn-puton'),
+  screen:$('#screen'), keys:$('#keys'), saycard:$('#saycard'), btnSaid:$('#btn-said'), speakEm:$('#speak-em'), speakText:$('#speak-text'), btnSaid2:$('#btn-said2'), btnNextRound:$('#btn-next-round'),
+  lvlChip:$('#lvl-chip'), dots:$('#dots'), overlay:$('#overlay'), card:$('#card')
+};
+
+/* ---------- game state ---------- */
+let G = null;            // current level run
+let R = null;            // current round
+let run = 0;             // token so abandoned runs stop
+let coachLine = '';
+let levelsThisSitting = 0; // in memory only, never saved: used to suggest a break, never to block
+
+/* ---------- idle nudge: 14 s with no taps -> say it again, wiggle the thing to tap ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- UI helpers ---------- */
+function show(viewId){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===viewId)); }
+function coach(text, face, speak=true, spoken){
+  coachLine = spoken || text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
+  if(speak) Voice.say(spoken || text);
+}
+function hint(cue, text){ if(!cue){ el.hint.classList.remove('on'); return; } el.hintCue.textContent = cue; el.hintText.textContent = text; el.hint.classList.add('on'); }
+function toast(text, mint){ const t = document.createElement('div'); t.className='toast'+(mint?' mint':''); t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function spark(xPct, yPct, em, spread){
+  const s = document.createElement('div'); s.className='spark'; s.textContent=em; s.style.left=xPct+'%'; s.style.top=yPct+'%';
+  s.style.setProperty('--dx', (Math.random()*2-1)*spread+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-4)+'cqw');
+  el.fx.appendChild(s); setTimeout(()=>s.remove(), 1400);
+}
+function confetti(){ for(let i=0;i<10;i++) spark(50, 55, pick(['⭐','✨','💛','🌟']), 30); }
+function fill(t, kid){ return String(t).replace(/\{name\}/g, kid.name).replace(/\{grown\}/g, kid.grown); }
+function setPlace(key){
+  if(!key || key==='street'){ el.place.classList.remove('on'); return; }
+  const p = PLACES[key]; el.place.className = 'place on '+p.cls; el.placeArt.innerHTML = p.art; el.placeCap.textContent = p.cap;
+}
+function setKid(kid){ el.kidFace.textContent = kid.em; el.kidName.textContent = kid.name; el.kid.className='kid'; el.kid.style.top=''; }
+function setSignal(sig){ el.sig.className = 'sig '+(sig||''); }
+function setLight(c){ el.light.className = 'light '+c; }
+function renderDots(){ el.dots.innerHTML = G.rounds.map((r,i)=>`<i class="${i<G.round?'done':i===G.round?'now':''}"></i>`).join(''); }
+function firstBtn(sel){ return [...el.scene.parentElement.querySelectorAll(sel)]; }
+
+/* ---------- cars: slow, obvious, never a countdown ---------- */
+const Cars = (() => {
+  let list = [], timer = null, last = 0, nextSpawn = 0, hold = false, running = false;
+  const LANES = [{top:36, dir:-1}, {top:58, dir:1}];  // top lane drives right-to-left, bottom lane left-to-right
+  function spawn(laneIdx){
+    const lane = LANES[laneIdx==null ? rnd(0,1) : laneIdx];
+    const c = {el:document.createElement('div'), x: lane.dir>0 ? -12 : 112, dir:lane.dir, speed: 15 + Math.random()*4, stopped:false, stopUntil:0};
+    c.el.className = 'car'+(lane.dir>0?' flip':''); c.el.innerHTML = `<span class="honk">Beep! 🙂</span>${pick(CAR_EMOJI)}`; c.el.style.top = lane.top+'%'; c.el.style.left = c.x+'%';
+    el.cars.appendChild(c.el); list.push(c); return c;
+  }
+  function tick(){
+    const now = performance.now(), dt = Math.min(0.1, (now-last)/1000); last = now;
+    for(const c of list){
+      if(c.stopped && now < c.stopUntil) continue;
+      if(c.stopped){ c.stopped=false; c.el.classList.remove('stopped'); }
+      // while a kid is crossing, cars wait politely before the crosswalk
+      const before = c.dir>0 ? (c.x < 34 && c.x + c.speed*dt >= 34) : (c.x > 66 && c.x - c.speed*dt <= 66);
+      if(hold && before){ c.x = c.dir>0 ? 33.5 : 66.5; c.el.style.left = c.x+'%'; continue; }
+      c.x += c.dir * c.speed * dt; c.el.style.left = c.x+'%';
+    }
+    list = list.filter(c => { if(c.x < -15 || c.x > 115){ c.el.remove(); return false; } return true; });
+    if(now > nextSpawn && list.length < 2){ spawn(); nextSpawn = now + (reduced ? 4000 : rnd(5500, 8500)); }
+  }
+  return {
+    start(){ if(running) return; running = true; last = performance.now(); nextSpawn = last + 1500; timer = setInterval(tick, 50); },
+    stop(){ running = false; clearInterval(timer); timer = null; list.forEach(c=>c.el.remove()); list = []; hold = false; },
+    get near(){ return list.some(c => (c.dir>0 && c.x > 8 && c.x < 62) || (c.dir<0 && c.x < 92 && c.x > 38)); },
+    get any(){ return list.length > 0; },
+    set hold(v){ hold = v; },
+    spawnNear(){ const c = spawn(1); c.x = 18; c.el.style.left = '18%'; return c; },
+    friendlyStop(){ list.forEach(c => { c.stopped = true; c.stopUntil = performance.now() + 1500; c.el.classList.add('stopped'); }); Sound.honk(); },
+    clearRoad(){ list.forEach(c => { c.el.remove(); }); list = []; nextSpawn = performance.now() + 6000; }
+  };
+})();
+
+/* ---------- Robo the street sweeper: silly, only when the road is clear ---------- */
+async function roboDrive(myRun, honks){
+  el.robo.classList.add('on','driving'); el.robo.style.transition='none'; el.robo.style.left='-20%'; void el.robo.offsetWidth;
+  Sound.whirr(reduced?0.3:3.2);
+  el.robo.style.transition = 'left '+(reduced?0.1:3.2)+'s linear'; el.robo.style.left = '115%';
+  for(let i=0;i<(honks||1);i++){
+    await wait(900); if(run!==myRun) return;
+    el.roboSay.textContent = pick(['Pfffrrt!','Toot toot!','Honk-a-doodle!','Brrrap!']); el.robo.classList.add('honking'); Sound.fart();
+    setTimeout(()=>el.robo.classList.remove('honking'), 700);
+  }
+  await wait(1500); if(run!==myRun) return;
+  el.robo.classList.remove('on','driving');
+}
+
+/* ---------- rounds ---------- */
+function newRound(type, kid){
+  R = {type, kid, correct:null, solved:false, attempts:0, phase:type, resolve:null, done:false};
+  return new Promise(res => { R.resolve = res; });
+}
+function solved(){ if(!R || R.solved) return; R.solved = true; G.stats.questions++; if(R.attempts===0) G.stats.firstTry++; setNudge(null); }
+function miss(explain, cue, reveal, lead){
+  R.attempts++; G.stats.wrong++; Sound.oops();
+  if(R.attempts === 1){ coach((lead||pick(TRY_AGAIN))+' '+explain, '🤗'); hint(cue, explain); }
+  else { coach((lead||'Here it is!')+' '+explain+' Tap the one with the pointing hand.', '💛'); hint(cue, explain); if(reveal) reveal(); }
+}
+function finishRound(){ if(!R || R.done) return; R.done = true; const r = R.resolve; R.resolve = null; r(); }
+async function celebrate(myRun, text, opts={}){
+  Sound.yay(); confetti(); coach(text || pick(PRAISE), '🎉'); hint(null);
+  if(opts.robo){ await roboDrive(myRun, 1); } else await wait(1300);
+}
+
+/* look left, right, left again; then Walk or Wait */
+function roundLook(myRun){
+  const p = newRound('look', pick(KIDS));
+  R.step = 0; R.sigOn = false; R.waited = false;
+  R.correctNow = () => R.phase==='look' ? ['left','right','left'][R.step] : (!R.sigOn ? 'wait' : (Cars.near ? 'wait' : 'walk'));
+  setPlace(null); setKid(R.kid); setSignal('stop'); setLight('green'); Cars.start(); Cars.hold = false;
+  el.arrows.querySelectorAll('.arrow').forEach(b=>b.classList.remove('done','reveal')); el.btnWalk.classList.add('dim'); el.btnWait.classList.remove('reveal');
+  show('v-look'); hint(null);
+  coach(`${R.kid.name} wants to cross. Look left!`, '🦺');
+  setNudge(()=>[el.arrows.children[R.step]], 'Tap the arrow. Look left first.');
+  // when a car has passed after a wait, remind them to walk
+  R.watch = setInterval(()=>{
+    if(!R || R.type!=='look' || R.phase!=='signal' || R.solved) return;
+    if(R.waited && !Cars.near){ R.waited=false; coach('The car is gone. Now tap Walk!', '🦺'); setNudge(()=>[el.btnWalk], 'The road is clear. Tap Walk.'); }
+  }, 300);
+  return p;
+}
+function look(dir){
+  if(!R || R.type!=='look' || R.phase!=='look' || R.solved) return false;
+  const want = ['left','right','left'][R.step];
+  if(dir !== want){
+    const arrow = el.arrows.children[R.step];
+    miss('First look left. Then right. Then left again.', '⬅️➡️⬅️', ()=>arrow.classList.add('reveal'));
+    return false;
+  }
+  Sound.pop(); el.arrows.children[R.step].classList.remove('reveal'); el.arrows.children[R.step].classList.add('done');
+  el.kid.classList.remove('look-left','look-right'); void el.kid.offsetWidth; el.kid.classList.add(dir==='left'?'look-left':'look-right');
+  R.step++;
+  if(R.step === 1){ coach('Now look right!', '🦺'); setNudge(()=>[el.arrows.children[1]], 'Tap the right arrow. Look right.'); }
+  else if(R.step === 2){ coach('Look left again!', '🦺'); setNudge(()=>[el.arrows.children[2]], 'Tap the left arrow. Look left again.'); }
+  else {
+    R.phase = 'signal'; hint(null);
+    coach('Good looking! Wait for the walking person.', '🦺'); setNudge(null);
+    setLight('amber');
+    setTimeout(()=>{ if(!R || R.type!=='look') return; setLight('red'); setSignal('walk'); R.sigOn = true; el.btnWalk.classList.remove('dim'); Sound.ding();
+      coach('The walking person is lit! Is a car coming? Tap Walk or Wait.', '🦺');
+      setNudge(()=>[Cars.near ? el.btnWait : el.btnWalk], 'Look at the road. If a car is coming, tap Wait. If it is clear, tap Walk.');
+    }, reduced ? 150 : 1200);
+  }
+  return true;
+}
+function walk(){
+  if(!R || R.type!=='look' || R.phase!=='signal' || R.solved) return false;
+  if(!R.sigOn){ coach('Not yet. Wait for the walking person to light up.', '✋'); return false; }
+  if(Cars.near){
+    Cars.friendlyStop(); el.kid.classList.remove('look-left','look-right'); R.waited = true;
+    miss('A car is coming. Wait for it to pass.', '🚗✋', ()=>el.btnWait.classList.add('reveal'), 'Whoa! Let’s wait for the car to pass.');
+    return false;
+  }
+  solved(); el.btnWait.classList.remove('reveal'); el.btnWalk.classList.add('dim'); Cars.hold = true; clearInterval(R.watch);
+  el.kid.classList.remove('look-left','look-right'); el.kid.classList.add('crossing','walkbob'); el.cross.classList.add('hot');
+  coach('Walk, don’t run. Keep looking!', '🦺');
+  const my = run;
+  (async () => {
+    for(let i=0;i<6;i++){ await wait(380); if(run!==my) return; Sound.step(); }
+    el.kid.classList.remove('walkbob'); el.cross.classList.remove('hot'); Cars.hold = false; setSignal('stop'); setLight('green');
+    await celebrate(my, `${pick(PRAISE)} ${R.kid.name} crossed safely.`, {robo:true}); if(run!==my) return;
+    finishRound();
+  })();
+  return true;
+}
+function waitBtn(){
+  if(!R || R.type!=='look' || R.phase!=='signal' || R.solved) return false;
+  if(!R.sigOn){ coach('Good waiting! The walking person is coming.', '🦺'); return true; }
+  if(Cars.near){ R.waited = true; el.btnWait.classList.remove('reveal'); coach('Good waiting! Let the car go by.', '🦺'); hint(null); toast('Good wait!', true); return true; }
+  coach('No cars coming. It is safe. Tap Walk!', '🦺'); setNudge(()=>[el.btnWalk], 'The road is clear. Tap Walk.'); return true;
+}
+
+/* three-choice scenes (signals, safe places, lost, tricky grown-ups, call or not) */
+function roundChoice(type, spec, kid){
+  const p = newRound(type, kid);
+  R.spec = spec; R.correct = fill(spec.correct, kid); R.correctNow = () => R.correct;
+  setKid(kid);
+  if(spec.sig){ setPlace(null); setSignal(spec.sig); setLight(spec.light||'red'); Cars.stop(); if(spec.light==='green'){ Cars.start(); } }
+  else { Cars.stop(); setPlace(spec.place||'street'); if(!spec.place || spec.place==='street'){ setSignal('stop'); setLight('green'); Cars.start(); } }
+  const q = fill(spec.q, kid);
+  el.choices.innerHTML = shuffle(spec.choices).map(c => { const t = fill(c[0], kid); return `<button class="choice" data-t="${t.replace(/"/g,'&quot;')}"><span class="em">${c[1]}</span><span>${t}</span></button>`; }).join('');
+  show('v-choice'); hint(null);
+  coach(q, spec.sig ? '🚦' : type==='call' ? '📞' : type==='tricky' ? '🙅' : type==='lost' ? '🔍' : '🦺');
+  setNudge(()=>[...el.choices.children], q + ' Tap what you would do.');
+  return p;
+}
+function choose(text){
+  if(!R || R.solved) return false;
+  if(R.type==='say' || (R.type==='dial' && R.phase==='say')){ return saidIt(); }
+  if(!R.spec) return false;
+  const btn = [...el.choices.children].find(b => b.dataset.t === text);
+  if(!btn) return false;
+  if(text === R.correct){
+    solved(); btn.classList.remove('reveal'); btn.classList.add('yes'); [...el.choices.children].forEach(b=>{ if(b!==btn) b.style.opacity='.5'; });
+    const my = run;
+    (async()=>{ await celebrate(my, pick(PRAISE)+' '+fill(R.spec.why, R.kid)); if(run!==my) return; finishRound(); })();
+    return true;
+  }
+  btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
+  const good = [...el.choices.children].find(b => b.dataset.t === R.correct);
+  miss(fill(R.spec.why, R.kid), R.spec.cue, ()=>good.classList.add('reveal'));
+  return false;
+}
+
+/* say it out loud (no typing): your grown-up's name */
+function roundSay(kid){
+  const p = newRound('say', kid);
+  R.correct = 'I said it!'; R.correctNow = () => R.correct;
+  setKid(kid); Cars.stop(); setPlace('park');
+  el.speakEm.textContent = '🗣️'; el.speakText.textContent = 'What is your grown-up’s name? Say it out loud!';
+  show('v-speak'); hint(null);
+  coach('What is your grown-up’s name? Say it out loud! Then tap I said it.', '🔍');
+  setNudge(()=>[el.btnSaid2], 'Say your grown-up’s name out loud. Then tap the green button.');
+  return p;
+}
+function saidIt(){
+  if(!R || R.solved) return false;
+  if(R.type==='say'){ solved(); const my=run; (async()=>{ await celebrate(my, 'Great! Say it to a helper if you get lost.'); if(run!==my) return; finishRound(); })(); return true; }
+  if(R.type==='dial' && R.phase==='say'){ solved(); const my=run; (async()=>{ await celebrate(my, 'Great! Stay on the phone. The helper will tell you what to do.'); if(run!==my) return; finishRound(); })(); return true; }
+  return false;
+}
+
+/* gear up: drag the right gear to the kid */
+let gearTargetOrder = shuffle(['bike','car','dock']);
+function roundGear(kid, targetKey){
+  const p = newRound('gear', kid);
+  const t = GEAR.targets[targetKey];
+  R.target = targetKey; R.correct = t.need; R.correctNow = () => R.correct; R.selected = null;
+  setKid(kid); Cars.stop(); setPlace(t.place);
+  el.targetArt.innerHTML = `${kid.em}${t.art}<span class="worn">${t.worn}</span>`; el.targetLbl.innerHTML = `${kid.name} is ${t.label}<small>Drag the right gear here</small>`;
+  el.target.classList.remove('done','hot'); el.target.dataset.t = targetKey;
+  el.items.innerHTML = shuffle(Object.keys(GEAR.items)).map(k => { const it = GEAR.items[k]; return `<button class="item" data-item="${k}" aria-label="${it.name}"><span class="em">${it.em||it.html}</span><small>${it.name}</small></button>`; }).join('');
+  show('v-gear'); hint(null);
+  const q = `${kid.name} is ${t.label}. Which gear does ${kid.name} need?`;
+  coach(q, '⛑️');
+  setNudge(()=>[...el.items.children], q + ' Drag it to ' + kid.name + '. Or tap it, then tap ' + kid.name + '.');
+  return p;
+}
+function drop(itemId, targetId){
+  if(!R || R.type!=='gear' || R.solved) return false;
+  if(targetId && targetId !== R.target) return false;
+  const btn = [...el.items.children].find(b => b.dataset.item === itemId); if(!btn) return false;
+  const t = GEAR.targets[R.target];
+  if(itemId === R.correct){
+    solved(); btn.classList.add('used'); btn.classList.remove('reveal','selected'); el.target.classList.add('done'); Sound.ding();
+    const my = run; (async()=>{ await celebrate(my, pick(PRAISE)+' '+t.why); if(run!==my) return; finishRound(); })();
+    return true;
+  }
+  btn.classList.remove('back','selected'); void btn.offsetWidth; btn.classList.add('back'); R.selected = null;
+  const joke = GEAR.jokes[itemId+'-'+R.target] || 'That does not go there. Silly!';
+  const good = [...el.items.children].find(b => b.dataset.item === R.correct);
+  miss(t.why, GEAR.items[R.correct].em || '🔒', ()=>good.classList.add('reveal'), joke);
+  return false;
+}
+
+/* call 9-1-1: tap the keypad in order, then say who and where you are */
+function roundDial(kid){
+  const p = newRound('dial', kid);
+  R.dialed = ''; R.correctNow = () => R.phase==='say' ? 'I said it!' : '911'[R.dialed.length];
+  R.where = pick(['home, at 12 Maple Street','the park on Elm Street','Grandma’s house','the store on Main Street']);
+  setKid(kid); Cars.stop(); setPlace('home');
+  el.screen.textContent = '📞'; el.saycard.hidden = true; el.btnSaid.hidden = true; el.keys.querySelectorAll('.key').forEach(k=>k.classList.remove('reveal'));
+  show('v-phone'); hint(null);
+  coach(`Someone is very hurt. ${kid.name} needs help. Tap 9, then 1, then 1.`, '📞');
+  setNudge(()=>[el.keys.querySelector('[data-k="9"]')], 'Tap 9, then 1, then 1.');
+  return p;
+}
+function dial(d){
+  if(!R || R.type!=='dial' || R.phase!=='dial' || R.solved) return false;
+  d = String(d); const want = '911'[R.dialed.length];
+  if(d !== want){
+    const key = el.keys.querySelector(`[data-k="${want}"]`);
+    miss(`The number is 9, then 1, then 1. Next is ${want}.`, '9️⃣1️⃣1️⃣', ()=>key.classList.add('reveal'));
+    return false;
+  }
+  Sound.beep(); el.keys.querySelectorAll('.key').forEach(k=>k.classList.remove('reveal'));
+  R.dialed += d; el.screen.textContent = R.dialed.split('').join('-');
+  if(R.dialed.length < 3){ const n = '911'[R.dialed.length]; coach(`Now tap ${n}.`, '📞'); setNudge(()=>[el.keys.querySelector(`[data-k="${n}"]`)], `Tap ${n}.`); return true; }
+  R.phase = 'say'; Sound.ring(); hint(null);
+  const lines = [['🙋', `My name is ${R.kid.full}.`], ['📍', `I am at ${R.where}.`], ['👪', `My grown-up is ${R.kid.grown}.`], ['🤕', 'Someone is hurt. Please help.']];
+  el.saycard.innerHTML = lines.map(l=>`<div><span>${l[0]}</span><span>${l[1]}</span></div>`).join(''); el.saycard.hidden = false; el.btnSaid.hidden = false;
+  coach('Ring ring! The helper answers. Say it out loud:', '📞', true, 'Ring ring! The helper answers. Say it out loud: ' + lines.map(l=>l[1]).join(' '));
+  setNudge(()=>[el.btnSaid], 'Say it out loud: ' + lines.map(l=>l[1]).join(' ') + ' Then tap I said it.');
+  return true;
+}
+
+/* Robo sweeper parade: everyone crosses safely, one by one, and Robo honks */
+async function parade(myRun){
+  show('v-next'); el.btnNextRound.hidden = true; setPlace(null); Cars.stop(); setSignal('walk'); setLight('red'); hint(null);
+  coach('Parade time! Everyone crosses safely. Robo honks!', '🎉');
+  const kids = shuffle(KIDS).slice(0,3);
+  const drive = roboDrive(myRun, 3);
+  for(const k of kids){
+    setKid(k); await wait(200); if(run!==myRun) return;
+    el.kid.classList.add('look-left'); await wait(300); el.kid.classList.remove('look-left'); el.kid.classList.add('look-right'); await wait(300); el.kid.classList.remove('look-right'); if(run!==myRun) return;
+    el.kid.classList.add('crossing','walkbob'); for(let i=0;i<4;i++){ await wait(300); Sound.step(); } if(run!==myRun) return;
+    el.kid.classList.remove('walkbob');
+  }
+  await drive; if(run!==myRun) return;
+  confetti(); Sound.fanfare(); await wait(1200);
+}
+
+/* ---------- level flow ---------- */
+function levelConfig(n){ return Object.assign({n}, LEVELS[Math.min(n, LEVELS.length)-1]); }
+function startLevel(n){
+  run++; const myRun = run;
+  const cfg = levelConfig(n);
+  const types = cfg.mixed ? shuffle(cfg.types).slice(0,6) : cfg.types.slice();
+  G = {cfg, n, round:0, rounds:types, complete:false, stats:{questions:0,firstTry:0,wrong:0}};
+  R = null; el.lvlChip.textContent = n; renderDots(); hideOverlay(); hint(null); Cars.stop(); el.robo.classList.remove('on','driving','honking');
+  gearTargetOrder = shuffle(['bike','car','dock']);
+  coach(`Level ${n}: ${cfg.title}.`, '🦺');
+  loop(myRun);
+}
+async function loop(myRun){
+  const used = {signal:[], safe:[], lost:[], tricky:[], call:[]};
+  const pickSpec = (pool, key) => { let left = pool.filter(s=>!used[key].includes(s)); if(!left.length){ used[key]=[]; left = pool; } const s = pick(left); used[key].push(s); return s; };
+  await wait(900); if(run!==myRun) return;
+  while(run === myRun && G.round < G.rounds.length){
+    const type = G.rounds[G.round]; renderDots();
+    const kid = pick(KIDS);
+    if(type==='look') await roundLook(myRun);
+    else if(type==='signal') await roundChoice('signal', pickSpec(SIGNALS,'signal'), kid);
+    else if(type==='safe') await roundChoice('safe', pickSpec(SAFE,'safe'), kid);
+    else if(type==='lost') await roundChoice('lost', pickSpec(LOST,'lost'), kid);
+    else if(type==='tricky') await roundChoice('tricky', pickSpec(TRICKY,'tricky'), kid);
+    else if(type==='call') await roundChoice('call', pickSpec(CALL,'call'), kid);
+    else if(type==='say') await roundSay(kid);
+    else if(type==='gear') await roundGear(kid, gearTargetOrder[G.round % 3]);
+    else if(type==='dial') await roundDial(kid);
+    if(run !== myRun) return;
+    if(R && R.watch) clearInterval(R.watch);
+    G.round++; renderDots();
+    await wait(300); if(run!==myRun) return;
+  }
+  if(run !== myRun) return;
+  R = null;
+  if(G.cfg.mixed){ await parade(myRun); if(run!==myRun) return; }
+  finishLevel();
+}
+function finishLevel(){
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  G.complete = true; Cars.stop();
+  progress.unlocked = Math.max(progress.unlocked, Math.min(G.n+1, LEVELS.length));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'You knew the safe thing to do almost every time. Super safe!' : stars===2 ? 'Great work! You are learning to stay safe.' : 'You finished the whole level! Practise makes it easy.';
+  Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3;
+  const hasNext = G.n < LEVELS.length;
+  const nextBtn = hasNext ? `<button class="${breakTime?'subbtn':'bigbtn'}" id="btn-next">Next level ▶</button>` : '';
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${nextBtn}<button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `${nextBtn}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay(`<div class="hero">🦺${G.cfg.em}</div><h1>Level ${G.n} done!</h1><h2>${G.cfg.title}</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    <div class="fact"><b>${s.firstTry}</b> of <b>${s.questions}</b> safe choices right the first time</div>
+    ${buttons}`);
+  Voice.say(`Level ${G.n} done! ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  if(hasNext) $('#btn-next').addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; R = null; levelsThisSitting = 0; Cars.stop();
+  const idea = pick(['go find a real crosswalk with your grown-up and look left, right, left','go check that your bike helmet fits snug','practise saying your grown-up’s full name out loud','go play outside for a bit','get a drink of water and a stretch']);
+  showOverlay(`<div class="hero">👋🦺</div><h2>Great work today!</h2><p>The crossing guard is going home for now. Stretch your arms, ${idea}. Robo will be here when you come back.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say(`Great work today! The crossing guard is going home for now. Stretch your arms, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null; R = null; Cars.stop(); setPlace(null); setSignal('stop'); setLight('green'); hint(null); show('');
+  showOverlay(`<div class="hero">🦺🚦🤖</div><h1>Crossing Guard</h1>
+    <p>You are the crossing guard! Help the kids look left, right, left, cross at the crosswalk, gear up, find a helper, and call 9-1-1 when it really matters.</p>
+    <div class="fact">Learn <b>👀</b> looking · <b>🚦</b> signals · <b>⛑️</b> helmets and seatbelts · <b>🔍</b> what to do if lost · <b>📞</b> 9-1-1</div>
+    <button class="bigbtn" id="btn-play">Play! 🦺</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap the 🔊 to hear it again.</p>`);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What each level teaches</b><ul>${LEVELS.map((l,i)=>`<li><b>${i+1}. ${l.title}:</b> ${l.teaches}</li>`).join('')}</ul>
+    <b style="display:block;margin-top:10px">Nothing scary</b><ul>
+      <li>Cars are slow and easy to see. If your child taps Walk while a car is near, the car simply stops with a friendly beep and the guard says “Whoa! Let’s wait.” No collisions are ever shown.</li>
+      <li>The lost and tricky-grown-up scenes are calm and kind: stay put, find a helper, say no, tell your grown-up. The safe choice is always on screen.</li>
+      <li>Robo’s silly sweeper (and its fart-horn) only drives by after a crossing is finished, never during the danger moment.</li></ul>
+    <b style="display:block;margin-top:10px">How hints work</b><ul>
+      <li>First miss: the guard explains the rule with a picture cue. Second miss: the right answer is shown to tap. Nobody fails a level.</li>
+      <li>If your child stops for a while, the instruction is repeated and the thing to tap wiggles.</li>
+      <li>Stars come only from first-try accuracy. No timers, no accounts, nothing leaves this device.</li></ul>
+    <b style="display:block;margin-top:10px">Practise for real</b><ul>
+      <li>Walk to a real crosswalk together. Say “left, right, left” out loud, hold hands, and wait for the walking person.</li>
+      <li>Practise your full name, your child’s address, and your name as their grown-up. Point out helpers: workers with name tags, parents with kids, police officers.</li>
+      <li>Check the bike helmet fits snug, two fingers above the eyebrows, and click the seatbelt every ride.</li>
+      <li>In Canada the emergency number is 9-1-1. Show your child how to unlock a phone and find the call button.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul><li>No streaks, daily rewards, countdowns or notifications. Nothing ever says “come back”.</li><li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li><li>Stars come only from accuracy. There is nothing random to chase.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null; R = null; Cars.stop();
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = LEVELS[n-1], locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="em">${c.em}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level teaches one safety idea. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- wiring ---------- */
+el.arrows.addEventListener('click', e => { const b = e.target.closest('.arrow'); if(!b) return; look(b.dataset.dir); });
+el.btnWalk.addEventListener('click', walk);
+el.btnWait.addEventListener('click', waitBtn);
+el.choices.addEventListener('click', e => { const b = e.target.closest('.choice'); if(!b) return; choose(b.dataset.t); });
+el.btnSaid.addEventListener('click', saidIt);
+el.btnSaid2.addEventListener('click', saidIt);
+el.keys.innerHTML = [1,2,3,4,5,6,7,8,9].map(n=>`<button class="key" data-k="${n}" aria-label="${n}">${n}</button>`).join('') + `<button class="key" data-k="0" aria-label="0" style="grid-column:2">0</button>`;
+el.keys.addEventListener('click', e => { const b = e.target.closest('.key'); if(!b) return; dial(b.dataset.k); });
+document.addEventListener('keydown', e => { if(R && R.type==='dial' && /^\d$/.test(e.key) && !el.overlay.classList.contains('on')) dial(e.key); });
+/* gear: real drag, tap-then-tap, and a plain button */
+(function initDrag(){
+  let drag = null;
+  el.items.addEventListener('pointerdown', e => {
+    const it = e.target.closest('.item'); if(!it || !R || R.type!=='gear' || R.solved) return;
+    e.preventDefault();
+    drag = {el:it, id:e.pointerId, sx:e.clientX, sy:e.clientY, moved:false};
+    try{ it.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  el.items.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId!==drag.id) return;
+    const dx = e.clientX-drag.sx, dy = e.clientY-drag.sy;
+    if(Math.hypot(dx,dy) > 6){ drag.moved = true; drag.el.classList.add('dragging'); }
+    if(drag.moved){ drag.el.style.transform = `translate(${dx}px,${dy}px)`; el.target.classList.toggle('hot', overTarget(e.clientX, e.clientY)); }
+  });
+  function end(e){
+    if(!drag || e.pointerId!==drag.id) return;
+    const d = drag; drag = null; d.el.classList.remove('dragging'); d.el.style.transform=''; el.target.classList.remove('hot');
+    if(d.moved){ if(overTarget(e.clientX, e.clientY)) drop(d.el.dataset.item, R.target); else coach('Almost! Drop it right on '+R.kid.name+'.', '🙂', false); }
+    else { el.items.querySelectorAll('.item').forEach(b=>b.classList.toggle('selected', b===d.el && !b.classList.contains('selected'))); R.selected = d.el.classList.contains('selected') ? d.el.dataset.item : null; if(R.selected) coach('Now tap '+R.kid.name+'!', '👉', false); }
+  }
+  el.items.addEventListener('pointerup', end); el.items.addEventListener('pointercancel', end);
+  function overTarget(x, y){ const t = el.target.getBoundingClientRect(); return x > t.left-10 && x < t.right+10 && y > t.top-10 && y < t.bottom+10; }
+  el.target.addEventListener('pointerdown', ()=>{ if(R && R.type==='gear' && R.selected) drop(R.selected, R.target); });
+  el.btnPuton.addEventListener('click', ()=>{ if(!R || R.type!=='gear' || R.solved) return; if(R.selected) drop(R.selected, R.target); else coach('Tap a piece of gear first. Then tap Put it on.', '👉'); });
+})();
+
+/* ---------- top bar ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+el.coachText.addEventListener('pointerdown', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+
+/* ---------- boot ---------- */
+showTitle();
+
+// debug hooks for automated testing
+window.__game = {
+  startLevel, look, walk, wait: waitBtn, choose, drop, dial, saidIt, showTitle, showLevels, showGrownups,
+  spawnCar(){ return !!Cars.spawnNear(); }, clearRoad(){ Cars.clearRoad(); },
+  get data(){ return {LEVELS, KIDS, SIGNALS, SAFE, LOST, TRICKY, CALL, GEAR}; },
+  get sittingLevels(){ return levelsThisSitting; },
+  get state(){
+    return {
+      level: G ? G.n : null, title: G ? G.cfg.title : null, round: G ? G.round : null, totalRounds: G ? G.rounds.length : 0, rounds: G ? G.rounds.slice() : [],
+      roundType: R ? R.type : null, phase: R ? R.phase : null, correct: R && R.correctNow ? R.correctNow() : null, solved: R ? R.solved : false, attempts: R ? R.attempts : 0,
+      kid: R ? R.kid.name : null, target: R ? R.target || null : null, dialed: R ? R.dialed || '' : '', sigOn: R ? !!R.sigOn : false,
+      carNear: Cars.near, complete: G ? G.complete : false, stats: G ? Object.assign({}, G.stats) : null, coach: coachLine, hint: el.hint.classList.contains('on') ? el.hintText.textContent : '',
+      overlay: el.overlay.classList.contains('on'), lastSpoken: Voice.last
+    };
+  }
+};
+})();
+</script>
+</body>
+</html>

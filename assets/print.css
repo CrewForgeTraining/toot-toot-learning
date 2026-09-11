@@ -1,0 +1,12 @@
+/* Shared print stylesheet for Toot Toot Learning PDFs (US Letter). Link ../assets/fonts.css first. */
+:root{--cream:#FFF4DC;--butter:#FFE29A;--ketchup:#F4552F;--ketchup-dark:#C9391A;--mint:#2FBFA6;--mint-dark:#1E8F7B;--cocoa:#3B2A1F;--cocoa-soft:#6E5546;--wood:#E0A96D;--display:'Fredoka','Nunito',system-ui,sans-serif;--body:'Nunito',system-ui,sans-serif}
+@page{size:Letter;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--cocoa);font-family:var(--body);font-size:14pt;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:8.5in;height:11in;padding:0.6in;page-break-after:always;position:relative;overflow:hidden;background:#fff}
+.page:last-child{page-break-after:auto}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;text-wrap:balance}
+.brand{position:absolute;left:0.6in;bottom:0.35in;font-family:var(--display);font-weight:700;font-size:10pt;color:var(--cocoa-soft)}
+.brand b{background:var(--ketchup);color:#fff;padding:2px 8px;border-radius:8px}
+.cut{border:2px dashed #B9A895;border-radius:12px}
+.big{font-family:var(--display);font-weight:700}

@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Seed to Sunflower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D; --grass:#8BD36F; --grass-dark:#5FB24A;
+  --soil:#6B4226; --pot:#D2743E; --pot-dark:#A8522A; --leaf:#4E9F3D; --leaf-dark:#2E7D32;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
+#topbar,#panel,#scene,.card{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+#app{max-width:1280px;margin:0 auto;padding-block:10px 20px;padding-inline:16px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;font-size:1.35rem;display:flex;align-items:center;gap:8px}
+.logo .sign{background:var(--leaf-dark);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 #1B5E20;transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.chip{background:var(--white);border-radius:999px;padding:6px 14px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- stage ---------- */
+#stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+#scene{position:relative;width:100%;aspect-ratio:16/9;container-type:inline-size;overflow:hidden;border-radius:24px;background:linear-gradient(#BDE8FF,#E6F6FF 60%);box-shadow:var(--shadow)}
+#scene.season-summer{background:linear-gradient(#9ED9FF,#EAF7FF 60%)}
+#scene.season-fall{background:linear-gradient(#FFD9A8,#FFF0D6 60%)}
+#scene.season-winter{background:linear-gradient(#DCE9F5,#F4F8FC 60%)}
+#scene.season-spring{background:linear-gradient(#C9EEFF,#F2FBFF 60%)}
+.ground{position:absolute;left:0;right:0;bottom:0;height:22%;background:linear-gradient(var(--grass),var(--grass-dark));border-top:.6cqw solid #6FBF57}
+#scene.season-fall .ground{background:linear-gradient(#C9B457,#9E8A3A)}
+#scene.season-winter .ground{background:linear-gradient(#FFFFFF,#DCE9F5);border-top-color:#fff}
+.sunbig{position:absolute;left:6%;top:8%;font-size:11cqw;line-height:1;transition:left 2.4s ease-in-out,top 2.4s ease-in-out,opacity .5s;filter:drop-shadow(0 0 1.5cqw rgba(255,200,61,.9))}
+.sunbig.spin{animation:sunspin 6s linear infinite}
+@keyframes sunspin{to{transform:rotate(360deg)}}
+.cloud{position:absolute;font-size:6cqw;line-height:1;opacity:.85;animation:drift 18s linear infinite}
+.cloud.c2{animation-duration:26s;animation-delay:-9s}
+@keyframes drift{from{transform:translateX(-20cqw)}to{transform:translateX(110cqw)}}
+.rain{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(100deg,transparent 0 3cqw,rgba(80,150,255,.35) 3cqw 3.4cqw);opacity:0;transition:opacity .4s}
+.rain.on{opacity:1;animation:rain .5s linear infinite}
+@keyframes rain{to{background-position:0 6cqw}}
+.snow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;font-size:3cqw;line-height:1;white-space:pre;overflow:hidden}
+.snow.on{opacity:.9}
+.snow span{position:absolute;top:-6%;animation:snowfall 6s linear infinite}
+@keyframes snowfall{to{transform:translateY(120cqh)}}
+.leaves-fall{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.leaves-fall span{position:absolute;top:-8%;font-size:3.5cqw;animation:leaffall 5s ease-in infinite}
+@keyframes leaffall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(8cqw,110cqh) rotate(300deg)}}
+
+/* helper animal + worm + robot */
+.helper{position:absolute;left:5%;bottom:11%;font-size:12cqw;line-height:1;z-index:4;text-align:center;width:16%}
+.helper .body{display:inline-block;filter:drop-shadow(0 .7cqw 0 rgba(59,42,31,.18))}
+.helper.happy .body{animation:happy .5s 2}
+.helper.chomp .body{animation:chomp .22s 8 alternate}
+@keyframes happy{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-1cqw)}75%{transform:rotate(8deg) translateY(-1cqw)}}
+@keyframes chomp{from{transform:scale(1,1)}to{transform:scale(1.08,.92) translateY(.6cqw)}}
+.helper .snack{position:absolute;left:70%;bottom:10%;font-size:.45em;opacity:0;transition:opacity .3s}
+.helper.snacking .snack{opacity:1}
+.bubble{position:absolute;left:100%;bottom:85%;width:max-content;min-width:12cqw;max-width:34cqw;background:#fff;border-radius:2cqw;padding:1cqw 1.5cqw;font-size:clamp(11px,2.2cqw,19px);font-weight:800;line-height:1.25;box-shadow:0 .5cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:0 100%;transition:opacity .25s,transform .25s cubic-bezier(.2,1.4,.4,1);white-space:normal;text-align:left;cursor:pointer;z-index:9;font-family:var(--body)}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:-1.2cqw;bottom:1.4cqw;border:1.4cqw solid transparent;border-right-color:#fff;border-left:0}
+.bubble.left{left:auto;right:100%;transform-origin:100% 100%}
+.bubble.left::after{left:auto;right:-1.2cqw;border-right:0;border-left:1.4cqw solid #fff}
+
+.potwrap{position:absolute;left:50%;bottom:6%;width:36%;transform:translateX(-50%);z-index:5;transition:opacity .4s}
+.potwrap.hide{opacity:0;pointer-events:none}
+.potwrap svg{width:100%;height:auto;display:block;overflow:visible}
+.potwrap .water{position:absolute;left:29%;right:29%;bottom:6%;height:0;background:rgba(80,160,255,.55);border-radius:2cqw 2cqw 0 0;transition:height .9s ease-out;pointer-events:none;z-index:3}
+.potwrap.overflow .water{height:60%}
+.spill{pointer-events:none;position:absolute;left:24%;right:24%;bottom:2%;height:0;background:rgba(80,160,255,.5);border-radius:50%;transition:height .6s,transform .6s;z-index:2;transform:scaleX(1)}
+.potwrap.overflow .spill{height:9%;transform:scaleX(1.6)}
+.wormfloat{position:absolute;left:30%;bottom:20%;font-size:6cqw;line-height:1;opacity:0;z-index:6;pointer-events:none;white-space:nowrap}
+.wormfloat.go{animation:wormfloat 2.8s ease-in-out forwards}
+@keyframes wormfloat{0%{opacity:0;transform:translate(0,3cqw) rotate(0)}15%{opacity:1}50%{transform:translate(14cqw,-6cqw) rotate(8deg)}100%{opacity:0;transform:translate(34cqw,-2cqw) rotate(-6deg)}}
+.worm{position:absolute;left:-4%;bottom:2%;font-size:5cqw;line-height:1;z-index:6;transform:translateY(20%) rotate(-20deg);transition:transform .4s cubic-bezier(.2,1.4,.4,1)}
+.worm.peek{transform:translateY(-40%) rotate(-30deg)}
+.worm .wb{position:absolute;left:90%;bottom:70%;width:max-content;max-width:30cqw;background:#fff;border-radius:2cqw;padding:.8cqw 1.3cqw;font-size:clamp(10px,2cqw,17px);font-weight:800;line-height:1.2;box-shadow:0 .4cqw 0 rgba(59,42,31,.12);opacity:0;transform:scale(.6);transform-origin:0 100%;transition:opacity .25s,transform .25s;cursor:pointer;z-index:9;font-family:var(--body);white-space:normal}
+.worm .wb.show{opacity:1;transform:scale(1)}
+
+.robot{position:absolute;right:5%;bottom:10%;width:16%;font-size:11cqw;line-height:1;text-align:center;z-index:4}
+.robot .bot{display:inline-block;position:relative;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
+.robot .can{position:absolute;left:-55%;top:10%;font-size:.55em;transform-origin:70% 90%;transition:transform .5s}
+.robot.tipping .can{transform:rotate(-70deg) translate(.5em,-.3em)}
+.robot .drips{position:absolute;left:0;top:-30%;font-size:.5em;opacity:0}
+.robot.tipping .drips{opacity:1;animation:drips .5s infinite}
+@keyframes drips{from{transform:translateY(0)}to{transform:translateY(.8em);opacity:.4}}
+.robot.zap .bot{animation:zap .12s 6 alternate}
+@keyframes zap{from{transform:translateX(-.4cqw) rotate(-5deg);filter:brightness(1.3)}to{transform:translateX(.4cqw) rotate(5deg)}}
+.robot.sneeze .bot{animation:sneeze .7s forwards}
+@keyframes sneeze{0%{transform:scale(1)}40%{transform:scale(1.15) translateY(-1.5cqw) rotate(-8deg)}70%{transform:scale(.95) translateY(1cqw) rotate(10deg)}100%{transform:scale(1)}}
+.robot.happy .bot{animation:happy .5s 2}
+.robot .say{position:absolute;right:90%;bottom:95%;font-size:.3em;background:#fff;border-radius:1.5cqw;padding:.5cqw 1cqw;white-space:nowrap;opacity:0;transition:opacity .2s;font-family:var(--body);font-weight:800;box-shadow:0 .4cqw 0 rgba(59,42,31,.12)}
+.robot .say.show{opacity:1}
+
+.bee{position:absolute;left:60%;top:22%;font-size:6cqw;line-height:1;z-index:8;cursor:pointer;transition:left 1.2s ease-in-out,top 1.2s ease-in-out;display:none;padding:1cqw;border-radius:50%}
+.bee.on{display:block;animation:hover 1s ease-in-out infinite alternate}
+@keyframes hover{from{transform:translateY(0) rotate(-6deg)}to{transform:translateY(-1.5cqw) rotate(6deg)}}
+.bee.picked{outline:.6cqw solid var(--mint);outline-offset:.4cqw;background:rgba(47,191,166,.15)}
+.bee.landed{animation:none;transform:rotate(-20deg)}
+.beehint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:5cqw;pointer-events:none;opacity:0}
+.pollen{position:absolute;font-size:3cqw;line-height:1;animation:pollen 1.3s ease-out forwards;pointer-events:none;z-index:9}
+@keyframes pollen{0%{transform:translate(0,0) scale(.5);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
+.seedfall{position:absolute;font-size:3cqw;line-height:1;animation:seedfall 1.6s ease-in forwards;pointer-events:none;z-index:9}
+@keyframes seedfall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(400deg);opacity:.9}}
+.toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.5);font-family:var(--display);font-weight:700;font-size:clamp(20px,6cqw,56px);color:#fff;-webkit-text-stroke:.35cqw var(--leaf-dark);paint-order:stroke fill;text-shadow:0 .6cqw 0 var(--leaf-dark);opacity:0;animation:toast 1.5s forwards;pointer-events:none;z-index:30;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+
+/* garden pots (level 6) */
+.gpots{position:absolute;left:23%;right:21%;bottom:12%;display:none;justify-content:space-around;align-items:flex-end;z-index:5}
+.gpots.on{display:flex}
+.gpot{width:20%;text-align:center;font-size:8cqw;line-height:1;position:relative;transition:transform .3s}
+.gpot .pl{display:inline-block;transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
+.gpot .pt{display:block;width:58%;height:.42em;margin:-.08em auto 0;background:#D2743E;border-radius:0 0 .18em .18em;border-top:.1em solid #E0885A;box-shadow:inset 0 -.06em 0 #A8522A}
+.gpot.now{transform:translateY(-1cqw)}
+.gpot.now::before{content:"👇";position:absolute;left:50%;top:-1.1em;transform:translateX(-50%);font-size:.6em;animation:tapdown 1s infinite}
+@keyframes tapdown{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,.4em)}}
+.gpot.grown .pl{transform:scale(1.25)}
+.gpot.sad .pl{transform:rotate(-20deg) scale(.9);filter:saturate(.5)}
+.gpot .nm{display:block;font-family:var(--display);font-weight:700;font-size:clamp(9px,2cqw,15px);background:#fff;border-radius:1cqw;padding:.1em .4em;margin-top:.2em}
+
+/* ---------- plant svg ---------- */
+#plant .grow{transition:transform .9s cubic-bezier(.3,1.3,.5,1),opacity .5s;transform-origin:0 0}
+#plant .stem{transition:transform .9s cubic-bezier(.3,1.3,.5,1);transform-origin:0 0}
+#plant .wholeplant{transform-origin:0 0;transition:transform .7s cubic-bezier(.3,1.4,.5,1)}
+#plant.droop .wholeplant{transform:translate(110px,205px) rotate(-16deg) translate(-110px,-205px)}
+#plant.droop .leaf path{transform:rotate(25deg)}
+#plant .leaf path{transition:transform .7s,fill .7s;transform-origin:0 0}
+#plant.crisp .leaf path{fill:#B07A3A}
+#plant.crisp .petal{fill:#D9A24A}
+#plant.pale{filter:saturate(.35) brightness(1.1)}
+#plant .hit{fill:transparent;stroke:none;cursor:pointer;pointer-events:all}
+#plant .hit.glow{fill:rgba(47,191,166,.28);stroke:var(--mint);stroke-width:4;stroke-dasharray:8 6;animation:glow 1s infinite alternate}
+#plant .hit.reveal{fill:rgba(255,200,61,.4);stroke:var(--ketchup);stroke-width:5;animation:glow .5s infinite alternate}
+@keyframes glow{from{opacity:.5}to{opacity:1}}
+#plant .lbl{font-family:var(--display);font-weight:700;font-size:18px;fill:#fff;stroke:var(--cocoa);stroke-width:4;paint-order:stroke fill;opacity:0;transition:opacity .4s;pointer-events:none}
+#plant .lbl.on{opacity:1}
+#plant .head{transition:transform .9s cubic-bezier(.3,1.3,.5,1);transform-origin:0 0}
+#plant .headin{transition:transform 1.6s ease-in-out;transform-origin:0 0}
+#plant.crisp .headin{transform:rotate(30deg)}
+.sparkle{position:absolute;font-size:4cqw;line-height:1;animation:spark 1.2s cubic-bezier(.2,.8,.3,1) forwards;pointer-events:none;z-index:9}
+@keyframes spark{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.3) rotate(180deg);opacity:0}}
+.drop{position:absolute;font-size:3.5cqw;line-height:1;animation:drop .7s ease-in forwards;pointer-events:none;z-index:9}
+@keyframes drop{from{transform:translateY(0);opacity:1}to{transform:translateY(12cqw);opacity:0}}
+
+/* ---------- panel ---------- */
+#panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:280px}
+.coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
+.coach .face{font-size:1.8rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
+.coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
+.view{display:none;flex-direction:column;gap:12px}
+.view.on{display:flex}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.choices.two{grid-template-columns:repeat(2,1fr)}
+.choices.five{grid-template-columns:repeat(5,1fr);gap:6px}
+.opt{background:#fff;border-radius:18px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:96px;transition:transform .15s;position:relative}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
+.opt .em{font-size:2.3rem;line-height:1}
+.opt .nm{font-size:.85rem;font-weight:800;color:var(--cocoa-soft);text-align:center;line-height:1.15}
+.opt.nope{animation:nope .4s}
+@keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.opt.glow{box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 4px var(--mint),0 0 16px rgba(47,191,166,.7);animation:glowpulse 1s infinite alternate}
+@keyframes glowpulse{from{transform:scale(1)}to{transform:scale(1.04)}}
+.opt.reveal{box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 4px var(--ketchup),0 0 16px rgba(244,85,47,.6);animation:nudge .55s infinite alternate}
+.opt.reveal::after{content:"👆";position:absolute;right:-6px;top:-10px;font-size:1.4rem;animation:tapdown 1s infinite}
+.opt.done{background:#E4FBF5;box-shadow:0 4px 0 var(--mint-dark),0 0 0 2px var(--mint)}
+.opt.placed{opacity:.45;background:#E4FBF5;pointer-events:none}
+.opt .num{position:absolute;left:-6px;top:-8px;background:var(--mint);color:#fff;font-family:var(--display);font-weight:700;border-radius:999px;width:26px;height:26px;display:grid;place-items:center;font-size:.9rem}
+.opt.ghost .num{background:rgba(59,42,31,.35)}
+.opt svg{width:56px;height:70px;display:block}
+.amount .opt .em{font-size:1.7rem;letter-spacing:-.15em}
+.tapnote{background:#F3FBFF;border-radius:14px;padding:10px 12px;font-weight:800;font-size:.95rem;line-height:1.4;text-align:center}
+.tapnote .big{font-size:1.6rem;display:block;line-height:1.1;margin-bottom:4px}
+.strip{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:34px}
+.strip .st{width:30px;height:30px;border-radius:50%;background:rgba(59,42,31,.1);display:grid;place-items:center;font-size:.9rem;font-family:var(--display);font-weight:700;color:var(--cocoa-soft)}
+.strip .st.ok{background:var(--mint);color:#fff}
+.gcard{background:#fff;border:3px dashed rgba(59,42,31,.2);border-radius:16px;padding:8px 12px;display:flex;align-items:center;gap:12px}
+.gcard .pic{font-size:2.6rem;line-height:1}
+.gcard .cues{display:flex;flex-direction:column;gap:2px;font-weight:800;font-size:.95rem}
+.gcard .cues b{font-family:var(--display);font-size:1.15rem}
+.gcard .cues span{letter-spacing:-.1em}
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem;min-height:44px}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wait{text-align:center;font-weight:800;color:var(--cocoa-soft);padding:14px 0;font-size:1.05rem}
+.wait .em{display:block;font-size:2.6rem;margin-bottom:6px;animation:bob 1.2s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:24px 22px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--leaf-dark);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.5rem,5vw,2.3rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.05rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(3rem,12vw,5.5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:104px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ico{font-size:1.4rem;margin-top:auto}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--leaf-dark)}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}#grownups ul{margin:6px 0 0;padding-left:18px}
+
+/* ---------- mobile fit ---------- */
+@media (max-width:900px) and (orientation:portrait){#stage{grid-template-columns:1fr}#scene{aspect-ratio:16/10;width:min(100%,calc(34vh*1.6));margin-inline:auto}}
+@media (max-width:900px) and (orientation:landscape){#stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}}
+@media (max-width:600px) and (orientation:portrait){#app{padding-block:6px 10px;gap:8px}#topbar{gap:6px}#scene{width:min(100%,calc(31vh*1.6))}#panel{padding:10px;gap:8px;min-height:0}.coach{padding:7px 10px}.coach p{font-size:.92rem}.coach .face{font-size:1.4rem}.coach .say{width:44px;height:44px}.opt{min-height:78px;padding:6px 4px}.opt .em{font-size:1.9rem}.opt .nm{font-size:.74rem}.opt svg{width:44px;height:56px}.tapnote{padding:6px 10px;font-size:.85rem}.tapnote .big{font-size:1.3rem}.gcard{padding:6px 10px}.gcard .pic{font-size:2rem}.gcard .cues{font-size:.85rem}.wait{padding:6px 0}.wait .em{font-size:2rem}.logo .sign{font-size:1rem;padding:3px 10px}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:44px;height:44px}}
+@media (orientation:landscape) and (max-height:560px){#app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:44px;height:44px;font-size:1.1rem}#scene{width:min(100%,calc((100vh - 64px)*16/9));margin-inline:auto}#panel{padding:8px;gap:6px;min-height:0;max-height:calc(100vh - 64px);overflow:auto}.coach{padding:6px 10px}.coach p{font-size:.85rem}.coach .face{font-size:1.3rem}.coach .say{width:44px;height:44px}.opt{min-height:64px;padding:5px 4px}.opt .em{font-size:1.6rem}.opt .nm{font-size:.7rem}.opt svg{width:36px;height:46px}.choices{gap:6px}.tapnote{padding:5px 8px;font-size:.8rem}.tapnote .big{font-size:1.2rem;margin-bottom:0}.gcard{padding:5px 10px;gap:8px}.gcard .pic{font-size:1.8rem}.gcard .cues{font-size:.8rem}.gcard .cues b{font-size:1rem}.wait{padding:4px 0}.wait .em{font-size:1.6rem;margin-bottom:2px}.strip .st{width:24px;height:24px;font-size:.75rem}.subbtn{padding:8px 12px;font-size:.9rem}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">🌻 Seed to Sunflower</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Round</small><span id="round-chip">1 / 6</span></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="stage">
+    <div id="scene" aria-label="Garden scene">
+      <div class="sunbig" id="sun">☀️</div>
+      <div class="cloud" style="top:6%">☁️</div><div class="cloud c2" style="top:18%">☁️</div>
+      <div class="rain" id="rain"></div>
+      <div class="snow" id="snow"></div>
+      <div class="leaves-fall" id="leaves"></div>
+      <div class="ground"></div>
+      <div class="helper" id="helper"><span class="body" id="helper-body">🐻</span><span class="snack" id="helper-snack">🌰</span><div class="bubble" id="bubble"></div></div>
+      <div class="gpots" id="gpots"></div>
+      <div class="potwrap" id="potwrap">
+        <svg id="plant" viewBox="0 0 220 300" aria-label="A plant in a pot"></svg>
+        <div class="water"></div><div class="spill"></div>
+        <div class="worm" id="worm">🪱<div class="wb" id="wormsay"></div></div>
+        <div class="wormfloat" id="wormfloat">🍃🪱🤿</div>
+      </div>
+      <div class="bee" id="bee" role="button" aria-label="Bee">🐝</div>
+      <div class="robot" id="robot"><span class="bot">🤖<span class="can">🚿</span><span class="drips">💦</span></span><span class="say" id="robosay"></span></div>
+      <div id="fx"></div>
+    </div>
+
+    <div id="panel">
+      <div class="coach"><span class="face" id="coach-face">🌻</span><p id="coach-text">Welcome to the garden!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+      <div class="view" id="v-choices"><div class="choices" id="choices"></div><div class="tapnote" id="choicenote" hidden></div><div class="gcard" id="gcard" hidden></div></div>
+      <div class="view" id="v-tap"><div class="tapnote" id="tapnote"><span class="big">👆</span>Tap it on the plant!</div><div class="choices five" id="partbtns"></div></div>
+      <div class="view" id="v-wait"><div class="wait"><span class="em" id="wait-em">🌱</span><span id="wait-text">Growing…</span></div></div>
+      <div class="strip" id="strip"></div>
+    </div>
+  </div>
+</div>
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fast = false; // test hook: shorten waits
+const wait = ms => new Promise(r => setTimeout(r, (reduced || fast) ? Math.min(ms,120) : ms));
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    grow(){ tone(300,0.6,{type:'triangle',gain:0.12,slide:900}); tone(600,0.3,{type:'sine',gain:0.08,delay:0.5,slide:1200}); },
+    splash(){ noise(0.35,{gain:0.18,from:2500,to:400}); tone(220,0.2,{type:'sine',gain:0.08,slide:120}); },
+    glug(){ [180,240,300].forEach((f,i)=>tone(f,0.12,{type:'sine',gain:0.1,delay:i*0.14,slide:f*1.5})); },
+    boing(){ tone(180,0.35,{type:'square',gain:0.06,slide:520}); },
+    droop(){ tone(400,0.5,{type:'triangle',gain:0.1,slide:150}); },
+    buzz(dur=1){ const c=ensure(); if(!c||!enabled) return; const t=c.currentTime; const o=c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(190,t); const lfo=c.createOscillator(); lfo.frequency.value=22; const lg=c.createGain(); lg.gain.value=30; lfo.connect(lg).connect(o.frequency); const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=900; const g=c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.05,t+0.05); g.gain.setValueAtTime(0.05,t+Math.max(0.1,dur-0.15)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur); lfo.stop(t+dur); },
+    zap(){ noise(0.25,{gain:0.12,from:6000,to:1500}); tone(900,0.15,{type:'square',gain:0.04,slide:200}); },
+    sneeze(){ tone(500,0.25,{type:'triangle',gain:0.1,slide:800}); tone(700,0.2,{type:'triangle',gain:0.1,delay:0.3,slide:1000}); noise(0.5,{gain:0.35,from:5000,to:300,delay:0.62}); tone(300,0.4,{type:'sawtooth',gain:0.08,delay:0.62,slide:90}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    chomp(){ noise(0.09,{gain:0.1,from:1200,to:300}); tone(160+Math.random()*60,0.08,{type:'square',gain:0.04}); }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){
+      if(!enabled || !has) return;
+      try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = 0.9; u.pitch = 1.1; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+    }
+  };
+})();
+
+/* ---------- progress ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootSeedToSunflower')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootSeedToSunflower', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true}, Save.load());
+
+/* ---------- DOM ---------- */
+const el = {
+  scene:$('#scene'), fx:$('#fx'), sun:$('#sun'), rain:$('#rain'), snow:$('#snow'), leaves:$('#leaves'), helper:$('#helper'), helperBody:$('#helper-body'), bubble:$('#bubble'),
+  potwrap:$('#potwrap'), plant:$('#plant'), worm:$('#worm'), wormsay:$('#wormsay'), wormfloat:$('#wormfloat'), bee:$('#bee'), robot:$('#robot'), robosay:$('#robosay'), gpots:$('#gpots'),
+  coachText:$('#coach-text'), coachFace:$('#coach-face'), choices:$('#choices'), choicenote:$('#choicenote'), gcard:$('#gcard'), tapnote:$('#tapnote'), partbtns:$('#partbtns'), strip:$('#strip'),
+  lvlChip:$('#lvl-chip'), roundChip:$('#round-chip'), overlay:$('#overlay'), card:$('#card'), waitEm:$('#wait-em'), waitText:$('#wait-text')
+};
+
+/* ---------- the plant (CSS + SVG, no images) ---------- */
+const STEM_TOP = 205, STEM_H = 125;
+const STAGES = ['seed','sprout','small plant','plant','bud','flower','seed head'];
+const STAGE_SCALE = [0, 0.18, 0.42, 0.66, 0.84, 1, 1];
+function leafPath(dir){ // a leaf drawn from (0,0) pointing left (dir -1) or right (dir 1)
+  const d = dir;
+  return `M0 0 C ${d*10} -14, ${d*34} -14, ${d*44} -2 C ${d*34} 10, ${d*10} 10, 0 0 Z`;
+}
+function petals(){ let s=''; for(let i=0;i<12;i++){ s += `<ellipse class="petal" cx="0" cy="-24" rx="7" ry="15" fill="#FFC83D" stroke="#E3A400" stroke-width="1.5" transform="rotate(${i*30})"/>`; } return s; }
+function plantSVG(opts){ // opts: {stage, labels:boolean, hits:boolean, id}
+  const st = opts.stage;
+  const cut = opts.cutaway !== false;
+  return `
+  <defs><clipPath id="${opts.id}-soilclip"><path d="M52 202 L168 202 L156 288 L64 288 Z"/></clipPath></defs>
+  <g class="pot"><path d="M46 196 H174 L160 292 H60 Z" fill="#D2743E" stroke="#A8522A" stroke-width="3"/>
+    <path d="M52 202 L168 202 L156 288 L64 288 Z" fill="#6B4226"/>
+    <rect x="40" y="188" width="140" height="18" rx="6" fill="#E0885A" stroke="#A8522A" stroke-width="3"/>
+    <ellipse cx="110" cy="204" rx="58" ry="7" fill="#5A3620"/></g>
+  <g class="roots part" data-part="roots" clip-path="url(#${opts.id}-soilclip)">
+    <g class="grow rootsg" data-k="roots" style="transform:translate(110px,206px) scale(${st>=1?1:0.35})">
+      <path d="M0 0 C -8 18 -26 24 -38 40 M0 0 C 4 22 20 26 30 44 M0 0 C -2 20 -4 40 -6 58 M-6 24 C -18 30 -24 42 -30 56 M6 26 C 16 36 18 46 22 60" fill="none" stroke="#F1DEB9" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+    <ellipse class="grow seedin" cx="110" cy="216" rx="9" ry="6" fill="#8B5A2B" stroke="#5A3620" stroke-width="2" style="opacity:${st===0?1:0}"/>
+  </g>
+  <g class="wholeplant">
+    <rect class="stem part" data-part="stem" x="105" y="${STEM_TOP-STEM_H}" width="10" height="${STEM_H}" rx="5" fill="#4E9F3D" stroke="#2E7D32" stroke-width="1.5" style="transform:translate(110px,${STEM_TOP}px) scaleY(${STAGE_SCALE[st]}) translate(-110px,-${STEM_TOP}px)"/>
+    ${[[-1,0.55,1],[1,0.4,1],[-1,0.25,3],[1,0.72,3]].map((L,i)=>{ const [dir,frac,minSt]=L; const on = st>=minSt; const y = STEM_TOP - STEM_H*STAGE_SCALE[st]*frac; const k = on? (st===1?0.55:1):0; return `<g class="leaf part grow" data-part="leaf" data-i="${i}" style="transform:translate(110px,${y.toFixed(1)}px) scale(${k})"><path d="${leafPath(dir)}" fill="#4E9F3D" stroke="#2E7D32" stroke-width="1.5"/></g>`; }).join('')}
+    <g class="head" style="transform:translate(110px,${(STEM_TOP - STEM_H*STAGE_SCALE[st]).toFixed(1)}px)">
+      <g class="headin">
+        <g class="grow budg" style="transform:scale(${st===4?1:0})"><circle cx="0" cy="-10" r="12" fill="#6DBF4E" stroke="#2E7D32" stroke-width="2"/><path d="M-9 -8 L0 -22 L9 -8" fill="#4E9F3D"/></g>
+        <g class="grow flowerg part" data-part="flower" style="transform:scale(${st>=5?1:0})">
+          <g class="petals" style="opacity:${st===6?0.55:1};transition:opacity .8s">${petals()}</g>
+          <g class="seeds part" data-part="seeds"><circle cx="0" cy="0" r="${st===6?22:17}" fill="#6B4226" stroke="#3B2A1F" stroke-width="2"/>
+            ${[[-8,-6],[6,-8],[0,2],[-9,6],[9,5],[0,-13],[0,12],[-13,0],[13,0]].map(p=>`<ellipse cx="${p[0]}" cy="${p[1]}" rx="3" ry="4" fill="#3B2A1F" stroke="#F1DEB9" stroke-width="1"/>`).join('')}
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  ${opts.hits ? `<g class="hits">
+    <rect class="hit" data-part="roots" x="50" y="204" width="120" height="84"/>
+    <ellipse class="hit" data-part="leaf" cx="76" cy="${(STEM_TOP - STEM_H*0.55).toFixed(1)}" rx="40" ry="26"/>
+    <ellipse class="hit" data-part="leaf" cx="144" cy="${(STEM_TOP - STEM_H*0.4).toFixed(1)}" rx="40" ry="26"/>
+    <path class="hit" data-part="flower" d="M110 ${STEM_TOP-STEM_H} m-46 0 a46 46 0 1 0 92 0 a46 46 0 1 0 -92 0 Z M110 ${STEM_TOP-STEM_H} m-19 0 a19 19 0 1 1 38 0 a19 19 0 1 1 -38 0 Z" fill-rule="evenodd"/>
+    <circle class="hit" data-part="seeds" cx="110" cy="${STEM_TOP-STEM_H}" r="19"/>
+    <rect class="hit" data-part="stem" x="88" y="${STEM_TOP-STEM_H+22}" width="44" height="${STEM_H-22}" rx="14"/>
+  </g>` : ''}
+  ${opts.labels ? `<g class="labels">
+    <text class="lbl" data-part="roots" x="118" y="262">roots</text>
+    <text class="lbl" data-part="stem" x="120" y="170">stem</text>
+    <text class="lbl" data-part="leaf" x="8" y="120">leaf</text>
+    <text class="lbl" data-part="flower" x="150" y="52">flower</text>
+    <text class="lbl" data-part="seeds" x="86" y="30">seeds</text>
+  </g>` : ''}`;
+}
+let plantStage = 0, plantOpts = {};
+function renderPlant(stage, opts={}){
+  plantStage = stage; plantOpts = opts;
+  el.plant.innerHTML = plantSVG({stage, labels:!!opts.labels, hits:!!opts.hits, id:'main'});
+  el.plant.classList.remove('droop','crisp','pale');
+}
+function setStage(stage){ // animate to a new stage in place (CSS transitions do the growing)
+  stage = Math.max(0, Math.min(6, stage)); plantStage = stage;
+  const s = STAGE_SCALE[stage];
+  const stem = el.plant.querySelector('.stem'); if(stem) stem.style.transform = `translate(110px,${STEM_TOP}px) scaleY(${s}) translate(-110px,-${STEM_TOP}px)`;
+  el.plant.querySelectorAll('.leaf').forEach((g,i)=>{ const [dir,frac,minSt] = [[-1,0.55,1],[1,0.4,1],[-1,0.25,3],[1,0.72,3]][i]; const y = STEM_TOP - STEM_H*s*frac; const k = stage>=minSt ? (stage===1?0.55:1) : 0; g.style.transform = `translate(110px,${y.toFixed(1)}px) scale(${k})`; });
+  const head = el.plant.querySelector('.head'); if(head) head.style.transform = `translate(110px,${(STEM_TOP - STEM_H*s).toFixed(1)}px)`;
+  const bud = el.plant.querySelector('.budg'); if(bud) bud.style.transform = `scale(${stage===4?1:0})`;
+  const fl = el.plant.querySelector('.flowerg'); if(fl) fl.style.transform = `scale(${stage>=5?1:0})`;
+  const pet = el.plant.querySelector('.petals'); if(pet) pet.style.opacity = stage===6?0.55:1;
+  const seedc = el.plant.querySelector('.seeds circle'); if(seedc) seedc.setAttribute('r', stage===6?22:17);
+  const roots = el.plant.querySelector('.rootsg'); if(roots) roots.style.transform = `translate(110px,206px) scale(${stage>=1?1:0.35})`;
+  const seedin = el.plant.querySelector('.seedin'); if(seedin) seedin.style.opacity = stage===0?1:0;
+  el.plant.querySelectorAll('.hits .hit').forEach(h => { h.style.display = (h.dataset.part==='flower'||h.dataset.part==='seeds') && stage<5 ? 'none' : ''; });
+}
+function plantMood(m){ el.plant.classList.remove('droop','crisp','pale'); if(m) el.plant.classList.add(m); }
+
+/* ---------- cast + data ---------- */
+const HELPERS = [{em:'🐻',name:'Benny Bear'},{em:'🐰',name:'Rosie Rabbit'},{em:'🦊',name:'Felix Fox'},{em:'🐸',name:'Freddy Frog'},{em:'🐷',name:'Penny Pig'},{em:'🐵',name:'Momo Monkey'},{em:'🐨',name:'Kiki Koala'},{em:'🐯',name:'Toby Tiger'},{em:'🦁',name:'Leo Lion'},{em:'🐮',name:'Clara Cow'},{em:'🐼',name:'Pip Panda'},{em:'🐶',name:'Daisy Dog'}];
+const NEEDS = {sun:{key:'sun',em:'☀️',label:'Sun'}, water:{key:'water',em:'💧',label:'Water'}, soil:{key:'soil',em:'🌱',label:'Soil'}, air:{key:'air',em:'🌬️',label:'Air'}};
+const SILLY = [
+  {key:'pizza',em:'🍕',label:'Pizza',say:'A pizza? Plants don’t eat pizza!'},{key:'teddy',em:'🧸',label:'Teddy',say:'A teddy? Plants can’t cuddle!'},
+  {key:'lolly',em:'🍭',label:'Lollipop',say:'A lollipop? Too sticky for a plant!'},{key:'shoe',em:'👟',label:'Shoe',say:'A shoe? Plants don’t have feet!'},
+  {key:'balloon',em:'🎈',label:'Balloon',say:'A balloon? It would float away!'},{key:'tv',em:'📺',label:'TV',say:'A TV? Plants don’t watch cartoons!'},
+  {key:'sock',em:'🧦',label:'Sock',say:'A sock? Plants don’t wear socks!'},{key:'car',em:'🚗',label:'Car',say:'A car? Plants can’t drive!'},
+  {key:'icecream',em:'🍦',label:'Ice cream',say:'Ice cream? Brrr, too cold for a plant!'},{key:'hat',em:'🎩',label:'Hat',say:'A hat? Well… maybe a sun hat!'}
+];
+const PRAISE = ['You did it!','Super job!','Wow, garden star! ⭐','Perfect!','That’s it!','Brilliant!','High five! 🙌','Look at it grow!'];
+const WORM_YAY = ['Mmm, lovely soil!','Wiggle wiggle! Nice one!','I felt that from down here!','Ooh, the roots tickle!'];
+const WATER_OPTS = [{key:'little',em:'💧',label:'A little'},{key:'some',em:'💧💧',label:'Some'},{key:'lot',em:'💧💧💧',label:'A lot'}];
+const SUN_OPTS = [{key:'little',em:'🌥️',label:'Shade'},{key:'some',em:'☀️',label:'Some sun'},{key:'lot',em:'🔆',label:'All day'}];
+const AMOUNT_WORD = {little:'a little', some:'some', lot:'a lot'};
+const SUN_WORD = {little:'shade', some:'some sun', lot:'sun all day'};
+const PARTS = {roots:{name:'roots',em:'🫚'}, stem:{name:'stem',em:'🥢'}, leaf:{name:'leaf',em:'🍃'}, flower:{name:'flower',em:'🌼'}, seeds:{name:'seeds',em:'🌰'}};
+const JOBS = [{key:'drink',em:'💧',label:'Drink water'},{key:'light',em:'☀️',label:'Catch sunlight'},{key:'hold',em:'💪',label:'Hold it up'},{key:'seeds',em:'🌰',label:'Make seeds'}];
+const JOB_OF = {roots:'drink', leaf:'light', stem:'hold', flower:'seeds'};
+const CYCLE = [{key:'seed',label:'Seed',stage:0},{key:'sprout',label:'Sprout',stage:1},{key:'plant',label:'Small plant',stage:2},{key:'flower',label:'Flower',stage:5},{key:'seedhead',label:'Seed head',stage:6}];
+const GARDEN = [
+  {key:'cactus',em:'🌵',name:'Cactus',water:'little',sun:'lot'},
+  {key:'fern',em:'🌿',name:'Fern',water:'some',sun:'little'},
+  {key:'sunflower',em:'🌻',name:'Sunflower',water:'some',sun:'lot'},
+  {key:'tomato',em:'🍅',name:'Tomato',water:'lot',sun:'lot'}
+];
+const SEASONS = {
+  spring:{key:'spring',em:'🌸',name:'Spring',stage:1,happens:{key:'plant',em:'🌰',label:'Plant the seed'}},
+  summer:{key:'summer',em:'☀️',name:'Summer',stage:5,happens:{key:'grow',em:'🌻',label:'It grows big'}},
+  fall:{key:'fall',em:'🍂',name:'Fall',stage:6,happens:{key:'seeds',em:'🌰🍂',label:'Seeds fall'}},
+  winter:{key:'winter',em:'❄️',name:'Winter',stage:0,happens:{key:'rest',em:'😴',label:'The garden rests'}}
+};
+const SEASON_ORDER = ['spring','summer','fall','winter'];
+
+/* round builders: each returns 6 rounds. A round: {type, prompt, options, answer, face, kind, stageAfter, scene:{...}} */
+function needRound(needKey, prompt, distractCount){
+  const need = NEEDS[needKey];
+  const others = shuffle(Object.values(NEEDS).filter(n=>n.key!==needKey));
+  const ds = shuffle(SILLY).slice(0, distractCount);
+  const options = shuffle([need, ...ds, ...(distractCount<2 ? others.slice(0, 2-distractCount) : [])]);
+  return {type:'choose', kind:'need', prompt, spoken:prompt, options, answer:need.key, face:'🥀', hintText:`Look! The ${need.label.toLowerCase()} is glowing. Tap it.`, reveal:`It needs ${need.label.toLowerCase()}! Tap the ${need.label.toLowerCase()} ${need.em}.`, right:`Yes! ${need.label}! The plant perks up.`, grow:true, mood:'droop'};
+}
+function buildNeeds(){
+  return [
+    needRound('water','The plant is thirsty. What does it need?',2),
+    needRound('sun','The plant is in the dark. What does it need?',2),
+    needRound('soil','The roots have nowhere to grow. What does it need?',2),
+    needRound('air','Plants breathe too! What does it need?',1),
+    needRound('water','The soil is dry again. What does it need?',1),
+    needRound('sun','It is a gloomy day. What does it need?',1)
+  ];
+}
+function amountRound(kind, answer, prompt){
+  const opts = kind==='water' ? WATER_OPTS : SUN_OPTS;
+  const w = kind==='water' ? AMOUNT_WORD[answer] : SUN_WORD[answer];
+  return {type:'amount', kind, prompt, options:opts, answer, face: kind==='water'?'🚿':'☀️', hintText:`Just enough! The glowing button is right. Tap it.`, reveal:`It wants ${w}. Tap ${kind==='water'?AMOUNT_WORD[answer]:SUN_WORD[answer]}.`, right:`Just right! Look at it grow.`, grow:true};
+}
+function buildAmounts(){
+  return [
+    amountRound('water','some','The soil is dry. How much water?'),
+    amountRound('sun','some','The plant wants light. How much sun?'),
+    amountRound('water','little','The soil is still wet. How much water now?'),
+    amountRound('sun','little','Phew, it is a very hot day. How much sun now?'),
+    amountRound('water','some','The soil is dry again. How much water?'),
+    amountRound('sun','some','A cloudy week is over. How much sun?')
+  ];
+}
+function partRound(part){
+  const p = PARTS[part];
+  return {type:'part', prompt:`Tap the ${p.name}.`, answer:part, face:'👆', hintText:`The ${p.name} is glowing. Tap it on the plant.`, reveal:`Here is the ${p.name}! Tap the glowing spot.`, right:`That’s the ${p.name}!`, fixedStage:5};
+}
+function jobRound(part){
+  const p = PARTS[part]; const ans = JOB_OF[part];
+  const options = shuffle([JOBS.find(j=>j.key===ans), ...shuffle(JOBS.filter(j=>j.key!==ans)).slice(0,2)]);
+  const jobText = {drink:'drink up the water', light:'catch the sunlight', hold:'hold the plant up', seeds:'make the seeds'}[ans];
+  return {type:'choose', kind:'job', prompt:`What do the ${p.name === 'leaf' ? 'leaves' : p.name} do?`, options, answer:ans, face:'🤔', hintText:`The glowing card is right. Tap it.`, reveal:`The ${p.name === 'leaf' ? 'leaves' : p.name} ${jobText}. Tap it.`, right:`Yes! The ${p.name === 'leaf' ? 'leaves' : p.name} ${jobText}.`, fixedStage:5, showPart:part};
+}
+function buildParts(){
+  const taps = shuffle(['roots','stem','leaf','flower','seeds']).slice(0,3);
+  const jobs = shuffle(['roots','leaf','stem','flower']).slice(0,3);
+  return [...taps.map(partRound), ...jobs.map(jobRound)];
+}
+function buildCycle(){
+  const rounds = CYCLE.map((c,i)=>({type:'order', prompt: i===0 ? 'What comes first? Tap the card.' : 'What comes next? Tap the card.', options:CYCLE, answer:c.key, index:i, face:'🔁', hintText:`The faded numbers show the order. Tap the one that comes next.`, reveal:`The ${c.label.toLowerCase()} comes next. Tap the ${c.label.toLowerCase()}.`, right: i===0 ? 'Yes! It all starts with a seed.' : `Yes! Then comes the ${c.label.toLowerCase()}.`, stageTo:c.stage}));
+  rounds.push({type:'choose', kind:'cycle', prompt:'The seeds fall in the soil. What grows next?', options:shuffle([{key:'sprout',em:'🌱',label:'A new sprout'},{key:'pizza',em:'🍕',label:'A pizza',say:'A pizza? Seeds don’t grow pizza!'},{key:'rock',em:'🪨',label:'A rock',say:'A rock? Rocks don’t grow!'}]), answer:'sprout', face:'🌱', hintText:'The glowing card is right. Tap it.', reveal:'A new sprout grows! Tap the sprout.', right:'Yes! A new sprout, and it starts all over again.', stageTo:1});
+  return rounds;
+}
+function beeRound(n){ return {type:'bee', prompt:'Tap the bee. Then tap the flower.', answer:'flower', face:'🐝', hintText:'The bee is glowing. Tap the bee first.', reveal:'Tap the bee, then tap the flower.', right:'Buzz! The bee carries pollen to the flower.', fixedStage:5, n}; }
+function helperChoose(prompt, right, wrongs, rightText){
+  return {type:'choose', kind:'helper', prompt, options:shuffle([right, ...wrongs]), answer:right.key, face:'🐝', hintText:'The glowing card is right. Tap it.', reveal:`${rightText} Tap it.`, right:rightText, fixedStage:5};
+}
+function buildHelpers(){
+  return [
+    beeRound(1),
+    helperChoose('Why do we need bees?', {key:'pollen',em:'🐝✨',label:'They carry pollen'}, [{key:'water',em:'💧',label:'They water plants',say:'Bees don’t carry water!'},{key:'dig',em:'⛏️',label:'They dig holes',say:'Bees are too small to dig!'}], 'Bees carry pollen, so flowers can make seeds.'),
+    helperChoose('Who makes the soil soft and rich?', {key:'worm',em:'🪱',label:'The worm'}, [{key:'cat',em:'🐱',label:'A cat',say:'A cat? Cats nap in the sun!'},{key:'bee',em:'🐝',label:'The bee',say:'Bees are busy with flowers!'}], 'Worms wiggle through the soil and make it rich.'),
+    helperChoose('What brings the rain?', {key:'cloud',em:'🌧️',label:'Rain clouds'}, [{key:'sun',em:'☀️',label:'The sun',say:'The sun is hot, not wet!'},{key:'moon',em:'🌙',label:'The moon',say:'The moon just shines at night!'}], 'Rain clouds bring the water.'),
+    beeRound(2),
+    helperChoose('What gives plants light?', {key:'sun',em:'☀️',label:'The sun'}, [{key:'teddy',em:'🧸',label:'A teddy',say:'A teddy? Teddies don’t glow!'},{key:'worm',em:'🪱',label:'The worm',say:'The worm lives in the dark soil!'}], 'The sun gives plants their light.')
+  ];
+}
+function gardenRound(plantKey, kind){
+  const p = GARDEN.find(g=>g.key===plantKey); const answer = p[kind];
+  const opts = kind==='water' ? WATER_OPTS : SUN_OPTS;
+  const w = kind==='water' ? AMOUNT_WORD[answer] : SUN_WORD[answer];
+  return {type:'choose', kind:'garden', pot:plantKey, amountKind:kind, prompt:`This is the ${p.name.toLowerCase()}. Read its card. How much ${kind}?`, options:opts, answer, face:p.em, hintText:`Look at the card. The ${kind==='water'?'drops':'suns'} show how much. The glowing button is right.`, reveal:`The ${p.name.toLowerCase()} likes ${w}. Tap it.`, right:`Yes! The ${p.name.toLowerCase()} likes ${w}.`, hidePot:true};
+}
+function buildGarden(){
+  return [gardenRound('cactus','water'), gardenRound('fern','sun'), gardenRound('sunflower','sun'), gardenRound('tomato','water'), gardenRound('cactus','sun'), gardenRound('fern','water')];
+}
+function seasonRound(sk){
+  const s = SEASONS[sk];
+  const wrongs = shuffle(SEASON_ORDER.filter(k=>k!==sk)).slice(0,2).map(k=>Object.assign({}, SEASONS[k].happens, {say:`Not yet! That happens in ${SEASONS[k].name.toLowerCase()}.`}));
+  return {type:'choose', kind:'season', season:sk, prompt:`It is ${s.name.toLowerCase()} ${s.em}. What happens in the garden?`, options:shuffle([s.happens, ...wrongs]), answer:s.happens.key, face:s.em, hintText:'The glowing card is right. Tap it.', reveal:`In ${s.name.toLowerCase()}, ${s.happens.label.toLowerCase()}. Tap it.`, right:`Yes! In ${s.name.toLowerCase()}, ${s.happens.label.toLowerCase()}.`, stageTo:s.stage};
+}
+function buildSeasons(){
+  const r = SEASON_ORDER.map(seasonRound);
+  r.push({type:'choose', kind:'season', season:'spring', prompt:'When do we plant the seeds?', options:shuffle([{key:'spring',em:'🌸',label:'Spring'},{key:'winter',em:'❄️',label:'Winter',say:'Brrr! The soil is frozen in winter.'},{key:'fall',em:'🍂',label:'Fall',say:'In fall the seeds are falling, not planted.'}]), answer:'spring', face:'🌸', hintText:'The glowing card is right. Tap it.', reveal:'We plant in spring. Tap spring.', right:'Yes! We plant seeds in spring.', stageTo:1});
+  r.push({type:'choose', kind:'season', season:'winter', prompt:'When does the garden rest?', options:shuffle([{key:'winter',em:'❄️',label:'Winter'},{key:'summer',em:'☀️',label:'Summer',say:'Summer is busy growing time!'},{key:'spring',em:'🌸',label:'Spring',say:'Spring is planting time!'}]), answer:'winter', face:'❄️', hintText:'The glowing card is right. Tap it.', reveal:'The garden rests in winter. Tap winter.', right:'Yes! The garden rests in winter.', stageTo:0});
+  return r;
+}
+function buildBig(){
+  const pool = [
+    needRound('water','Your sunflower is thirsty. What does it need?',2),
+    amountRound('water','some','The soil is dry. How much water?'),
+    needRound('sun','Your sunflower wants light. What does it need?',1),
+    jobRound(pick(['roots','leaf','stem'])),
+    amountRound('sun','some','How much sun today?'),
+    helperChoose('Who carries pollen to the flower?', {key:'bee',em:'🐝',label:'The bee'}, [{key:'car',em:'🚗',label:'A car',say:'A car? Beep beep, no!'},{key:'sock',em:'🧦',label:'A sock',say:'A sock? Socks can’t fly!'}], 'The bee carries the pollen.')
+  ];
+  return pool.map(r => Object.assign(r, {grow:true, fixedStage:undefined, mood: r.kind==='need' ? 'droop' : null}));
+}
+const LEVELS = [
+  {title:'What does it need?', ico:'☀️💧', build:buildNeeds, startStage:1, teach:'sun, water, soil and air'},
+  {title:'Just enough', ico:'🚿', build:buildAmounts, startStage:1, teach:'too little, too much, just right'},
+  {title:'Parts of a plant', ico:'🌿', build:buildParts, startStage:5, teach:'roots, stem, leaf, flower, seeds and their jobs'},
+  {title:'Life cycle', ico:'🔁', build:buildCycle, startStage:0, teach:'seed to sprout to plant to flower to seeds'},
+  {title:'Garden helpers', ico:'🐝', build:buildHelpers, startStage:5, teach:'bees, worms, sun and rain'},
+  {title:'Grow a garden', ico:'🪴', build:buildGarden, startStage:0, teach:'different plants need different care'},
+  {title:'Seasons', ico:'🍂', build:buildSeasons, startStage:1, teach:'spring, summer, fall, winter'},
+  {title:'The big sunflower', ico:'🌻', build:buildBig, startStage:0, teach:'everything, all mixed up'}
+];
+
+/* ---------- game state ---------- */
+let G = null, run = 0, coachLine = '', lastBubbleSpeech = '', levelsThisSitting = 0, idleMs = 14000;
+function levelConfig(n){ const i = Math.min(n, LEVELS.length) - 1; return Object.assign({n}, LEVELS[i], n > LEVELS.length ? {title:'Sunflower Champion '+(n-LEVELS.length)} : {}); }
+
+/* ---------- idle nudge ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < idleMs) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- UI helpers ---------- */
+function show(viewId){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id===viewId)); }
+function coach(text, face, speak=true){ coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face; if(speak) Voice.say(text); }
+function toast(text){ const t = document.createElement('div'); t.className='toast'; t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600); }
+function bubble(html, speakText){ el.bubble.innerHTML = html; el.bubble.classList.add('show'); if(speakText){ lastBubbleSpeech = speakText; Voice.say(speakText); } }
+function hideBubble(){ el.bubble.classList.remove('show'); }
+function wormSay(text, ms=2600){ el.worm.classList.add('peek'); el.wormsay.textContent = text; el.wormsay.classList.add('show'); clearTimeout(wormSay.t); wormSay.t = setTimeout(()=>{ el.wormsay.classList.remove('show'); el.worm.classList.remove('peek'); }, ms); }
+function roboSay(text, ms=2200){ el.robosay.textContent = text; el.robosay.classList.add('show'); clearTimeout(roboSay.t); roboSay.t = setTimeout(()=>el.robosay.classList.remove('show'), ms); }
+function pct(x){ return x+'%'; }
+function sparkle(xPct, yPct, em, n=8, spread=14){
+  for(let i=0;i<n;i++){ const s = document.createElement('div'); s.className='sparkle'; s.textContent = em; s.style.left=pct(xPct); s.style.top=pct(yPct);
+    s.style.setProperty('--dx', ((Math.random()*2-1)*spread)+'cqw'); s.style.setProperty('--dy', (-(Math.random()*spread)-3)+'cqw'); el.fx.appendChild(s); setTimeout(()=>s.remove(), 1300); }
+}
+function drops(xPct, yPct, n=6){ for(let i=0;i<n;i++){ const d=document.createElement('div'); d.className='drop'; d.textContent='💧'; d.style.left=pct(xPct+(Math.random()*2-1)*6); d.style.top=pct(yPct); d.style.animationDelay=(i*0.08)+'s'; el.fx.appendChild(d); setTimeout(()=>d.remove(),1000); } }
+function setRoundChip(){ el.roundChip.textContent = `${Math.min(G.round+1, G.total)} / ${G.total}`; el.strip.innerHTML = G.rounds.map((r,i)=>`<span class="st ${i<G.round||(i===G.round&&r.solved)?'ok':''}">${i<G.round||(i===G.round&&r.solved)?'✓':i+1}</span>`).join(''); }
+function setSeason(sk){ el.scene.className = sk ? 'season-'+sk : ''; el.snow.classList.toggle('on', sk==='winter'); el.leaves.innerHTML = sk==='fall' ? [0,1,2,3,4].map(i=>`<span style="left:${10+i*18}%;animation-delay:${-i*1.3}s">🍂</span>`).join('') : ''; el.sun.style.opacity = sk==='winter' ? .5 : 1; }
+if(!el.snow.children.length) el.snow.innerHTML = [0,1,2,3,4,5,6].map(i=>`<span style="left:${5+i*14}%;animation-delay:${-i*0.9}s">❄️</span>`).join('');
+
+/* ---------- Robo the garden robot: waters himself, short-circuits, sneezes ---------- */
+async function roboSneeze(myRun){
+  const alive = () => run === myRun;
+  el.robot.classList.add('tipping'); Sound.splash(); roboSay('Oops! Wrong pot!');
+  await wait(900); if(!alive()) return;
+  el.robot.classList.remove('tipping'); el.robot.classList.add('zap'); Sound.zap(); roboSay('Bzzzt!');
+  await wait(700); if(!alive()) return;
+  el.robot.classList.remove('zap'); roboSay('Ah… ah… ah…');
+  await wait(700); if(!alive()) return;
+  el.robot.classList.add('sneeze'); Sound.sneeze(); roboSay('CHOO! 🤧'); toast('Ah-CHOO!');
+  sparkle(80, 60, '✨', 10, 16); sparkle(78, 62, '💛', 5, 12);
+  await wait(900); if(!alive()) return;
+  el.robot.classList.remove('sneeze'); roboSay('Excuse me!', 1400);
+}
+
+/* ---------- overflow / droop / crisp effects ---------- */
+async function overflowPot(myRun){
+  el.potwrap.classList.add('overflow'); Sound.glug(); drops(50, 30, 8);
+  el.wormfloat.classList.remove('go'); void el.wormfloat.offsetWidth; el.wormfloat.classList.add('go'); Sound.splash();
+  wormSay('Glug! Too much! Pass the snorkel!', 2600);
+  await wait(2000); if(run!==myRun) return;
+  el.potwrap.classList.remove('overflow');
+}
+
+/* ---------- level flow ---------- */
+function startLevel(n){
+  run++; const myRun = run;
+  const cfg = levelConfig(n);
+  const rounds = cfg.build().map(r => Object.assign({wrong:0, hint:0, solved:false, revealed:false, step:0, busy:false}, r));
+  G = {cfg, n, rounds, total:rounds.length, round:0, stage:cfg.startStage, stats:{questions:0,firstTry:0,wrong:0}, complete:false, helper:pick(HELPERS), placed:[], sneezed:false, bloomed:false};
+  el.lvlChip.textContent = n; hideOverlay(); hideBubble();
+  el.helperBody.textContent = G.helper.em; el.helper.className='helper'; el.robot.className='robot'; el.bee.className='bee'; el.gpots.className='gpots'; el.fx.innerHTML='';
+  el.potwrap.className='potwrap'; el.sun.className='sunbig'; el.sun.style.left=''; el.sun.style.top='';
+  setSeason(n===7 ? 'spring' : null);
+  renderPlant(G.stage, {labels:n===3, hits:true});
+  if(n===6) renderGarden();
+  coach(`Level ${n}: ${cfg.title}.`, '🌻');
+  setTimeout(()=>{ if(run===myRun) playRound(myRun); }, fast ? 50 : 900);
+}
+function renderGarden(){
+  el.gpots.innerHTML = GARDEN.map(g=>`<div class="gpot" data-key="${g.key}"><span class="pl">${g.em}</span><span class="pt"></span><span class="nm">${g.name}</span></div>`).join('');
+  el.gpots.classList.add('on');
+}
+function playRound(myRun){
+  if(run!==myRun) return;
+  const q = G.rounds[G.round]; G.q = q;
+  setRoundChip();
+  el.choices.className='choices'; el.choices.innerHTML=''; el.choicenote.hidden = true; el.gcard.hidden = true;
+  el.plant.querySelectorAll('.hit').forEach(h=>h.classList.remove('glow','reveal'));
+  el.bee.className='bee'; el.gpots.querySelectorAll('.gpot').forEach(p=>p.classList.remove('now'));
+  el.potwrap.classList.toggle('hide', !!q.hidePot);
+  plantMood(q.mood || null);
+  if(q.fixedStage !== undefined && plantStage !== q.fixedStage) setStage(q.fixedStage);
+  if(q.season) setSeason(q.season);
+  if(q.kind==='season' && q.stageTo !== undefined && G.round < 4) setStage(q.stageTo === 0 && q.season==='winter' ? 0 : (q.season==='spring' ? 0 : q.stageTo));
+  if(q.mood==='droop'){ Sound.droop(); }
+  if(q.type==='choose' || q.type==='order'){
+    show('v-choices');
+    if(q.type==='order'){
+      el.choices.className='choices five';
+      el.choices.innerHTML = CYCLE.map(c=>`<button class="opt ${G.placed.includes(c.key)?'placed':''}" data-key="${c.key}" aria-label="${c.label}"><span class="num" ${G.placed.includes(c.key)?'':'hidden'}>${G.placed.indexOf(c.key)+1}</span><svg viewBox="40 0 140 300">${plantSVG({stage:c.stage, id:'c-'+c.key})}</svg><span class="nm">${c.label}</span></button>`).join('');
+    } else {
+      el.choices.innerHTML = q.options.map(o=>`<button class="opt" data-key="${o.key}" aria-label="${o.label}"><span class="em">${o.em}</span><span class="nm">${o.label}</span></button>`).join('');
+      if(q.kind==='garden'){ el.choices.classList.add('amount'); const g = GARDEN.find(x=>x.key===q.pot); el.gcard.hidden=false; el.gcard.innerHTML = `<span class="pic">${g.em}</span><div class="cues"><b>${g.name}</b><div>Water: <span>${'💧'.repeat({little:1,some:2,lot:3}[g.water])}</span></div><div>Sun: <span>${{little:'🌥️',some:'☀️',lot:'☀️☀️☀️'}[g.sun]}</span></div></div>`; el.gpots.querySelector(`[data-key="${q.pot}"]`)?.classList.add('now'); }
+      if(q.showPart){ const h = el.plant.querySelector(`.hit[data-part="${q.showPart}"]`); if(h) h.classList.add('glow'); const l = el.plant.querySelector(`.lbl[data-part="${q.showPart}"]`); if(l) l.classList.add('on'); }
+    }
+    setNudge(()=>[el.choices.querySelector(`.opt[data-key="${q.answer}"]`)], q.prompt);
+  } else if(q.type==='amount'){
+    show('v-choices'); el.choices.className='choices amount';
+    el.choices.innerHTML = q.options.map(o=>`<button class="opt" data-key="${o.key}" aria-label="${o.label}"><span class="em">${o.em}</span><span class="nm">${o.label}</span></button>`).join('');
+    if(q.kind==='water'){ el.choicenote.hidden=false; el.choicenote.textContent = 'Tap how much water to give.'; } else { el.choicenote.hidden=false; el.choicenote.textContent = 'Tap how much sun to give.'; }
+    setNudge(()=>[el.choices.querySelector(`.opt[data-key="${q.answer}"]`)], q.prompt);
+  } else if(q.type==='part'){
+    show('v-tap'); el.tapnote.innerHTML = `<span class="big">${PARTS[q.answer].em} 👆</span>Tap the <b>${q.answer}</b> on the plant.`;
+    el.partbtns.innerHTML = '';
+    setNudge(()=>[...el.plant.querySelectorAll(`.hit[data-part="${q.answer}"]`)].slice(0,1), q.prompt);
+  } else if(q.type==='bee'){
+    show('v-tap'); el.tapnote.innerHTML = `<span class="big">🐝 👉 🌻</span>Tap the bee. Then tap the flower.`;
+    el.partbtns.innerHTML = `<button class="opt" data-bee="bee" style="grid-column:span 2"><span class="em">🐝</span><span class="nm">Tap the bee</span></button><button class="opt" data-bee="flower" style="grid-column:span 3"><span class="em">🌻</span><span class="nm">Tap the flower</span></button>`;
+    el.bee.classList.add('on'); el.bee.style.left = q.n===1 ? '58%' : '22%'; el.bee.style.top = q.n===1 ? '20%' : '26%';
+    setNudge(()=>[el.bee], q.prompt);
+  }
+  coach(q.prompt, q.face);
+}
+function nextRound(myRun){
+  if(run!==myRun) return;
+  G.round++;
+  if(G.round >= G.total){ finishLevel(myRun); return; }
+  playRound(myRun);
+}
+async function solve(myRun, viaReveal){
+  const q = G.q; if(!q || q.solved || q.busy) return;
+  q.solved = true; q.busy = true;
+  G.stats.questions++; if(q.wrong===0) G.stats.firstTry++;
+  setRoundChip(); setNudge(null);
+  Sound.yay();
+  const alive = () => run===myRun;
+  if(q.type==='part'){ el.plant.querySelectorAll('.hit').forEach(h=>h.classList.remove('glow','reveal')); const l = el.plant.querySelector(`.lbl[data-part="${q.answer}"]`); if(l) l.classList.add('on'); sparkle(50, 40, '✨', 6, 10); }
+  if(q.type==='order'){ G.placed.push(q.answer); setStage(q.stageTo); Sound.grow(); }
+  if(q.kind==='season'){ if(q.stageTo !== undefined) setStage(q.stageTo); if(q.season==='fall') seedDrop(); if(q.season==='spring') { plantMood(null); } }
+  if(q.kind==='garden'){ const p = el.gpots.querySelector(`[data-key="${q.pot}"]`); if(p){ p.classList.remove('sad'); p.classList.add('grown'); setTimeout(()=>p.classList.remove('grown'), 1500); } sparkle(40, 50, '✨', 6, 10); }
+  if(q.grow){ plantMood(null); if(q.kind==='need' && q.answer==='water') drops(50, 28, 6); if(q.kind==='need' && q.answer==='sun'){ el.sun.classList.add('spin'); setTimeout(()=>el.sun.classList.remove('spin'), 1500); } G.stage = Math.min(6, G.stage+1); setStage(G.stage); Sound.grow(); sparkle(50, 45, '✨', 6, 10); }
+  if(q.type==='amount' && q.kind==='water') drops(50, 28, 6);
+  if(q.type==='bee'){ el.bee.classList.add('landed'); el.bee.style.left='50%'; el.bee.style.top='16%'; Sound.buzz(1.2); setTimeout(()=>sparkle(50, 22, '✨', 8, 8), 1100); }
+  el.helper.classList.add('happy'); setTimeout(()=>el.helper.classList.remove('happy'), 1100);
+  const praise = pick(PRAISE);
+  coach(`${praise} ${q.right}`, '🎉');
+  if(Math.random()<0.5) wormSay(pick(WORM_YAY));
+  await wait(1800); if(!alive()) return;
+  if(!G.sneezed && G.round===2 && G.n!==8){ G.sneezed = true; await roboSneeze(myRun); if(!alive()) return; }
+  q.busy = false;
+  nextRound(myRun);
+}
+function skipWait(){ /* __game.next(): jump straight to the next round when the current one is solved */
+  if(!G || !G.q || !G.q.solved || G.complete) return false;
+  run++; const myRun = run; G.q.busy=false; el.robot.className='robot';
+  nextRound(myRun); return true;
+}
+async function wrong(myRun, key){
+  const q = G.q; if(!q || q.solved || q.busy) return;
+  q.wrong++; G.stats.wrong++; Sound.oops();
+  const alive = () => run===myRun;
+  const btn = el.choices.querySelector(`.opt[data-key="${key}"]`); if(btn){ btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope'); }
+  let react = '';
+  const opt = (q.options||[]).find(o=>o.key===key);
+  if(opt && opt.say) react = opt.say;
+  else if(q.kind==='need' && NEEDS[key]) react = `${NEEDS[key].label} is good, but not right now.`;
+  else if(q.type==='amount' || q.kind==='garden'){
+    const kind = q.amountKind || q.kind; const order = ['little','some','lot']; const more = order.indexOf(key) > order.indexOf(q.answer);
+    q.busy = true;
+    if(kind==='water'){
+      if(more){ react = 'Whoa! Too much! The pot is overflowing.'; if(q.kind==='garden'){ const p = el.gpots.querySelector(`[data-key="${q.pot}"]`); if(p) p.classList.add('sad'); wormSay('Glug! Too soggy!'); } else await overflowPot(myRun); }
+      else { react = 'Still thirsty! It needs a bit more.'; if(q.kind==='garden'){ const p = el.gpots.querySelector(`[data-key="${q.pot}"]`); if(p) p.classList.add('sad'); } else { plantMood('droop'); Sound.droop(); } await wait(1200); }
+    } else {
+      if(more){ react = 'Too hot! The leaves went crispy.'; if(q.kind==='garden'){ const p = el.gpots.querySelector(`[data-key="${q.pot}"]`); if(p) p.classList.add('sad'); } else { plantMood('crisp'); Sound.droop(); } await wait(1200); }
+      else { react = 'Too dark! The plant is drooping.'; if(q.kind==='garden'){ const p = el.gpots.querySelector(`[data-key="${q.pot}"]`); if(p) p.classList.add('sad'); } else { plantMood('pale'); el.plant.classList.add('droop'); Sound.droop(); } await wait(1200); }
+    }
+    if(!alive()) return; q.busy = false;
+    if(q.kind!=='garden') plantMood(null);
+  }
+  else if(q.type==='order'){ react = 'Not that one yet.'; }
+  else if(q.type==='part'){ react = `That’s the ${key}. Look again!`; }
+  else if(q.type==='bee'){ react = 'Tap the bee first!'; }
+  else react = 'Good try!';
+  if(q.kind==='need' && opt && opt.say && Math.random()<0.6) wormSay(pick(['I’d eat it!','Ha! Silly!','Not for plants!']));
+  if(q.wrong === 1){ q.hint = 1; showHint(q); coach(`${react} ${q.hintText}`, '🤗'); }
+  else { q.hint = 2; q.revealed = true; showReveal(q); coach(`${react} ${q.reveal}`, '💛'); }
+}
+function targetEls(q){
+  if(q.type==='part') return [...el.plant.querySelectorAll(`.hit[data-part="${q.answer}"]`)];
+  if(q.type==='bee') return [q.step===0 ? el.bee : el.plant.querySelector('.hit[data-part="flower"]'), q.step===0 ? el.partbtns.querySelector('[data-bee="bee"]') : el.partbtns.querySelector('[data-bee="flower"]')].filter(Boolean);
+  return [el.choices.querySelector(`.opt[data-key="${q.answer}"]`)].filter(Boolean);
+}
+function showHint(q){
+  if(q.type==='order'){ el.choices.querySelectorAll('.opt').forEach(b=>{ const i = CYCLE.findIndex(c=>c.key===b.dataset.key); if(!b.classList.contains('placed')){ b.classList.add('ghost'); const n=b.querySelector('.num'); n.hidden=false; n.textContent=i+1; } }); }
+  targetEls(q).forEach(t=>t.classList.add('glow'));
+  setNudge(()=>targetEls(q), q.reveal);
+}
+function showReveal(q){
+  targetEls(q).forEach(t=>{ t.classList.remove('glow'); t.classList.add('reveal'); });
+  setNudge(()=>targetEls(q), q.reveal);
+}
+/* answers coming from taps or from the test hooks */
+function answer(key){
+  if(!G || !G.q || G.complete) return false;
+  const q = G.q, myRun = run; if(q.solved || q.busy) return false;
+  key = String(key);
+  if(q.type==='bee'){
+    if(q.step===0){ if(key==='bee'){ q.step=1; el.bee.classList.add('picked'); Sound.buzz(0.5); coach('Now tap the flower!', '🐝'); el.tapnote.innerHTML = `<span class="big">🌻 👆</span>Now tap the <b>flower</b>.`; setNudge(()=>targetEls(q), 'Now tap the flower.'); return true; } wrong(myRun, key); return false; }
+    if(key==='flower'){ solve(myRun); return true; } wrong(myRun, key); return false;
+  }
+  if(key === q.answer){ solve(myRun); return true; }
+  wrong(myRun, key); return false;
+}
+function findKey(text){ // choose(text) accepts a key or a visible label
+  const q = G && G.q; if(!q) return null; const t = String(text).trim().toLowerCase();
+  const opts = q.type==='order' ? CYCLE : (q.options||[]);
+  const o = opts.find(o=>o.key.toLowerCase()===t) || opts.find(o=>o.label.toLowerCase()===t);
+  if(o) return o.key;
+  if(q.type==='bee' && /bee|flower/.test(t)) return t.includes('bee') ? 'bee' : 'flower';
+  return t;
+}
+el.choices.addEventListener('click', e=>{ const b = e.target.closest('.opt'); if(!b || b.classList.contains('placed')) return; Sound.pop(); answer(b.dataset.key); });
+el.partbtns.addEventListener('click', e=>{ const b = e.target.closest('[data-bee]'); if(!b) return; Sound.pop(); answer(b.dataset.bee); });
+el.plant.addEventListener('pointerdown', e=>{
+  const h = e.target.closest('.hit'); if(!h || !G || !G.q) return;
+  const part = h.dataset.part;
+  if(G.q.type==='part'){ Sound.pop(); answer(part); }
+  else if(G.q.type==='bee' && (part==='flower'||part==='seeds')){ Sound.pop(); answer('flower'); }
+});
+el.bee.addEventListener('pointerdown', ()=>{ if(G && G.q && G.q.type==='bee'){ Sound.pop(); answer('bee'); } });
+
+/* ---------- seeds, bloom finale, level complete ---------- */
+function seedDrop(){ for(let i=0;i<8;i++){ const s=document.createElement('div'); s.className='seedfall'; s.textContent='🌰'; s.style.left=pct(48+(Math.random()*2-1)*4); s.style.top='22%'; s.style.setProperty('--dx',((Math.random()*2-1)*16)+'cqw'); s.style.setProperty('--dy',(28+Math.random()*10)+'cqw'); s.style.animationDelay=(i*0.12)+'s'; el.fx.appendChild(s); setTimeout(()=>s.remove(),2600); } }
+async function bloomFinale(myRun){
+  const alive = () => run===myRun;
+  G.bloomed = true; show('v-wait'); el.waitEm.textContent='🌻'; el.waitText.textContent='It’s blooming!';
+  setStage(6); setStage(5); coach('It bloomed! Watch it follow the sun.', '🌻');
+  Sound.grow();
+  const headin = el.plant.querySelector('.headin');
+  el.sun.style.left='74%'; el.sun.style.top='2%'; if(headin) headin.style.transform='rotate(22deg)';
+  await wait(1300); if(!alive()) return;
+  el.sun.style.left='6%'; el.sun.style.top='8%'; if(headin) headin.style.transform='rotate(-22deg)';
+  await wait(1300); if(!alive()) return;
+  if(headin) headin.style.transform='rotate(0deg)';
+  setStage(6); seedDrop(); coach('Now it drops its seeds. Snack time!', '🌰');
+  el.helper.classList.add('snacking','chomp'); Sound.chomp(); setTimeout(()=>Sound.chomp(), 300); setTimeout(()=>Sound.chomp(), 600);
+  bubble('Mmm, sunflower seeds! 😋', `${G.helper.name} says: Mmm, sunflower seeds!`);
+  roboSneeze(myRun);
+  await wait(2400); if(!alive()) return;
+  el.helper.classList.remove('chomp'); hideBubble();
+}
+async function finishLevel(myRun){
+  if(run!==myRun) return;
+  G.complete = true; setNudge(null); show('v-wait'); el.waitEm.textContent='🌟'; el.waitText.textContent='Level done!';
+  if(G.n===8 || G.n>LEVELS.length){ await bloomFinale(myRun); if(run!==myRun) return; }
+  const s = G.stats; const rate = s.questions ? s.firstTry/s.questions : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  progress.unlocked = Math.max(progress.unlocked, G.n+1);
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  const msg = stars===3 ? 'Every answer right on the first try. You’re a garden superstar!' : stars===2 ? 'Great growing! You know a lot about plants.' : 'You finished the whole level! Plants and gardeners get better with practice.';
+  Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3;
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns"><button class="subbtn" id="btn-next">Next level ▶</button><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `<button class="bigbtn" id="btn-next">Next level ▶</button><div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay(`<div class="hero">🌻${G.helper.em}</div><h1>It grew!</h1><h2>Level ${G.n} done: ${G.cfg.title}</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    <div class="fact"><b>${s.firstTry}</b> of <b>${s.questions}</b> right first time · ${G.helper.name} and the worm say thanks 🪱</div>
+    ${buttons}`);
+  Voice.say(`It grew! Level ${G.n} done. ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  $('#btn-next').addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  run++; G = null; levelsThisSitting = 0;
+  const idea = pick(['go plant a real bean in a cup of soil and watch it grow','go look for a real leaf and find its lines','go give a real plant a little drink of water','go find a flower outside and look for a bee','go play outside for a bit']);
+  showOverlay(`<div class="hero">👋🌻</div><h2>Great work today!</h2><p>The garden is resting now. Stretch your arms, ${idea}. The worm will keep the soil warm.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say(`Great work today! The garden is resting now. Stretch your arms, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  run++; G = null;
+  renderPlant(5, {hits:false}); el.gpots.className='gpots'; el.potwrap.className='potwrap'; setSeason(null);
+  showOverlay(`<div class="hero">🌰🌱🌻</div><h1>Seed to Sunflower</h1>
+    <p>Give your plant what it needs, learn its parts, and grow a seed all the way to a big sunflower. Robo helps… when he isn’t watering himself!</p>
+    <div class="fact">Learn <b>☀️ sun</b> · <b>💧 water</b> · <b>🌱 soil</b> · <b>🌬️ air</b> · <b>🔁 seed to seed</b></div>
+    <button class="bigbtn" id="btn-play">Play! 🌻</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap any speech bubble or 🔊 to hear it again.</p>`);
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What each level teaches</b><ul>
+      ${LEVELS.map((l,i)=>`<li><b>${i+1}. ${l.title}</b>: ${l.teach}</li>`).join('')}</ul>
+    <b style="display:block;margin-top:10px">How hints work</b><ul>
+      <li>First wrong answer: a picture hint. The right thing glows, or the right order shows faded.</li>
+      <li>Second wrong answer: the answer, ready to tap. Nobody fails a level.</li>
+      <li>If your child stops for a while, the instruction is repeated and the thing to tap wiggles.</li>
+      <li>Stars come only from accuracy. Nothing is random.</li></ul>
+    <b style="display:block;margin-top:10px">Try it for real</b><ul>
+      <li>Plant a dried bean in a cup of soil on a sunny windowsill. Water it a little every few days and watch for the sprout in about a week. Ask: what does it need today?</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul>
+      <li>No streaks, timers, daily rewards, countdowns or notifications. Nothing ever says “come back”.</li>
+      <li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li>
+      <li>No accounts, no ads, nothing leaves this device. Sound and read-aloud toggles are in the top bar. ⛶ makes it full screen on a tablet.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  run++; G = null;
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ico">${c.ico}</span></button>`;
+  }
+  showOverlay(`<h2>Choose a level</h2><p>Each level grows a plant. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>startLevel(+b.dataset.n)));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+el.bubble.addEventListener('pointerdown', e=>{ e.stopPropagation(); if(lastBubbleSpeech){ const was=Voice.enabled; Voice.enabled=true; Voice.say(lastBubbleSpeech); Voice.enabled=was; } });
+el.wormsay.addEventListener('pointerdown', e=>{ e.stopPropagation(); const was=Voice.enabled; Voice.enabled=true; Voice.say(el.wormsay.textContent); Voice.enabled=was; });
+el.worm.addEventListener('pointerdown', ()=>{ if(!el.wormsay.classList.contains('show')) wormSay(pick(['Hello! I live in the pot.','I make the soil nice and soft.','Wiggle wiggle!','Plants love good soil.'])); });
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+
+/* ---------- boot ---------- */
+function boot(data){ if(data && data.level && data.level <= progress.unlocked) startLevel(data.level); else showTitle(); }
+try{ window.claude?.hot?.snapshot?.(()=>({level: G ? G.n : null})); }catch(e){}
+if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+
+/* ---------- debug hooks for automated testing ---------- */
+window.__game = {
+  startLevel, showTitle, showLevels,
+  get state(){
+    if(!G) return {level:null};
+    const q = G.q || {};
+    return {level:G.n, title:G.cfg.title, round:G.round, total:G.total, type:q.type||null, kind:q.kind||null, answer:q.answer||null, answers:q.answer?[q.answer]:[], options:(q.type==='order'?CYCLE:(q.options||[])).map(o=>o.key), solved:!!q.solved, wrong:q.wrong||0, hint:q.hint||0, revealed:!!q.revealed, busy:!!q.busy, step:q.step||0, stage:plantStage, plantStage:STAGES[plantStage], placed:G.placed.slice(), overflow:el.potwrap.classList.contains('overflow'), mood:el.plant.className.baseVal||el.plant.getAttribute('class')||'', complete:G.complete, bloomed:G.bloomed, stats:Object.assign({},G.stats)};
+  },
+  choose(text){ return answer(findKey(text)); },
+  tapPart(name){ return answer(String(name)); },
+  placeCard(name){ return answer(findKey(name)); },
+  water(level){ return answer(String(level)); },
+  next(){ return skipWait(); },
+  get fast(){ return fast; }, set fast(v){ fast = !!v; },
+  get idleMs(){ return idleMs; }, set idleMs(v){ idleMs = v; },
+  get sittingLevels(){ return levelsThisSitting; },
+  data:{LEVELS, CYCLE, GARDEN, SEASONS}
+};
+})();
+</script>
+</body>
+</html>
