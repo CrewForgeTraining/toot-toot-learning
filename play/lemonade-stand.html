@@ -672,7 +672,7 @@ function addToTray(v, fromBtn){
   const q = G.q; const cur = trayTotal(q);
   if(cur + v > q.target){ // over-pay: the coin bounces gently back
     const c = coinEl(v, 'bounce'); el.tray.appendChild(c); Sound.boing(); setTimeout(()=>c.remove(), 700);
-    miss(q, `${DENOMS[v].a} is too much. We need ${spoken(q.target - cur)} more.`);
+    const a = DENOMS[v].a; miss(q, `${a[0].toUpperCase()+a.slice(1)} is too much. We need ${spoken(q.target - cur)} more.`);
     return false;
   }
   q.tray.push(v); const c = coinEl(v, 'in'); el.tray.appendChild(c); Sound.clink();
@@ -763,9 +763,10 @@ function miss(q, why){
   if(q.mode === 'pay' || q.mode === 'change'){
     const need = ghostRemaining(q);
     const hopFrom = q.mode === 'change' ? q.price : trayTotal(q);
-    const line = q.mode === 'change' ? `Count up from ${fmt(q.price)} to ${fmt(q.paid)}:` + countUpHTML(q.price, need) : `Fill the ghost coins:` + countUpHTML(trayTotal(q), need);
+    const hops = q.tray.concat(need); // coins already given, then the ones still needed
+    const line = q.mode === 'change' ? `Count up from ${fmt(q.price)} to ${fmt(q.paid)}:` + countUpHTML(q.price, hops) : `Fill the ghost coins:` + countUpHTML(trayTotal(q), need);
     setHint(line);
-    const sp = q.mode === 'change' ? countUpSpoken(q.price, need) : `Tap ${coinWords(need)}.`;
+    const sp = q.mode === 'change' ? countUpSpoken(q.price, hops) : `Tap ${coinWords(need)}.`;
     if(!second) coach(`${pick(TRY_AGAIN)} ${why}`, '🤗', true, `${pick(TRY_AGAIN)} ${why} ${sp}`);
     else coach(`Tap ${coinWords(need)}. Then tap Give it ✓`, '💛', true, `Here is the answer. Tap ${coinWords(need)}. ${sp} Then tap give it.`);
     void hopFrom;
