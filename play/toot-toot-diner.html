@@ -25,6 +25,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow-x:hidden;touch-action:manipulation}
 #topbar,#panel,#scene,.card,.toot-app{user-select:none;-webkit-user-select:none}
+[hidden]{display:none!important}
 button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem}
 button:focus-visible,[tabindex]:focus-visible{outline:4px solid var(--focus);outline-offset:2px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
@@ -57,7 +58,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 @media (orientation:landscape) and (max-height:560px){
   .toot-app{padding-block:6px 8px;gap:6px}#topbar{gap:8px}.logo .sign{font-size:.95rem;padding:2px 10px}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:44px;height:44px;font-size:1.1rem}.meter .bar{height:18px}
   #scene{width:min(100%,calc((100vh - 72px)*16/9));margin-inline:auto}#panel{padding:10px;gap:8px;min-height:0;max-height:calc(100vh - 72px);overflow:auto}
-  .hint{padding:6px 10px}.key{height:40px;font-size:1.2rem;border-radius:12px}.pad-keys{gap:6px}.numpad{gap:6px}.bigbtn{padding:11px 14px;font-size:1.1rem}.coach{padding:6px 10px}.coach p{font-size:.88rem}.coach .face{font-size:1.3rem}.coach .say{width:44px;height:44px}.equation{font-size:1.5rem}.wait{padding:6px 0}.wait .em{font-size:2rem}
+  .hint{padding:6px 10px}.key{height:44px;font-size:1.2rem;border-radius:12px}.pad-keys{gap:6px}.numpad{gap:6px}.bigbtn{padding:11px 14px;font-size:1.1rem}.coach{padding:6px 10px}.coach p{font-size:.88rem}.coach .face{font-size:1.3rem}.coach .say{width:44px;height:44px}.equation{font-size:1.5rem}.wait{padding:6px 0}.wait .em{font-size:2rem}
 }
 @media (max-width:600px){.logo .sign{font-size:1rem;padding:3px 10px}.chip{padding:4px 10px;font-size:.85rem}.meter label{font-size:.85rem}.iconbtn{width:44px;height:44px;font-size:1.15rem}}
 @media (max-width:600px) and (orientation:portrait){
@@ -758,7 +759,9 @@ const ui = (() => {
       if (!portrait) { if (scene.style.width) scene.style.width = ''; return; }
       const r = scene.getBoundingClientRect(); if (!r.width || !r.height) return;
       const aspect = r.width / r.height;
-      const free = innerHeight - document.documentElement.scrollHeight;   // >0 = spare room, <0 = page scrolls
+      const pad = parseFloat(getComputedStyle(app).paddingBottom) || 0;
+      const bottom = Math.max(...Array.from(app.children).filter(c => c.offsetParent !== null || c === stage).map(c => c.getBoundingClientRect().bottom)) + pad + (window.scrollY || 0);
+      const free = innerHeight - Math.max(bottom, document.documentElement.scrollHeight > innerHeight ? document.documentElement.scrollHeight : 0);   // >0 = spare room, <0 = page scrolls
       if (Math.abs(free) < 6) return;
       const maxW = stage.clientWidth;
       scene.style.width = '';                                             // measure the CSS default
@@ -787,10 +790,10 @@ const ui = (() => {
   /* speech bubble on any positioned host element; tap re-reads it */
   function bubble(host, content, speakText, o) {  /* o: {speak:false} to set the re-read text without speaking, {ids} for clips */
     let b = host.querySelector(':scope > .bubble');
-    if (!b) { b = html('<div class="bubble" role="button" tabindex="0"></div>'); host.appendChild(b); b.addEventListener('pointerdown', e => { e.stopPropagation(); if (b._speak) voice.say(b._speak, { force: true }); }); }
+    if (!b) { b = html('<div class="bubble" role="button" tabindex="0"></div>'); host.appendChild(b); b.addEventListener('pointerdown', e => { e.stopPropagation(); if (b._speak) voice.say(b._speak, Object.assign({ force: true }, b._ids ? { ids: b._ids } : {})); }); }
     if (content == null) { b.classList.remove('show'); return b; }
     b.innerHTML = content; b.classList.add('show');
-    if (speakText) { b._speak = speakText; lastBubble = speakText; if (!(o && o.speak === false)) voice.say(speakText, o && o.ids ? { ids: o.ids } : undefined); }
+    if (speakText) { b._speak = speakText; b._ids = o && o.ids ? o.ids : null; lastBubble = speakText; if (!(o && o.speak === false)) voice.say(speakText, o && o.ids ? { ids: o.ids } : undefined); }
     return b;
   }
   function wiggle(el, ms = 2200) { if (!el) return; el.classList.remove('nudge'); void el.offsetWidth; el.classList.add('nudge'); setTimeout(() => el.classList.remove('nudge'), ms); }
@@ -840,7 +843,7 @@ const ui = (() => {
     const breakTime = sitting >= 3;
     const msg = o.msg || (st === 3 ? 'Every answer right on the first try. Superstar!' : st === 2 ? 'Great work! You are getting stronger every time.' : 'You finished the whole level! Practice makes you stronger.');
     const buttons = breakTime
-      ? `<p><b>You’ve done ${sitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns"><button class="subbtn" id="btn-next">Next level ▶</button><button class="subbtn" id="btn-replay">Play again</button>${o.onLevels ? '<button class="subbtn" id="btn-levels">Choose level</button>' : ''}</div>`
+      ? `<p><b>You’ve done ${sitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${o.last ? '' : '<button class="subbtn" id="btn-next">Next level ▶</button>'}<button class="subbtn" id="btn-replay">Play again</button>${o.onLevels ? '<button class="subbtn" id="btn-levels">Choose level</button>' : ''}</div>`
       : `${o.last ? '' : '<button class="bigbtn" id="btn-next">Next level ▶</button>'}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play again</button>${o.onLevels ? '<button class="subbtn" id="btn-levels">Choose level</button>' : ''}<button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
     overlay(`${o.hero ? `<div class="hero">${o.hero}</div>` : ''}<h1>${esc(o.title || 'Level done!')}</h1>${o.subtitle ? `<h2>${esc(o.subtitle)}</h2>` : ''}
       ${o.noStars ? '' : `<div class="stars">${[1, 2, 3].map(i => `<span class="${i <= st ? 'lit' : ''}" style="animation-delay:${i * 0.25}s">⭐</span>`).join('')}</div>`}
@@ -855,7 +858,7 @@ const ui = (() => {
   function goodbye(o = {}) {
     sitting = 0; nudge.clear();
     const idea = o.idea || pick(o.ideas || ['go draw a picture of Robo', 'go stack some real blocks', 'go find a real menu and read the prices', 'go play outside for a bit', 'go get a drink of water and a stretch', 'go tell someone a joke']);
-    overlay(`<div class="hero">${o.hero || '👋'}</div><h2>Great work today!</h2><p>${o.text || `The game is closed for now. Stretch your arms, ${idea}. Robo will be here when you come back.`}</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+    overlay(`<div class="hero">${o.hero || '👋'}</div><h2>${esc(o.title || 'Great work today!')}</h2><p>${o.text || `The game is closed for now. Stretch your arms, ${idea}. Robo will be here next time.`}</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
     if (Toot.cast) castify($('.hero', refs.card));
     if (o.speak !== false) voice.say(o.spoken || `Great work today! Stretch your arms, ${idea}. See you next time!`, o.ids ? { ids: o.ids } : undefined);
     on('#btn-title', o.onBack);
