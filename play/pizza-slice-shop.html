@@ -350,7 +350,8 @@ function settle(el) {
   if (el._tootAnims) el._tootAnims.clear();
   el.querySelectorAll('*').forEach(p => { if (p._tootAnims) p._tootAnims.clear(); });
 }
-Toot.util = { $, $$, rnd, pick, shuffle, clamp, lerp, wait, html, esc, retrigger, anim, settle, reduced };
+const waitReal = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 150) : ms));  /* ignores Toot.speed: use inside freeze/slow-mo sequences */
+Toot.util = { $, $$, rnd, pick, shuffle, clamp, lerp, wait, waitReal, html, esc, retrigger, anim, settle, reduced };
 Toot.reduced = reduced;
 
 /* ======================================================================
@@ -734,10 +735,11 @@ const ui = (() => {
   }
   function chip(id, value) { const el = refs.chips[id]; if (el) el.textContent = value; }
   function show(viewId) { $$('.view', refs.views || document).forEach(v => v.classList.toggle('on', v.id === viewId)); if (refs.app) refs.app.dataset.view = viewId; }
-  function coach(text, face, speak = true) {
-    coachLine = text; if (refs.coachText) refs.coachText.textContent = text;
+  function coach(text, face, speak = true) {   /* speak: true | false | {spoken, ids} (spoken form + clip ids; re-read and nudge use it) */
+    const spoken = speak && typeof speak === 'object' ? (speak.spoken || text) : text;
+    coachLine = spoken; if (refs.coachText) refs.coachText.textContent = text;
     if (face && refs.coachFace) { if (Toot.cast && Toot.cast.names.includes(face)) { refs.coachFace.innerHTML = ''; refs.coachFace.appendChild(Toot.cast.make(face, { size: 40 })); } else refs.coachFace.textContent = face; }
-    if (speak) return voice.say(text);
+    if (speak) return voice.say(spoken, speak && typeof speak === 'object' && speak.ids ? { ids: speak.ids } : undefined);
   }
   function toast(text, host) {
     const h = host || refs.scene; if (!h) return;
@@ -802,7 +804,7 @@ const ui = (() => {
       ? `<p><b>You’ve done ${sitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns"><button class="subbtn" id="btn-next">Next level ▶</button><button class="subbtn" id="btn-replay">Play again</button>${o.onLevels ? '<button class="subbtn" id="btn-levels">Choose level</button>' : ''}</div>`
       : `${o.last ? '' : '<button class="bigbtn" id="btn-next">Next level ▶</button>'}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play again</button>${o.onLevels ? '<button class="subbtn" id="btn-levels">Choose level</button>' : ''}<button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
     overlay(`${o.hero ? `<div class="hero">${o.hero}</div>` : ''}<h1>${esc(o.title || 'Level done!')}</h1>${o.subtitle ? `<h2>${esc(o.subtitle)}</h2>` : ''}
-      <div class="stars">${[1, 2, 3].map(i => `<span class="${i <= st ? 'lit' : ''}" style="animation-delay:${i * 0.25}s">⭐</span>`).join('')}</div>
+      ${o.noStars ? '' : `<div class="stars">${[1, 2, 3].map(i => `<span class="${i <= st ? 'lit' : ''}" style="animation-delay:${i * 0.25}s">⭐</span>`).join('')}</div>`}
       <p>${msg}</p>${o.fact ? `<div class="fact">${o.fact}</div>` : ''}${buttons}`);
     if (o.hero && Toot.cast) castify($('.hero', refs.card));
     sound.fanfare();
@@ -816,7 +818,7 @@ const ui = (() => {
     const idea = o.idea || pick(o.ideas || ['go draw a picture of Robo', 'go stack some real blocks', 'go find a real menu and read the prices', 'go play outside for a bit', 'go get a drink of water and a stretch', 'go tell someone a joke']);
     overlay(`<div class="hero">${o.hero || '👋'}</div><h2>Great work today!</h2><p>${o.text || `The game is closed for now. Stretch your arms, ${idea}. Robo will be here when you come back.`}</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
     if (Toot.cast) castify($('.hero', refs.card));
-    voice.say(`Great work today! Stretch your arms, ${idea}. See you next time!`);
+    if (o.speak !== false) voice.say(o.spoken || `Great work today! Stretch your arms, ${idea}. See you next time!`, o.ids ? { ids: o.ids } : undefined);
     on('#btn-title', o.onBack);
   }
   /* <div class="hero">bear robo</div> → drawn characters instead of emoji when names are given */
