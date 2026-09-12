@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Letter Kart · Toot Toot Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --white:#FFFDF8; --sun:#FFC83D;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#app,#topbar,#scene,.card,.coach{user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{height:100%;max-width:1280px;margin:0 auto;padding-block:8px 10px;padding-inline:16px;display:flex;flex-direction:column;gap:8px}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:44px}
+.logo{font-family:var(--display);font-weight:700;font-size:1.25rem;display:flex;align-items:center;gap:8px;min-width:0}
+.logo .sign{background:var(--ketchup);color:#fff;padding:4px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.logo .brand{font-size:.72rem;color:var(--cocoa-soft);font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.chip{background:var(--white);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.95rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip small{font-weight:700;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.06em;font-size:.68rem}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center;flex:none}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn.on{background:var(--butter);box-shadow:0 3px 0 rgba(59,42,31,.12),0 0 0 3px var(--mint)}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- scene (canvas + overlaid controls) ---------- */
+#scene{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;background:#BDE8FF;box-shadow:var(--shadow);container-type:size}
+#road{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#wordbar{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;pointer-events:auto;cursor:pointer;z-index:5;max-width:calc(100% - 20px);flex-wrap:nowrap}
+.lbox{width:clamp(38px,9cqw,64px);height:clamp(44px,10.5cqw,72px);border-radius:14px;background:rgba(255,253,248,.92);box-shadow:0 4px 0 rgba(59,42,31,.18);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,5.5cqw,2.6rem);color:rgba(59,42,31,.25);transition:transform .25s,background .25s,color .25s;line-height:1;text-transform:lowercase}
+.lbox.next{background:var(--butter);color:var(--cocoa);animation:glow 1.1s infinite;transform:scale(1.08)}
+.lbox.filled{background:var(--mint);color:#fff;animation:pop .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes glow{0%,100%{box-shadow:0 4px 0 rgba(59,42,31,.18),0 0 0 0 rgba(255,200,61,.9)}50%{box-shadow:0 4px 0 rgba(59,42,31,.18),0 0 0 8px rgba(255,200,61,0)}}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+#wordpic{width:clamp(44px,10.5cqw,72px);height:clamp(44px,10.5cqw,72px);display:grid;place-items:center;font-size:clamp(1.6rem,6.5cqw,3rem);line-height:1;opacity:0;transform:translateY(-60px) scale(.5)}
+#wordpic.drop{opacity:1;animation:drop .6s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes drop{0%{opacity:0;transform:translateY(-70px) scale(.4)}70%{opacity:1;transform:translateY(6px) scale(1.15)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.fly{position:absolute;z-index:6;width:56px;height:56px;border-radius:14px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.2);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:2rem;color:var(--cocoa);transition:left .55s cubic-bezier(.3,.9,.4,1),top .55s cubic-bezier(.3,.9,.4,1),transform .55s;pointer-events:none;transform:translate(-50%,-50%) scale(1.3);text-transform:lowercase}
+.steer{position:absolute;bottom:14px;width:clamp(72px,18cqw,120px);height:clamp(72px,18cqw,120px);border-radius:26px;background:rgba(255,253,248,.92);box-shadow:0 6px 0 rgba(59,42,31,.25);font-size:clamp(1.8rem,7cqw,3rem);display:grid;place-items:center;z-index:5;line-height:1;font-family:var(--display);font-weight:700}
+.steer:active,.steer.down{transform:translateY(4px);box-shadow:0 2px 0 rgba(59,42,31,.25);background:var(--butter)}
+#btn-left{left:14px}#btn-right{right:14px}
+.steer span{font-size:.55em;display:block}
+#btn-horn{position:absolute;left:14px;bottom:calc(14px + clamp(72px,18cqw,120px) + 12px);width:clamp(56px,13cqw,84px);height:clamp(56px,13cqw,84px);border-radius:50%;background:var(--sun);box-shadow:0 5px 0 #C9931A;font-size:clamp(1.6rem,6cqw,2.4rem);display:grid;place-items:center;z-index:5}
+#btn-horn:active{transform:translateY(3px);box-shadow:0 2px 0 #C9931A}
+#toasts{position:absolute;left:0;right:0;top:22%;text-align:center;pointer-events:none;z-index:6}
+.toast{display:inline-block;background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;font-size:clamp(1.3rem,6cqw,2.4rem);padding:6px 18px;border-radius:999px;box-shadow:0 5px 0 var(--ketchup-dark);animation:toast 1.4s forwards}
+.toast.mint{background:var(--mint);box-shadow:0 5px 0 var(--mint-dark)}
+@keyframes toast{0%{opacity:0;transform:scale(.5) rotate(-6deg)}20%{opacity:1;transform:scale(1.1) rotate(2deg)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-30px) scale(.9)}}
+
+/* ---------- coach strip ---------- */
+.coach{display:flex;align-items:center;gap:10px;background:var(--butter);border-radius:16px;padding:8px 12px;flex:none}
+.coach .face{font-size:1.7rem;line-height:1}
+.coach p{margin:0;font-weight:800;font-size:1.02rem;flex:1;line-height:1.25;min-width:0}
+.coach .say{width:44px;height:44px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none;box-shadow:0 3px 0 rgba(59,42,31,.12)}
+
+/* ---------- buttons + overlays ---------- */
+.bigbtn{width:100%;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem;min-height:44px}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:22px 20px;max-width:640px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto}
+.card h1{font-size:clamp(2rem,7vw,3.4rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700;letter-spacing:.01em}
+.card h2{font-size:clamp(1.4rem,5vw,2.2rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1.02rem;color:var(--cocoa-soft);max-width:48ch;margin-inline:auto}
+.card .hero{font-size:clamp(2.6rem,10vw,5rem);line-height:1;letter-spacing:-.1em}
+.card .stars{font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.05em}
+.card .stars span{display:inline-block;opacity:.25}
+.card .stars span.lit{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+.drivers{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.drv{width:54px;height:54px;border-radius:16px;background:#fff;font-size:1.9rem;box-shadow:0 4px 0 rgba(59,42,31,.14);display:grid;place-items:center;line-height:1}
+.drv.sel{background:var(--butter);box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 4px var(--mint);transform:scale(1.08)}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;text-align:left}
+.lv{background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 0 rgba(59,42,31,.14);text-align:left;position:relative;min-height:96px}
+.lv:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
+.lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
+.lv .ex{font-size:.85rem;color:var(--cocoa-soft);margin-top:auto}
+.lv .lvstars{font-size:.9rem;letter-spacing:.05em}
+.lv.locked{opacity:.55;cursor:not-allowed}
+.lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
+#grownups{text-align:left;font-size:.95rem}#grownups li{margin-bottom:4px}#grownups ul{margin:6px 0 0;padding-left:18px}
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ---------- small screens ---------- */
+@media (max-width:600px){#app{padding-block:6px 8px;padding-inline:16px;gap:6px}.logo .sign{font-size:1rem;padding:3px 10px}.logo .brand{display:none}.chip{padding:4px 10px;font-size:.85rem}.iconbtn{width:40px;height:40px;font-size:1.1rem}#topbar{gap:6px}.coach{padding:6px 10px}.coach p{font-size:.9rem}.coach .face{font-size:1.4rem}}
+@media (orientation:landscape) and (max-height:560px){#app{padding-block:4px 6px;gap:4px}#topbar{min-height:36px;gap:6px}.logo .sign{font-size:.9rem;padding:2px 10px}.logo .brand{display:none}.chip{padding:2px 10px;font-size:.8rem}.iconbtn{width:36px;height:36px;font-size:1rem}.coach{padding:4px 10px}.coach p{font-size:.85rem}.coach .face{font-size:1.2rem}.coach .say{width:36px;height:36px}#scene{border-radius:16px}#wordbar{top:6px}.lbox{width:clamp(34px,6cqw,52px);height:clamp(40px,7cqw,58px);font-size:clamp(1.3rem,4cqw,2rem)}.steer{bottom:10px}#btn-left{left:10px}#btn-right{right:10px}#btn-horn{left:10px;bottom:calc(10px + clamp(72px,18cqw,120px) + 8px)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Letter Kart</span><span class="brand">Toot Toot Learning</span></div>
+    <div class="chip"><small>Level</small><span id="lvl-chip">1</span></div>
+    <div class="chip"><small>Words</small><span id="word-chip">0/6</span></div>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-tilt" aria-label="Tilt steering on or off" title="Tilt steering">📱</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to levels" title="Levels">🏠</button>
+  </div>
+
+  <div id="scene" aria-label="Road">
+    <canvas id="road"></canvas>
+    <div id="wordbar" role="button" aria-label="Tap to hear the word again" tabindex="0"></div>
+    <div id="toasts"></div>
+    <button class="steer" id="btn-left" aria-label="Steer left">◀<span>🏎️</span></button>
+    <button class="steer" id="btn-right" aria-label="Steer right">▶<span>🏎️</span></button>
+    <button id="btn-horn" aria-label="Honk the horn">📯</button>
+  </div>
+
+  <div class="coach"><span class="face" id="coach-face">🏁</span><p id="coach-text">Welcome to Letter Kart!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
+</div>
+
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; };
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+
+/* ---------- data ---------- */
+/* letter sounds: same map as Sound It Out so every game says the letters the same way */
+const SOUNDS = {
+  a:'ah', b:'buh', c:'kuh', d:'duh', e:'eh', f:'fuh', g:'guh', h:'huh', i:'ih', j:'juh', k:'kuh', l:'luh', m:'muh', n:'nuh',
+  o:'aw', p:'puh', q:'kwuh', r:'ruh', s:'suh', t:'tuh', u:'uh', v:'vuh', w:'wuh', x:'ecks', y:'yuh', z:'zuh',
+  sh:'shuh', ch:'chuh', th:'thuh', ck:'kuh', wh:'wuh', qu:'kwuh', ll:'luh', ss:'suh', ff:'fuh',
+  ee:'ee', ea:'ee', ai:'ay', ay:'ay', oa:'oh', oo:'ooh',
+  'a_e':'ay', 'i_e':'eye', 'o_e':'oh', 'u_e':'you', 'e_e':'ee', '_e':'silent e'
+};
+const DIGRAPHS = ['sh','ch','th','ck','ll','ss','ff','wh','qu'];
+const PLAIN = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const LEVELS = [
+  {title:'Short a', ex:'cat · hat', words:[['cat','🐱'],['hat','🎩'],['bat','🦇'],['map','🗺️'],['bag','👜'],['van','🚐'],['can','🥫'],['rat','🐀'],['jam','🫙'],['pan','🍳'],['cap','🧢'],['fan','🪭']]},
+  {title:'Short e and i', ex:'bed · pig', words:[['bed','🛏️'],['pen','🖊️'],['hen','🐔'],['pig','🐷'],['bin','🗑️'],['web','🕸️'],['jet','✈️'],['net','🥅'],['leg','🦵'],['pin','📌'],['kid','🧒'],['ten','🔟'],['lip','👄'],['red','🔴']]},
+  {title:'Short o and u', ex:'dog · sun', words:[['dog','🐶'],['log','🪵'],['box','📦'],['sun','☀️'],['bus','🚌'],['cup','☕'],['bug','🐛'],['fox','🦊'],['pot','🍲'],['nut','🥜'],['tub','🛁'],['mop','🧹'],['hug','🤗'],['run','🏃']]},
+  {title:'Mixed words', ex:'cab · gem · hut', words:[['cab','🚕'],['gem','💎'],['hut','🛖'],['fix','🔧'],['zap','⚡'],['sip','🥤'],['bud','🌱'],['fog','🌫️'],['dot','⚫'],['tap','🚰'],['cub','🐻'],['gas','⛽'],['wet','💦'],['yum','😋'],['ant','🐜'],['egg','🥚']]},
+  {title:'Blends', ex:'frog · stop', words:[['frog','🐸'],['flag','🚩'],['drum','🥁'],['crab','🦀'],['stop','🛑'],['swim','🏊'],['clap','👏'],['grin','😁'],['nest','🪺'],['tent','⛺'],['hand','✋'],['gift','🎁'],['milk','🥛'],['sled','🛷'],['plug','🔌'],['camp','🏕️'],['drip','💧']]},
+  {title:'sh · ch · th · ck', ex:'ship · chip · bath', words:[['ship','🚢'],['fish','🐟'],['chip','🍟'],['bath','🛁'],['duck','🦆'],['sock','🧦'],['shop','🏪'],['dish','🍽️'],['lock','🔒'],['rock','🪨'],['chop','🪓'],['moth','🦋'],['chat','💬'],['shed','🏚️'],['kick','🦵'],['cash','💵']]},
+  {title:'Five letters', ex:'plant · truck', words:[['plant','🪴'],['stamp','📮'],['blast','🚀'],['frost','❄️'],['twist','🌀'],['clock','🕐'],['truck','🚚'],['brush','🪥'],['shell','🐚'],['chick','🐤'],['trunk','🐘'],['skunk','🦨'],['print','🖨️'],['crust','🥧'],['drink','🧃'],['stick','🥢']]},
+  {title:'Everything mixed', ex:'bell · lunch · splash', words:[['bell','🔔'],['drip','💧'],['camp','🏕️'],['chess','♟️'],['brick','🧱'],['sniff','👃'],['punch','🥊'],['lunch','🥪'],['bench','🪑'],['crash','💥'],['splash','💦'],['flash','🔦'],['wax','🕯️'],['zip','🤐'],['jump','🤸'],['hen','🐔'],['fox','🦊'],['pig','🐷']]}
+];
+const WORDS_PER_LEVEL = 6;
+function tokenize(word){
+  const out = []; let i = 0;
+  while(i < word.length){ const two = word.slice(i, i+2); if(two.length === 2 && DIGRAPHS.includes(two)){ out.push(two); i += 2; } else { out.push(word[i]); i++; } }
+  return out;
+}
+const WORDS = [];
+LEVELS.forEach((lv, li) => { lv.n = li+1; lv.list = lv.words.map(([word, em]) => { const w = {word, em, level: li+1, tokens: tokenize(word)}; WORDS.push(w); return w; }); });
+const DRIVERS = [
+  {em:'🐻',name:'Benny Bear',color:'#F4552F'},{em:'🐰',name:'Rosie Rabbit',color:'#F28CB1'},{em:'🦊',name:'Felix Fox',color:'#FF9B3D'},{em:'🐸',name:'Freddy Frog',color:'#5FC34C'},
+  {em:'🐷',name:'Penny Pig',color:'#F7A1C4'},{em:'🐵',name:'Momo Monkey',color:'#B97B3F'},{em:'🐨',name:'Kiki Koala',color:'#9FB3C8'},{em:'🐯',name:'Toby Tiger',color:'#FFB703'},
+  {em:'🦁',name:'Leo Lion',color:'#E8B04B'},{em:'🐮',name:'Clara Cow',color:'#7B6CF6'},{em:'🐼',name:'Pip Panda',color:'#3B2A1F'},{em:'🐶',name:'Daisy Dog',color:'#2FBFA6'}
+];
+const PRAISE = ['Yes!','Zoom!','Super!','You got it!','Toot toot!','Wow!','Nice driving!','Brilliant!'];
+const WHOA = ['Whoa!','Wobbly!','Whoops!','Spin spin!'];
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    ding(){ tone(1046,0.35,{gain:0.16}); tone(1568,0.5,{gain:0.1,delay:0.08}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.18,{type:'triangle',gain:0.14,delay:i*0.09})); },
+    oops(){ tone(330,0.18,{type:'triangle',gain:0.1}); tone(262,0.25,{type:'triangle',gain:0.1,delay:0.16}); },
+    fanfare(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.25,{type:'triangle',gain:0.16,delay:i*0.12})); tone(1568,0.7,{type:'triangle',gain:0.16,delay:0.62}); },
+    /* the diner fart, reused as the kart's exhaust */
+    fart(){
+      const c = ensure(); if(!c || !enabled) return;
+      const t = c.currentTime, dur = 0.22 + Math.random()*0.4, base = 55 + Math.random()*75;
+      const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.55, t+dur);
+      const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 16+Math.random()*22;
+      const lg = c.createGain(); lg.gain.value = 20+Math.random()*30; lfo.connect(lg).connect(o.frequency);
+      const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 360; f.Q.value = 7;
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.4,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+    },
+    boost(){ this.fart(); tone(220,0.5,{type:'sawtooth',gain:0.06,slide:660,delay:0.05}); noise(0.5,{gain:0.05,from:1500,to:4000}); },
+    honk(){ this.fart(); tone(392,0.28,{type:'square',gain:0.08}); tone(494,0.28,{type:'square',gain:0.08}); tone(330,0.3,{type:'square',gain:0.08,delay:0.3}); },
+    squeal(){ noise(0.5,{gain:0.12,from:6000,to:2500}); tone(1600,0.55,{type:'sawtooth',gain:0.05,slide:900}); tone(1650,0.55,{type:'sawtooth',gain:0.04,slide:950,delay:0.02}); },
+    boing(){ tone(180,0.4,{type:'triangle',gain:0.12,slide:90}); tone(420,0.25,{type:'sine',gain:0.1,slide:180,delay:0.05}); },
+    splash(){ noise(0.35,{gain:0.2,from:2500,to:600}); [900,1200,700].forEach((f,i)=>tone(f,0.12,{type:'sine',gain:0.06,slide:f*1.6,delay:0.08+i*0.08})); },
+    goat(){ [0,0.14,0.28].forEach((d,i)=>tone(440+i*30,0.16,{type:'sawtooth',gain:0.07,slide:380,delay:d})); },
+    whoosh(){ noise(0.3,{gain:0.08,from:800,to:5000}); }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  function speak(text, rate, pitch){
+    if(!enabled || !has) return;
+    try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(clean(text)); u.rate = rate; u.pitch = pitch; if(voice) u.voice = voice; speechSynthesis.speak(u); }catch(e){}
+  }
+  return {
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has) speechSynthesis.cancel(); },
+    clean,
+    say(text){ speak(text, 0.9, 1.1); },
+    sound(text){ speak(text, 0.75, 1.0); }
+  };
+})();
+
+/* ---------- progress (stars and toggles only; nothing sticky is saved) ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootLetterKart')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootLetterKart', JSON.stringify(p)); }catch(e){} }
+};
+let progress = Object.assign({unlocked:1, stars:{}, sound:true, voice:true, driver:0}, Save.load());
+
+/* ======================================================================
+   ROAD ENGINE (pseudo-3D, OutRun style, canvas primitives only)
+   ====================================================================== */
+const canvas = $('#road'), ctx = canvas.getContext('2d');
+const scene = $('#scene');
+const SEG = 200, RUMBLE = 3, DRAW = 55, TRACK_N = 900;
+const CAM = {height:1000, depth:1/Math.tan((100/2)*Math.PI/180)};
+const LANES = [-0.62, 0, 0.62];
+let W = 400, H = 600, dpr = 1, hy = 250, zBottom = 700, PZ = 800, bottomHalf = 180, roadWidth = 700;
+const segX = new Float64Array(DRAW+2), segY = new Float64Array(DRAW+2), segS = new Float64Array(DRAW+2), segZ = new Float64Array(DRAW+2);
+let track = [];           // [{curve, sprites:[{kind, x, seed}]}]
+let curveNow = 0;         // curve under the kart (for parallax)
+let bgX = 0;              // hill parallax scroll
+const hillsA = new Float32Array(160), hillsB = new Float32Array(160);
+for(let i=0;i<160;i++){ hillsA[i] = 0.35+0.65*Math.abs(Math.sin(i*0.37)*Math.cos(i*0.11)); hillsB[i] = 0.3+0.7*Math.abs(Math.sin(i*0.23+1)*Math.cos(i*0.07)); }
+const clouds = [{x:0.1,y:0.12,s:1},{x:0.45,y:0.06,s:.7},{x:0.75,y:0.16,s:1.2},{x:1.1,y:0.09,s:.8}];
+let cloudX = 0;
+const fontCache = new Map();
+function font(size, emoji){ const k = (emoji?'e':'f')+(size|0); let f = fontCache.get(k); if(!f){ f = emoji ? `${size|0}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif` : `700 ${size|0}px Fredoka,Nunito,system-ui,sans-serif`; fontCache.set(k,f); } return f; }
+
+function resize(){
+  const r = scene.getBoundingClientRect();
+  W = Math.max(200, Math.round(r.width)); H = Math.max(200, Math.round(r.height));
+  dpr = Math.min(window.devicePixelRatio||1, 1.5);
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  hy = Math.round(H*(W>H ? 0.40 : 0.42));
+  // the z whose ground point lands on the bottom edge of the screen
+  zBottom = CAM.depth*CAM.height*(H/2)/(H-hy);
+  PZ = zBottom*1.18;                       // where the kart sits along the road
+  bottomHalf = W*(W>H ? 0.36 : 0.47);      // half road width, in px, at the bottom of the screen
+  roadWidth = bottomHalf/((CAM.depth/zBottom)*(W/2));
+  skyGrad = ctx.createLinearGradient(0,0,0,hy); skyGrad.addColorStop(0,'#7CC8FF'); skyGrad.addColorStop(1,'#E6F7FF');
+}
+let skyGrad = null;
+new ResizeObserver(resize).observe(scene);
+resize();
+
+/* track with gentle curves (levels 3+) and roadside scenery */
+function buildTrack(curviness){
+  track = new Array(TRACK_N);
+  for(let i=0;i<TRACK_N;i++) track[i] = {curve:0, sprites:[]};
+  if(curviness > 0){
+    let i = 60;
+    while(i < TRACK_N-120){
+      const dir = Math.random()<0.5?-1:1, amt = dir*(0.8+Math.random()*curviness), enter = 24, hold = rnd(30,70), exit = 24;
+      for(let k=0;k<enter;k++,i++) track[i].curve = amt*(k/enter);
+      for(let k=0;k<hold && i<TRACK_N-60;k++,i++) track[i].curve = amt;
+      for(let k=0;k<exit;k++,i++) track[i].curve = amt*(1-k/exit);
+      i += rnd(40,90);
+    }
+  }
+  for(let i=0;i<TRACK_N;i+=4){
+    const side = (i/4)%2===0 ? -1 : 1, r = Math.random();
+    const kind = r<0.5 ? 'tree' : r<0.72 ? 'bush' : r<0.86 ? 'cone' : 'board';
+    track[i].sprites.push({kind, x: side*(kind==='cone'?1.12:1.5+Math.random()*1.2), seed:Math.random()});
+    if(Math.random()<0.35) track[i+2].sprites.push({kind:'tree', x:-side*(1.8+Math.random()*1.5), seed:Math.random()});
+  }
+}
+buildTrack(0);
+function curveAt(pos){ const i = Math.floor(pos/SEG) % TRACK_N; return track[(i+TRACK_N)%TRACK_N].curve; }
+
+/* project the DRAW+2 segment points ahead of `position` into screen space */
+function project(position){
+  const base = Math.floor(position/SEG), basePct = (position - base*SEG)/SEG;
+  const baseSeg = track[((base%TRACK_N)+TRACK_N)%TRACK_N];
+  let x = 0, dx = -(baseSeg.curve*basePct);
+  for(let n=0;n<DRAW+2;n++){
+    const seg = track[((base+n)%TRACK_N+TRACK_N)%TRACK_N];
+    let z = n*SEG - basePct*SEG; if(z < 40) z = 40;
+    const s = CAM.depth/z;
+    segZ[n] = z; segS[n] = s;
+    segX[n] = W/2 + s*(x*roadWidth)*(W/2);
+    segY[n] = hy + s*CAM.height*(H/2);
+    x += dx; dx += seg.curve;
+  }
+  curveNow = baseSeg.curve;
+}
+/* screen position of something at road distance `rel` ahead and lane offset `lx` (road units). returns false if not visible */
+const P = {x:0,y:0,s:0,w:0};
+function place(rel, lx, position){
+  if(rel < 60 || rel > (DRAW-1)*SEG) return false;
+  const basePct = (position - Math.floor(position/SEG)*SEG)/SEG;
+  const nf = (rel + basePct*SEG)/SEG, i = Math.floor(nf), f = nf - i;
+  if(i < 0 || i+1 > DRAW+1) return false;
+  P.s = segS[i] + (segS[i+1]-segS[i])*f;
+  P.x = segX[i] + (segX[i+1]-segX[i])*f + P.s*lx*roadWidth*(W/2);
+  P.y = segY[i] + (segY[i+1]-segY[i])*f;
+  P.w = P.s*roadWidth*(W/2); // half road width in px at that spot
+  return true;
+}
+
+/* ---------- drawing helpers ---------- */
+function rr(x,y,w,h,r){ r = Math.min(r, w/2, h/2); ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function quad(x1,y1,w1,x2,y2,w2,color){ ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x1-w1,y1); ctx.lineTo(x2-w2,y2); ctx.lineTo(x2+w2,y2); ctx.lineTo(x1+w1,y1); ctx.closePath(); ctx.fill(); }
+function emoji(em, x, y, size){ ctx.font = font(size, true); ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(em, x, y); }
+
+function drawSky(t){
+  ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,hy+2);
+  // sun
+  ctx.fillStyle = '#FFE066'; ctx.beginPath(); ctx.arc(W*0.8 - bgX*0.02, hy*0.35, Math.max(18,W*0.05), 0, 6.283); ctx.fill();
+  // clouds
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  for(let i=0;i<clouds.length;i++){ const c = clouds[i]; let cx = ((c.x*W + cloudX*c.s*0.3 - bgX*0.05*c.s) % (W*1.4)); if(cx<0) cx += W*1.4; cx -= W*0.2; const cy = hy*c.y+hy*0.15, s = W*0.035*c.s;
+    ctx.beginPath(); ctx.arc(cx,cy,s,0,6.283); ctx.arc(cx+s*1.1,cy-s*0.4,s*0.9,0,6.283); ctx.arc(cx+s*2.1,cy,s*0.8,0,6.283); ctx.arc(cx+s*1,cy+s*0.2,s*0.9,0,6.283); ctx.fill(); }
+  // hills, two layers, parallax with the curve
+  hills(hillsB, 0.55, '#A9DDA0', -bgX*0.12);
+  hills(hillsA, 0.35, '#7FC97C', -bgX*0.25);
+}
+function hills(arr, amp, color, off){
+  const step = W/20, hh = hy*amp;
+  ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(-10, hy+2);
+  const k0 = Math.floor(off/step);
+  for(let i=-1;i<=22;i++){ const idx = ((k0+i)%160+160)%160; const x = (i-(off/step-k0))*step; ctx.lineTo(x, hy - arr[idx]*hh); }
+  ctx.lineTo(W+10, hy+2); ctx.closePath(); ctx.fill();
+}
+function drawRoad(position, finishRel){
+  const base = Math.floor(position/SEG);
+  ctx.fillStyle = '#8BD36F'; ctx.fillRect(0, hy, W, H-hy);
+  let finishN = -1;
+  if(finishRel > 0){ const basePct = (position - base*SEG)/SEG; finishN = Math.floor((finishRel + basePct*SEG)/SEG); }
+  for(let n=DRAW;n>=0;n--){
+    const y1 = segY[n], y2 = segY[n+1]; if(y2 >= y1 || y1 < hy) continue;
+    const light = (Math.floor((base+n)/RUMBLE)%2)===0;
+    const x1 = segX[n], x2 = segX[n+1], w1 = segS[n]*roadWidth*(W/2), w2 = segS[n+1]*roadWidth*(W/2);
+    ctx.fillStyle = light ? '#8BD36F' : '#7CC768'; ctx.fillRect(0, y2, W, y1-y2+1);
+    quad(x1,y1,w1*1.12,x2,y2,w2*1.12, light ? '#FFF4DC' : '#F4552F');
+    quad(x1,y1,w1,x2,y2,w2, light ? '#6E6E7A' : '#66666F');
+    if(n === finishN){ // checkered band across the road
+      const cols = 8, rows = 2; for(let r=0;r<rows;r++){ const ya = y1+(y2-y1)*(r/rows), yb = y1+(y2-y1)*((r+1)/rows), xa = x1+(x2-x1)*(r/rows), xb = x1+(x2-x1)*((r+1)/rows), wa = w1+(w2-w1)*(r/rows), wb = w1+(w2-w1)*((r+1)/rows);
+        for(let c=0;c<cols;c++){ ctx.fillStyle = ((c+r)%2)?'#222':'#fff'; ctx.beginPath(); ctx.moveTo(xa-wa+wa*2*c/cols, ya); ctx.lineTo(xb-wb+wb*2*c/cols, yb); ctx.lineTo(xb-wb+wb*2*(c+1)/cols, yb); ctx.lineTo(xa-wa+wa*2*(c+1)/cols, ya); ctx.closePath(); ctx.fill(); } } }
+    else if(light){ // lane lines
+      quad(x1-w1*0.34,y1,w1*0.02,x2-w2*0.34,y2,w2*0.02,'#FFFDF8'); quad(x1+w1*0.34,y1,w1*0.02,x2+w2*0.34,y2,w2*0.02,'#FFFDF8');
+    }
+  }
+}
+function drawScenery(position){
+  const base = Math.floor(position/SEG);
+  for(let n=DRAW;n>=1;n--){
+    const seg = track[((base+n)%TRACK_N+TRACK_N)%TRACK_N]; if(!seg.sprites.length) continue;
+    const y = segY[n]; if(y < hy || y > H+40) continue;
+    const s = segS[n], half = s*roadWidth*(W/2);
+    for(let k=0;k<seg.sprites.length;k++){ const sp = seg.sprites[k]; const x = segX[n] + sp.x*half; const sz = half*0.55;
+      if(sp.kind==='tree') drawTree(x,y,sz*(0.8+sp.seed*0.5), sp.seed);
+      else if(sp.kind==='bush') drawBush(x,y,sz*0.5);
+      else if(sp.kind==='cone') drawCone(x,y,sz*0.28);
+      else drawBoard(x,y,sz*0.9, sp.seed);
+    }
+  }
+}
+function drawTree(x,y,s,seed){ ctx.fillStyle='#8A5A2B'; ctx.fillRect(x-s*0.08,y-s*0.9,s*0.16,s*0.9); ctx.fillStyle = seed<0.5?'#3FA34D':'#57B85F'; ctx.beginPath(); ctx.arc(x,y-s*1.05,s*0.42,0,6.283); ctx.arc(x-s*0.3,y-s*0.8,s*0.32,0,6.283); ctx.arc(x+s*0.3,y-s*0.8,s*0.32,0,6.283); ctx.fill(); }
+function drawBush(x,y,s){ ctx.fillStyle='#4CB25C'; ctx.beginPath(); ctx.arc(x,y-s*0.4,s*0.5,0,6.283); ctx.arc(x-s*0.45,y-s*0.3,s*0.38,0,6.283); ctx.arc(x+s*0.45,y-s*0.3,s*0.38,0,6.283); ctx.fill(); ctx.fillStyle='#F28CB1'; ctx.beginPath(); ctx.arc(x+s*0.1,y-s*0.6,s*0.1,0,6.283); ctx.fill(); }
+function drawCone(x,y,s){ ctx.fillStyle='#FF7A1A'; ctx.beginPath(); ctx.moveTo(x,y-s*2.2); ctx.lineTo(x+s*0.8,y); ctx.lineTo(x-s*0.8,y); ctx.closePath(); ctx.fill(); ctx.fillStyle='#fff'; ctx.fillRect(x-s*0.45,y-s*1.2,s*0.9,s*0.3); }
+function drawBoard(x,y,s,seed){ ctx.fillStyle='#B97B3F'; ctx.fillRect(x-s*0.06,y-s*1.1,s*0.12,s*1.1); ctx.fillStyle='#FFF4DC'; rr(x-s*0.6,y-s*1.8,s*1.2,s*0.75,s*0.1); ctx.fill(); ctx.strokeStyle='#F4552F'; ctx.lineWidth=Math.max(1,s*0.05); ctx.stroke(); if(s>16) emoji(seed<0.33?'🍔':seed<0.66?'🍦':'🍩', x, y-s*1.22, s*0.5); }
+function drawSign(x,y,w,letter,alpha,hint){
+  // a big letter sign standing in a lane; w = full width in px
+  const h = w*1.15;
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(x,y,w*0.55,w*0.12,0,0,6.283); ctx.fill();
+  ctx.fillStyle='#B97B3F'; ctx.fillRect(x-w*0.06,y-h*0.35,w*0.12,h*0.35);
+  ctx.fillStyle='#FFFDF8'; rr(x-w/2,y-h*0.35-h,w,h,w*0.18); ctx.fill();
+  ctx.strokeStyle = hint ? (Math.sin(sim.t*10) > 0 ? '#2FBFA6' : '#1E8F7B') : '#FFC83D'; ctx.lineWidth=Math.max(1.5,w*(hint?0.12:0.07)); ctx.stroke();
+  ctx.fillStyle='#3B2A1F'; ctx.font = font(w*(letter.length>1?0.6:0.82)); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(letter, x, y-h*0.35-h*0.5+w*0.04);
+  ctx.globalAlpha = 1;
+}
+function drawFinish(x,y,half,s){
+  const ph = half*0.9, pw = Math.max(2,half*0.05);
+  ctx.fillStyle='#FFFDF8'; ctx.fillRect(x-half*1.15-pw, y-ph, pw*2, ph); ctx.fillRect(x+half*1.15-pw, y-ph, pw*2, ph);
+  const bh = half*0.28, by = y-ph, cols = 10;
+  for(let c=0;c<cols;c++){ for(let r=0;r<2;r++){ ctx.fillStyle = ((c+r)%2)?'#222':'#fff'; ctx.fillRect(x-half*1.15+half*2.3*c/cols, by+bh*r/2, half*2.3/cols+0.5, bh/2+0.5); } }
+  if(half>60){ ctx.fillStyle='#F4552F'; rr(x-half*0.55,by-bh*0.05,half*1.1,bh*1.1,bh*0.3); ctx.fill(); ctx.fillStyle='#fff'; ctx.font=font(bh*0.7); ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('FINISH', x, by+bh*0.5); }
+}
+function drawKart(x, y, w, drv, angle, flame, bounce, dizzy){
+  // (x,y) = bottom centre; w = kart width
+  ctx.save(); ctx.translate(x, y - w*0.3); ctx.rotate(angle); ctx.translate(0, -(bounce||0)*w*0.12);
+  ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0,w*0.3,w*0.6,w*0.13,0,0,6.283); ctx.fill();
+  if(flame>0){ const f = flame*(0.7+Math.random()*0.6); ctx.fillStyle='#FF7A1A'; ctx.beginPath(); ctx.moveTo(-w*0.2,w*0.2); ctx.lineTo(0,w*(0.2+0.55*f)); ctx.lineTo(w*0.2,w*0.2); ctx.closePath(); ctx.fill(); ctx.fillStyle='#FFE066'; ctx.beginPath(); ctx.moveTo(-w*0.1,w*0.2); ctx.lineTo(0,w*(0.2+0.32*f)); ctx.lineTo(w*0.1,w*0.2); ctx.closePath(); ctx.fill(); }
+  ctx.fillStyle='#2b2b2b'; rr(-w*0.5,w*0.02,w*0.2,w*0.26,w*0.05); ctx.fill(); rr(w*0.3,w*0.02,w*0.2,w*0.26,w*0.05); ctx.fill();
+  rr(-w*0.44,-w*0.42,w*0.16,w*0.2,w*0.04); ctx.fill(); rr(w*0.28,-w*0.42,w*0.16,w*0.2,w*0.04); ctx.fill();
+  ctx.fillStyle = drv.color; rr(-w*0.36,-w*0.5,w*0.72,w*0.72,w*0.16); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.25)'; rr(-w*0.3,-w*0.46,w*0.6,w*0.2,w*0.08); ctx.fill();
+  ctx.fillStyle='#FFFDF8'; rr(-w*0.34,w*0.05,w*0.68,w*0.14,w*0.05); ctx.fill();
+  ctx.fillStyle='#3B2A1F'; ctx.beginPath(); ctx.arc(0,-w*0.32,w*0.11,0,6.283); ctx.fill(); ctx.fillStyle=drv.color; ctx.beginPath(); ctx.arc(0,-w*0.32,w*0.07,0,6.283); ctx.fill();
+  emoji(drv.em, 0, -w*0.42, w*0.44);
+  if(dizzy>0){ const a = dizzy*9; for(let i=0;i<3;i++){ emoji('💫', Math.cos(a+i*2.094)*w*0.42, -w*0.75+Math.sin(a+i*2.094)*w*0.12, w*0.24); } }
+  ctx.restore();
+}
+
+/* ---------- particles (pooled) ---------- */
+const CONF_N = 90, conf = {x:new Float32Array(CONF_N), y:new Float32Array(CONF_N), vx:new Float32Array(CONF_N), vy:new Float32Array(CONF_N), r:new Float32Array(CONF_N), c:new Uint8Array(CONF_N), n:0};
+const CONF_COLORS = ['#F4552F','#FFC83D','#2FBFA6','#7B6CF6','#F28CB1','#FFFDF8'];
+function burstConfetti(){ conf.n = CONF_N; for(let i=0;i<CONF_N;i++){ conf.x[i] = W/2 + (Math.random()-0.5)*W*0.6; conf.y[i] = -20 - Math.random()*H*0.4; conf.vx[i] = (Math.random()-0.5)*120; conf.vy[i] = 120+Math.random()*220; conf.r[i] = Math.random()*6.28; conf.c[i] = i%CONF_COLORS.length; } }
+function drawConfetti(dt){ if(conf.n<=0) return; let alive=0; for(let i=0;i<conf.n;i++){ conf.x[i] += conf.vx[i]*dt; conf.y[i] += conf.vy[i]*dt; conf.r[i] += dt*5; if(conf.y[i] < H+20) alive++; ctx.fillStyle = CONF_COLORS[conf.c[i]]; ctx.save(); ctx.translate(conf.x[i],conf.y[i]); ctx.rotate(conf.r[i]); ctx.fillRect(-5,-3,10,6); ctx.restore(); } if(!alive) conf.n = 0; }
+const SPL_N = 26, spl = {x:new Float32Array(SPL_N), y:new Float32Array(SPL_N), vx:new Float32Array(SPL_N), vy:new Float32Array(SPL_N), t:0};
+function burstSplash(x){ spl.t = 1; for(let i=0;i<SPL_N;i++){ spl.x[i] = x+(Math.random()-0.5)*60; spl.y[i] = H; spl.vx[i] = (Math.random()-0.5)*500; spl.vy[i] = -(400+Math.random()*700); } }
+function drawSplash(dt){ if(spl.t<=0) return; spl.t -= dt; ctx.fillStyle='rgba(90,170,255,.75)'; for(let i=0;i<SPL_N;i++){ spl.vy[i] += 1500*dt; spl.x[i] += spl.vx[i]*dt; spl.y[i] += spl.vy[i]*dt; ctx.beginPath(); ctx.arc(spl.x[i],spl.y[i],8+ (i%3)*4,0,6.283); ctx.fill(); } }
+function drawSpeedLines(k){ ctx.strokeStyle = `rgba(255,255,255,${0.6*k})`; ctx.lineWidth = 3; ctx.beginPath(); for(let i=0;i<14;i++){ const a = (i/14)*6.283 + k; const r0 = Math.min(W,H)*0.35, r1 = r0 + Math.min(W,H)*0.25*(0.5+((i*7)%5)/5); ctx.moveTo(W/2+Math.cos(a)*r0, H*0.55+Math.sin(a)*r0*0.8); ctx.lineTo(W/2+Math.cos(a)*r1, H*0.55+Math.sin(a)*r1*0.8); } ctx.stroke(); }
+
+/* ======================================================================
+   GAME STATE + SIMULATION
+   ====================================================================== */
+const el = { wordbar:$('#wordbar'), coachText:$('#coach-text'), coachFace:$('#coach-face'), lvlChip:$('#lvl-chip'), wordChip:$('#word-chip'), overlay:$('#overlay'), card:$('#card'), toasts:$('#toasts'), left:$('#btn-left'), right:$('#btn-right'), horn:$('#btn-horn'), tilt:$('#btn-tilt') };
+let G = null;                 // current level run
+let run = 0;                  // token so abandoned runs stop
+let fast = false;             // test hook: run the simulation 6x
+let levelsThisSitting = 0;    // in memory only, never saved: used to suggest a break, never to block
+let coachLine = '';
+const sim = {
+  position:0, baseSpeed:600, speed:600, playerX:0, targetLane:1, frame:0, t:0,
+  kart:{angle:0, spin:-1, wobble:0, boost:0, dance:0, dizzy:0, bounce:0},
+  things:[], robo:null, goat:null, roboTimer:12, goatCount:0, rowCount:0, finishT:0
+};
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : fast ? Math.min(ms,120) : ms));
+function driver(){ return DRIVERS[clamp(progress.driver|0, 0, DRIVERS.length-1)]; }
+const ROBO = {em:'🤖', name:'Robo', color:'#9FB3C8'};
+function rowGap(){ return sim.baseSpeed*3.0; }
+function visDist(){ return sim.baseSpeed*3.3; }
+
+/* ---------- things on the road ---------- */
+function addThing(t){ sim.things.push(t); return t; }
+function removeThing(t){ const i = sim.things.indexOf(t); if(i>=0) sim.things.splice(i,1); }
+function spawnRow(){
+  const needed = G.tokens[G.next], others = G.tokens.filter(t => t !== needed);
+  const notNeeded = PLAIN.filter(l => l !== needed);
+  const d1 = (others.length && Math.random() < 0.5) ? pick(others) : pick(notNeeded);
+  const d2 = pick(notNeeded.filter(l => l !== d1 && l !== needed));
+  const correct = rnd(0,2), lanes = ['','',''];
+  lanes[correct] = needed; const ds = shuffle([d1,d2]); let k = 0; for(let i=0;i<3;i++) if(i!==correct) lanes[i] = ds[k++];
+  const row = {id: ++sim.rowCount, pos: sim.position + PZ + rowGap(), lanes, correct, done:false, things:[]};
+  for(let i=0;i<3;i++) row.things.push(addThing({kind:'letter', row, lane:i, pos:row.pos, x:LANES[i], letter:lanes[i]}));
+  G.row = row;
+  if(coachLine.includes('%L')){ coach(coachLine.replace('%L', ['left','middle','right'][correct]), '😵‍💫'); }
+  // silly bits between rows: a puddle or a wandering goat
+  const mid = row.pos - rowGap()*0.5;
+  if(sim.rowCount % 4 === 2) addThing({kind:'puddle', pos:mid, x:LANES[rnd(0,2)], hit:false});
+  else if(sim.rowCount % 5 === 3 && !sim.goat){ sim.goat = addThing({kind:'goat', pos:mid, x:-1.9, startled:false, hop:0}); }
+}
+function clearRow(){ if(G && G.row){ G.row.things.forEach(removeThing); G.row.done = true; } }
+function spawnFinish(){ G.finish = addThing({kind:'finish', pos: sim.position + PZ + rowGap()*0.8, x:0}); }
+function spawnRobo(){ sim.robo = addThing({kind:'robo', pos: sim.position + PZ + visDist()*1.6, x:1.02, k:0.7, mode:'approach', t:0, angle:0, spin:0, banana:null}); }
+
+/* ---------- per-frame update (sdt = simulated seconds) ---------- */
+function update(sdt){
+  sim.t += sdt;
+  const k = sim.kart;
+  // steering tween: never instant
+  const target = LANES[sim.targetLane];
+  const ease = 1 - Math.exp(-sdt*(fast?18:7));
+  sim.playerX += (target - sim.playerX)*ease;
+  const lean = (target - sim.playerX)*0.45;
+  // spin-out and wobble
+  let speedK = 1;
+  if(k.spin >= 0){ k.spin += sdt/1.1; speedK = 0.35; k.dizzy = 1; if(k.spin >= 1){ k.spin = -1; k.wobble = 0.9; sim.playerX += (Math.random()<0.5?-0.18:0.18); if(G && G.pendingRow){ G.pendingRow = false; spawnRow(); } } }
+  if(k.wobble > 0){ k.wobble -= sdt; k.dizzy = Math.max(0, k.wobble); }
+  if(k.boost > 0) k.boost -= sdt/1.2;
+  k.angle = k.spin >= 0 ? (k.spin*k.spin*(3-2*k.spin))*6.283 : lean + (k.wobble>0 ? Math.sin(sim.t*30)*0.12*k.wobble : 0);
+  if(k.bounce > 0) k.bounce -= sdt*3;
+  k.dance = (G && G.phase === 'finish') ? Math.abs(Math.sin(sim.t*12)) : 0;
+  const boostK = k.boost > 0 ? 1 + 0.6*k.boost : 1;
+  sim.speed = sim.baseSpeed*speedK*boostK*(G && G.phase==='finish' ? 0.7 : 1);
+  sim.position += sim.speed*sdt;
+  bgX += curveNow*sim.speed*sdt*0.01; cloudX += sdt*6;
+  const front = sim.position + PZ;
+
+  // things: rows, puddles, goat, finish
+  if(G && G.phase === 'drive'){
+    const row = G.row;
+    if(row && !row.done && front >= row.pos) evaluateRow(row);
+    for(let i=sim.things.length-1;i>=0;i--){ const t = sim.things[i];
+      if(t.kind==='puddle'){ if(!t.hit && front >= t.pos){ t.hit = true; if(Math.abs(sim.playerX - t.x) < 0.3){ burstSplash(kartX()); Sound.splash(); toast('Splash! 💦'); } } if(t.pos < sim.position - 200) sim.things.splice(i,1); }
+      else if(t.kind==='goat'){ const rel = t.pos - front; if(!t.startled){ t.x += sdt*0.55; if(rel < 1200) startleGoat(t); } else { t.x -= sdt*3; t.hop += sdt*14; if(t.x < -2.6 || rel < -100){ sim.things.splice(i,1); sim.goat = null; } } }
+    }
+    if(G.finish && front >= G.finish.pos){ removeThing(G.finish); G.finish = null; celebrateWord(); }
+  }
+  // Robo the rival: comic relief only, never in a letter lane
+  if(G && (G.phase==='drive' || G.phase==='finish')){
+    if(!sim.robo){ sim.roboTimer -= sdt; if(sim.roboTimer <= 0) spawnRobo(); }
+    else { const r = sim.robo; r.t += sdt; const rel = r.pos - front;
+      if(r.mode==='approach' && rel < 900){ r.mode = 'alongside'; r.k = 1; r.t = 0; Sound.honk(); toast('🤖 Toot toot!'); }
+      else if(r.mode==='alongside' && r.t > 1.6){ r.mode = 'ahead'; r.k = 1.3; r.banana = addThing({kind:'banana', pos: r.pos + 2600, x:1.02}); }
+      else if(r.mode==='ahead' && r.banana && r.pos >= r.banana.pos){ removeThing(r.banana); r.banana = null; r.mode = 'spin'; r.t = 0; r.k = 0.25; Sound.squeal(); Sound.boing(); toast('🍌 Whoa, Robo!'); }
+      else if(r.mode==='spin'){ r.spin += sdt*6; if(r.t > 1.5){ r.mode = 'behind'; r.k = 0.45; } }
+      else if(r.mode==='behind' && rel < -900){ removeThing(r); sim.robo = null; sim.roboTimer = 28 + Math.random()*16; }
+      r.pos += sim.baseSpeed*r.k*sdt;
+    }
+  }
+}
+function kartX(){ return W/2 + sim.playerX*(bottomHalf/1.18); }
+function kartW(){ return clamp(Math.min(W*0.2, H*0.3), 64, 150); }
+function startleGoat(t){ if(t.startled) return; t.startled = true; Sound.goat(); toast('🐐 Baa!'); }
+
+/* ---------- render ---------- */
+let last = performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt = (now - last)/1000; last = now; if(!(dt > 0)) dt = 0.016; if(dt > 0.05) dt = 0.05;
+  sim.frame++;
+  update(fast ? dt*6 : dt);
+  render(dt);
+}
+function render(dt){
+  project(sim.position);
+  drawSky();
+  const front = sim.position + PZ;
+  drawRoad(sim.position, G && G.finish ? G.finish.pos - sim.position : -1);
+  drawScenery(sim.position);
+  const th = sim.things; th.sort((a,b)=>b.pos-a.pos);
+  for(let i=0;i<th.length;i++){ const t = th[i]; const rel = t.pos - sim.position; if(rel < 60) continue;
+    if(t.kind==='letter'){ const vis = visDist(); if(rel > vis) continue; if(!place(rel, t.x, sim.position)) continue; const a = clamp((vis - rel)/500, 0, 1); drawSign(P.x, P.y, Math.max(P.w*0.5, W*0.055), t.letter, a, G && G.attempts >= 1 && t.row.correct === t.lane); }
+    else if(t.kind==='puddle'){ if(!place(rel, t.x, sim.position)) continue; ctx.fillStyle='rgba(90,170,255,.8)'; ctx.beginPath(); ctx.ellipse(P.x, P.y, P.w*0.3, P.w*0.09, 0,0,6.283); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(P.x-P.w*0.1, P.y-P.w*0.03, P.w*0.09, P.w*0.025, 0,0,6.283); ctx.fill(); }
+    else if(t.kind==='goat'){ if(!place(rel, t.x, sim.position)) continue; const s = Math.max(P.w*0.42, 14); emoji('🐐', P.x, P.y - (t.startled ? Math.abs(Math.sin(t.hop))*s*0.4 : 0), s); if(t.startled && s>20) emoji('❗', P.x+s*0.5, P.y-s*1.1, s*0.5); }
+    else if(t.kind==='banana'){ if(!place(rel, t.x, sim.position)) continue; emoji('🍌', P.x, P.y, Math.max(P.w*0.3, 12)); }
+    else if(t.kind==='finish'){ if(!place(rel, 0, sim.position)) continue; drawFinish(P.x, P.y, P.w, P.s); }
+    else if(t.kind==='robo'){ if(!place(rel, t.x, sim.position)) continue; drawKart(P.x, P.y, P.w*0.5, ROBO, t.mode==='spin' ? t.spin : Math.sin(t.t*3)*0.05, t.mode==='ahead'?0.6:0, 0, t.mode==='spin'?1:0); }
+  }
+  const k = sim.kart, drv = G ? G.driver : driver();
+  drawKart(kartX(), H - H*0.03, kartW(), drv, k.angle, k.boost>0 ? k.boost : (G && G.phase==='drive' ? 0.15 : 0), k.dance + Math.max(0,k.bounce), k.dizzy);
+  if(k.boost > 0 && !reduced) drawSpeedLines(k.boost);
+  drawSplash(dt); drawConfetti(dt);
+}
+requestAnimationFrame(frame);
+
+/* ---------- picking up letters ---------- */
+function phrase(i){
+  const tok = G.tokens[i], snd = SOUNDS[tok] || tok;
+  if(G.n <= 2) return `the letter ${tok}, ${snd}`;
+  return tok.length > 1 ? `the letters ${tok.split('').join(' ')}, ${snd}` : snd;
+}
+function instruction(){ return G.next < G.tokens.length ? `Spell ${G.word}. Find ${phrase(G.next)}.` : `Spell ${G.word}. Zoom to the finish line!`; }
+function evaluateRow(row){
+  row.done = true;
+  const settled = Math.abs(sim.playerX - LANES[sim.targetLane]) < 0.22;
+  const lane = settled ? sim.targetLane : -1;
+  const needed = G.tokens[G.next];
+  row.things.forEach(removeThing);
+  if(lane < 0){ // drove between the signs: nothing bad, the row comes round again
+    coach(`Almost! ${instruction()}`, '🙂'); spawnRow(); return;
+  }
+  const got = row.lanes[lane];
+  if(got === needed){
+    G.stats.letters++; if(G.attempts === 0) G.stats.firstTry++;
+    G.attempts = 0;
+    sim.kart.boost = 1; Sound.boost(); toast(pick(PRAISE), 'mint');
+    flyLetter(needed, G.next);
+    G.next++;
+    if(G.next < G.tokens.length){ coach(`${SOUNDS[needed]}! Now find ${phrase(G.next)}.`, '😀'); renderWord(); spawnRow(); }
+    else { coach(`${SOUNDS[needed]}! Zoom to the finish line!`, '🏁'); renderWord(); spawnFinish(); }
+  } else {
+    G.attempts++; G.stats.wrong++; G.spins++;
+    sim.kart.spin = 0; Sound.squeal(); Sound.oops();
+    toast(pick(WHOA));
+    coach(G.attempts >= 2 ? `Whoa! Find ${phrase(G.next)}. It is the glowing sign in the %L lane.` : `Whoa! That was ${SOUNDS[got]||got}. Find ${phrase(G.next)}. Look for the glowing sign.`, '😵‍💫');
+    G.pendingRow = true; // the same letter comes round again after the spin
+  }
+}
+function flyLetter(letter, idx){
+  const box = el.wordbar.children[idx]; if(!box) return;
+  if(fast || reduced){ box.classList.add('filled'); return; }
+  const sr = scene.getBoundingClientRect(), br = box.getBoundingClientRect();
+  const f = document.createElement('div'); f.className='fly'; f.textContent = letter;
+  f.style.left = kartX()+'px'; f.style.top = (H - kartW()*0.9)+'px';
+  scene.appendChild(f);
+  requestAnimationFrame(()=>{ f.style.left = (br.left - sr.left + br.width/2)+'px'; f.style.top = (br.top - sr.top + br.height/2)+'px'; f.style.transform = 'translate(-50%,-50%) scale(.9)'; });
+  setTimeout(()=>{ f.remove(); box.classList.add('filled'); Sound.pop(); }, 560);
+}
+async function celebrateWord(){
+  const myRun = run; G.phase = 'finish';
+  Sound.fanfare(); if(!reduced) burstConfetti();
+  const pic = $('#wordpic'); if(pic){ pic.textContent = G.em; pic.classList.add('drop'); }
+  coach(`${G.word}! ${G.tokens.join(', ')}, ${G.word}!`, '🎉');
+  sim.finishT = sim.t;
+  await wait(2600); if(run !== myRun) return;
+  G.solved++; el.wordChip.textContent = `${G.solved}/${G.words.length}`;
+  if(G.solved >= G.words.length) finishLevel(); else nextWord();
+}
+
+/* ---------- level flow ---------- */
+function levelConfig(n){ return LEVELS[clamp(n,1,LEVELS.length)-1]; }
+function startLevel(n){
+  n = clamp(n|0, 1, LEVELS.length);
+  run++; const myRun = run;
+  const cfg = levelConfig(n);
+  sim.things.length = 0; sim.robo = null; sim.goat = null; sim.roboTimer = 14; sim.rowCount = 0;
+  sim.baseSpeed = 1100 + (n-1)*70; sim.kart.spin = -1; sim.kart.wobble = 0; sim.kart.boost = 0; sim.kart.dizzy = 0; sim.targetLane = 1; sim.playerX = 0;
+  buildTrack(n >= 3 ? 0.4 + (n-3)*0.25 : 0);
+  G = {n, cfg, title:cfg.title, words:shuffle(cfg.list).slice(0, WORDS_PER_LEVEL), wi:-1, word:'', em:'', tokens:[], next:0, attempts:0, row:null, finish:null, pendingRow:false,
+       phase:'drive', spins:0, solved:0, honks:0, stats:{letters:0, firstTry:0, wrong:0}, driver:driver(), run:myRun};
+  el.lvlChip.textContent = n; el.wordChip.textContent = `0/${G.words.length}`;
+  hideOverlay();
+  nextWord(`Level ${n}, ${cfg.title}. `);
+}
+function nextWord(prefix){
+  G.wi++; const w = G.words[G.wi];
+  G.word = w.word; G.em = w.em; G.tokens = w.tokens; G.next = 0; G.attempts = 0; G.phase = 'drive'; G.finish = null; G.pendingRow = false;
+  renderWord();
+  coach((prefix||'') + instruction(), '🏁');
+  spawnRow();
+  setNudge(()=>[el.left, el.right], instruction());
+}
+function renderWord(){
+  if(!G) { el.wordbar.innerHTML = ''; return; }
+  let html = '';
+  G.tokens.forEach((t,i) => { html += `<div class="lbox ${i < G.next ? 'filled' : i === G.next ? 'next' : ''}">${i < G.next ? t : (i === G.next ? t : '')}</div>`; });
+  html += `<div id="wordpic"></div>`;
+  el.wordbar.innerHTML = html;
+}
+function finishLevel(){
+  const s = G.stats; const rate = s.letters ? s.firstTry/s.letters : 1;
+  const stars = rate >= 0.8 ? 3 : rate >= 0.5 ? 2 : 1;
+  progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, G.n+1));
+  progress.stars[G.n] = Math.max(progress.stars[G.n]||0, stars); Save.save(progress);
+  G.phase = 'done'; G.row = null; sim.things.length = 0; sim.robo = null; sim.goat = null; setNudge(null);
+  const msg = stars===3 ? 'Nearly every letter on the first try. Super speller!' : stars===2 ? 'Great driving! Your letter sounds are getting stronger.' : 'You finished the whole level! Every lap makes you stronger.';
+  Sound.fanfare();
+  levelsThisSitting++;
+  const breakTime = levelsThisSitting >= 3, hasNext = G.n < LEVELS.length;
+  const nextBtn = hasNext ? `<button class="${breakTime?'subbtn':'bigbtn'}" id="btn-next">Next level ▶</button>` : '';
+  const buttons = breakTime
+    ? `<p><b>You’ve done ${levelsThisSitting} levels! Time for a break?</b></p><button class="bigbtn mint" id="btn-done">All done for today 👋</button><div class="rowbtns">${nextBtn}<button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button></div>`
+    : `${nextBtn}<div class="rowbtns"><button class="subbtn" id="btn-replay">Play it again</button><button class="subbtn" id="btn-levels">Choose level</button><button class="subbtn" id="btn-done">All done for today 👋</button></div>`;
+  showOverlay('complete', `<div class="hero">🏁${G.driver.em}</div><h1>Lap done!</h1><h2>Level ${G.n}: ${G.title}</h2>
+    <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.25}s">⭐</span>`).join('')}</div>
+    <p>${msg}</p>
+    <div class="fact">Spelled <b>${G.words.map(w=>w.word).join(' · ')}</b><br><b>${s.firstTry}</b> of <b>${s.letters}</b> letters on the first try · <b>${G.spins}</b> spin${G.spins===1?'':'s'}</div>
+    ${buttons}`, breakTime ? 'break' : 'complete');
+  Voice.say(`Lap done! Level ${G.n} finished. ${msg}` + (breakTime ? ` You’ve done ${levelsThisSitting} levels. Time for a break?` : ''));
+  if(hasNext) $('#btn-next').addEventListener('click', ()=>startLevel(G.n+1));
+  $('#btn-replay').addEventListener('click', ()=>startLevel(G.n));
+  $('#btn-levels').addEventListener('click', showLevels);
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function stopRun(){ run++; if(G){ G.phase = 'done'; } G = null; sim.things.length = 0; sim.robo = null; sim.goat = null; sim.baseSpeed = 600; sim.targetLane = 1; setNudge(null); renderWord(); }
+function showGoodbye(){
+  stopRun(); levelsThisSitting = 0;
+  const idea = pick(['go find a letter on a real sign','go draw a picture of your kart','go play outside for a bit','go get a drink of water and a stretch','go read a book with a grown-up']);
+  showOverlay('goodbye', `<div class="hero">👋🏎️</div><h2>Great driving today!</h2><p>The kart is parked for now. Stretch your legs, ${idea}. Robo will be waiting at the start line.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  Voice.say(`Great driving today! The kart is parked for now. Stretch your legs, ${idea}. See you next time!`);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- overlays ---------- */
+let cardName = '';
+function showOverlay(name, html, cardId){ cardName = cardId || name; el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); cardName = ''; }
+function showTitle(){
+  stopRun();
+  showOverlay('title', `<div class="hero">🏎️💨🔤</div><h1>Letter Kart</h1>
+    <p>Drive the kart, steer to the right letters, and spell the word! Wrong letter? Just a silly spin. Nobody ever loses.</p>
+    <div class="fact">Pick your driver<div class="drivers" id="drivers" style="margin-top:8px">${DRIVERS.map((d,i)=>`<button class="drv ${i===(progress.driver|0)?'sel':''}" data-i="${i}" aria-label="${d.name}">${d.em}</button>`).join('')}</div></div>
+    <button class="bigbtn" id="btn-play">Play! 🏁</button>
+    <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
+    <p style="font-size:.85rem">Everything is read out loud. Tap the word or 🔊 to hear it again.</p>`);
+  $('#drivers').addEventListener('click', e => { const b = e.target.closest('.drv'); if(!b) return; progress.driver = +b.dataset.i; Save.save(progress); $('#drivers').querySelectorAll('.drv').forEach(x=>x.classList.toggle('sel', x===b)); Sound.ensure(); Sound.pop(); Voice.say(`${DRIVERS[progress.driver].name} is driving!`); });
+  $('#btn-play').addEventListener('click', ()=>{ Sound.ensure(); startLevel(Math.min(progress.unlocked, LEVELS.length)); });
+  $('#btn-choose').addEventListener('click', ()=>{ Sound.ensure(); showLevels(); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay('grownups', `<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>What it teaches</b><ul>
+      <li>Levels 1–4: three-letter words with short vowels (cat, pig, dog, hut). The letter is named and its sound is spoken on levels 1–2; sound only after that.</li>
+      <li>Level 5: four-letter words with blends (frog, stop, milk).</li>
+      <li>Level 6: sh, ch, th and ck as one sign (ship, chip, bath, duck).</li>
+      <li>Levels 7–8: five-letter words and everything mixed (plant, truck, lunch, splash).</li>
+      <li>Device voices only approximate letter sounds; say them together for the best effect.</li></ul>
+    <b style="display:block;margin-top:10px">How it helps without nagging</b><ul>
+      <li>The kart drives itself. Your child only steers left and right between three lanes.</li>
+      <li>The needed letter glows at the top and is spoken. A wrong letter is a silly spin-out and the same letter comes round again. Nobody fails a level.</li>
+      <li>If your child stops for a while, the instruction is repeated and the steering buttons wiggle.</li>
+      <li>Stars are for letters picked up on the first try. No timers, no accounts, nothing leaves this device. Sound, read-aloud and full screen ⛶ are in the top bar. Tilt steering 📱 is optional and asks first.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul><li>No streaks, timers, countdowns, daily rewards or notifications. Nothing ever says “come back”.</li><li>Levels never auto-advance. Every level ends with an “All done for today” button, and after three levels in a row the game suggests a break.</li><li>Stars come only from accuracy. There is nothing random to chase.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showLevels(){
+  stopRun();
+  let cards=''; for(let n=1;n<=LEVELS.length;n++){
+    const c = levelConfig(n), locked = n > progress.unlocked, st = progress.stars[n]||0;
+    cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n}</span><span class="ttl">${c.title}</span><span class="ex">${c.ex}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span></button>`;
+  }
+  showOverlay('levels', `<h2>Choose a level</h2><p>Each level adds a little more. Finish one to open the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`);
+  el.card.querySelectorAll('.lv:not(.locked)').forEach(b=>b.addEventListener('click', ()=>{ Sound.ensure(); startLevel(+b.dataset.n); }));
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- coach, toasts, idle nudge ---------- */
+function coach(text, face, speak=true){ coachLine = text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face; if(speak) Voice.say(text); }
+function toast(text, cls){ const t = document.createElement('div'); t.className='toast'+(cls?' '+cls:''); t.textContent=text; el.toasts.innerHTML=''; el.toasts.appendChild(t); setTimeout(()=>t.remove(),1400); }
+let lastAction = performance.now(), nudge = null;
+function setNudge(target, text){ nudge = target ? {target, text} : null; lastAction = performance.now(); }
+function bump(){ lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, bump, {passive:true}));
+setInterval(()=>{
+  if(!G || !nudge || G.phase !== 'drive' || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.target === 'function' ? nudge.target() : [nudge.target];
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  Voice.say(nudge.text || coachLine);
+}, 1000);
+
+/* ---------- controls: buttons, keyboard, tilt, horn ---------- */
+function steer(lane){ lane = clamp(lane|0, 0, 2); if(lane !== sim.targetLane){ sim.targetLane = lane; Sound.whoosh(); } bump(); return sim.targetLane; }
+function press(btn, dir){
+  const go = e => { if(e.cancelable) e.preventDefault(); Sound.ensure(); steer(sim.targetLane + dir); btn.classList.add('down'); };
+  btn.addEventListener('pointerdown', go);
+  btn.addEventListener('pointerup', ()=>btn.classList.remove('down')); btn.addEventListener('pointercancel', ()=>btn.classList.remove('down')); btn.addEventListener('pointerleave', ()=>btn.classList.remove('down'));
+  btn.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); steer(sim.targetLane + dir); } });
+}
+press(el.left, -1); press(el.right, +1);
+document.addEventListener('keydown', e => {
+  if(el.overlay.classList.contains('on')) return;
+  if(e.key==='ArrowLeft' || e.key==='a' || e.key==='A'){ e.preventDefault(); steer(sim.targetLane-1); }
+  else if(e.key==='ArrowRight' || e.key==='d' || e.key==='D'){ e.preventDefault(); steer(sim.targetLane+1); }
+  else if(e.key==='h' || e.key==='H' || e.key===' '){ e.preventDefault(); honk(); }
+});
+function honk(){
+  Sound.ensure(); Sound.honk(); sim.kart.bounce = 1; bump();
+  if(G) G.honks++;
+  toast('📯 Toot toot!');
+  if(sim.goat && !sim.goat.startled && sim.goat.pos - sim.position < visDist()) startleGoat(sim.goat);
+  return true;
+}
+el.horn.addEventListener('pointerdown', e => { if(e.cancelable) e.preventDefault(); honk(); });
+let tilt = false;
+function onTilt(e){
+  if(!tilt) return;
+  const landscape = (screen.orientation && /landscape/.test(screen.orientation.type)) || (window.innerWidth > window.innerHeight && !screen.orientation);
+  let v = landscape ? (e.beta||0) : (e.gamma||0);
+  if(landscape && screen.orientation && /secondary/.test(screen.orientation.type)) v = -v;
+  const lane = v < -12 ? 0 : v > 12 ? 2 : 1;
+  if(lane !== sim.targetLane) steer(lane);
+}
+async function toggleTilt(){
+  if(tilt){ tilt = false; el.tilt.classList.remove('on'); window.removeEventListener('deviceorientation', onTilt); coach('Tilt steering is off.', '📱'); return; }
+  try{
+    if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
+      const r = await DeviceOrientationEvent.requestPermission(); if(r !== 'granted'){ coach('Tilt is not allowed on this device. Use the buttons!', '📱'); return; }
+    }
+  }catch(e){ coach('Tilt is not allowed on this device. Use the buttons!', '📱'); return; }
+  tilt = true; el.tilt.classList.add('on'); window.addEventListener('deviceorientation', onTilt);
+  coach('Tilt steering is on! Tip your tablet left and right.', '📱');
+}
+el.tilt.addEventListener('click', toggleTilt);
+if(!('DeviceOrientationEvent' in window)) el.tilt.style.display = 'none';
+el.wordbar.addEventListener('pointerdown', e => { e.stopPropagation(); bump(); if(G && G.phase==='drive'){ const was = Voice.enabled; Voice.enabled = true; Voice.say(instruction()); Voice.enabled = was; } });
+el.wordbar.addEventListener('keydown', e => { if((e.key==='Enter'||e.key===' ') && G){ e.preventDefault(); Voice.say(instruction()); } });
+
+/* ---------- top bar ---------- */
+function applySettings(){ Sound.enabled = progress.sound !== false; Voice.enabled = progress.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ progress.sound = !(progress.sound !== false); Save.save(progress); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ progress.voice = !(progress.voice !== false); Save.save(progress); applySettings(); if(Voice.enabled) Voice.say('Read aloud is on.'); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+$('#btn-home').addEventListener('click', showLevels);
+$('#btn-say').addEventListener('click', ()=>{ const was = Voice.enabled; Voice.enabled = true; Voice.say(coachLine); Voice.enabled = was; });
+
+/* ---------- boot ---------- */
+showTitle();
+
+/* debug hooks for automated testing */
+window.__game = {
+  startLevel, steer, honk,
+  get fast(){ return fast; }, set fast(v){ fast = !!v; },
+  words: WORDS, sounds: SOUNDS, drivers: DRIVERS,
+  levels: LEVELS.map(l=>({n:l.n, title:l.title, count:l.list.length, words:l.list.map(w=>w.word)})),
+  get state(){
+    const row = G && G.row ? {id:G.row.id, lanes:G.row.lanes.slice(), correct:G.row.correct, pos:G.row.pos, done:G.row.done, dist:Math.round(G.row.pos - (sim.position+PZ))} : null;
+    return { level: G?G.n:null, title: G?G.title:'', word: G?G.word:'', em: G?G.em:'', tokens: G?G.tokens.slice():[], next: G?G.next:0, attempts: G?G.attempts:0,
+      lane: sim.targetLane, laneX: +sim.playerX.toFixed(3), settled: Math.abs(sim.playerX - LANES[sim.targetLane]) < 0.22, row, spins: G?G.spins:0, solved: G?G.solved:0, wordsInLevel: G?G.words.length:0,
+      phase: G?G.phase:'idle', finishDist: G && G.finish ? Math.round(G.finish.pos - (sim.position+PZ)) : null, frame: sim.frame, speed: Math.round(sim.speed), spinning: sim.kart.spin >= 0, boost: +sim.kart.boost.toFixed(2),
+      overlay: el.overlay.classList.contains('on'), card: cardName, cardButtons: [...el.card.querySelectorAll('button')].map(b=>({id:b.id, text:b.textContent.trim(), cls:b.className})),
+      stats: G?Object.assign({}, G.stats):null, stars: Object.assign({}, progress.stars), unlocked: progress.unlocked, sittingLevels: levelsThisSitting,
+      coach: coachLine, instruction: G && G.phase==='drive' ? instruction() : '', honks: G?G.honks:0, goat: !!sim.goat, robo: sim.robo ? sim.robo.mode : null, things: sim.things.length,
+      fast, driver: (G?G.driver:driver()).name, tilt, canvas:{w:W,h:H} };
+  }
+};
+})();
+</script>
+</body>
+</html>

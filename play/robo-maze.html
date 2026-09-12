@@ -63,11 +63,15 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 .crumb.gone{opacity:0;transform:scale(.2)}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
 #paths{position:absolute;inset:2cqw;pointer-events:none}
-.arrow{position:absolute;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:calc(52cqw/var(--n));color:var(--mint-dark);text-shadow:0 0 .6cqw #fff,0 0 .6cqw #fff;opacity:0;animation:arrowin .4s forwards}
-@keyframes arrowin{to{opacity:.9}}
+.arrow{position:absolute;display:grid;place-items:center;padding:14%;opacity:0;animation:arrowin .4s forwards}
+.arrow .ico{filter:drop-shadow(0 0 .5cqw #fff) drop-shadow(0 0 .5cqw #fff)}
+@keyframes arrowin{to{opacity:.92}}
+.ico{display:block;width:100%;height:100%}
+.mi{display:inline-block;width:1.5em;height:1.5em;vertical-align:middle}
 
 .robo{position:absolute;width:calc(100%/var(--n));height:calc(100%/var(--n));display:grid;place-items:center;font-size:calc(58cqw/var(--n));line-height:1;transition:left .38s ease,top .38s ease;z-index:5;will-change:left,top}
-.robo .ring{position:absolute;inset:6%;border-radius:50%;transition:transform .25s ease}
+.robo .body{position:relative;width:100%;height:100%;display:grid;place-items:center;transition:transform .22s ease;will-change:transform}
+.robo .ring{position:absolute;inset:6%;border-radius:50%}
 .robo .ring::before{content:"";position:absolute;left:50%;top:-6%;transform:translateX(-50%);border-left:calc(7cqw/var(--n)) solid transparent;border-right:calc(7cqw/var(--n)) solid transparent;border-bottom:calc(9cqw/var(--n)) solid var(--ketchup);filter:drop-shadow(0 .2cqw 0 var(--ketchup-dark))}
 .robo .bot{position:relative;display:inline-block;filter:drop-shadow(0 .5cqw 0 rgba(59,42,31,.2))}
 .robo .glow{position:absolute;left:50%;top:50%;width:130%;height:130%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(47,191,166,.55) 0%,rgba(255,200,61,.3) 45%,transparent 70%);opacity:0;transition:opacity .3s;z-index:-1}
@@ -94,11 +98,19 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 #panel{background:var(--white);border-radius:24px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:280px}
 .coach{display:flex;align-items:flex-start;gap:10px;background:var(--butter);border-radius:16px;padding:10px 12px}
 .coach .face{font-size:1.8rem;line-height:1}
+.coach .face .demo{width:3rem;height:3rem;display:block}
+.demo .demo-rot{transform-box:view-box;transform-origin:50% 50%;transition:transform .6s ease}
+.demo.go .demo-mv{animation:demogo .6s ease}
+@keyframes demogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .coach p{margin:0;font-weight:800;font-size:1.05rem;flex:1;line-height:1.3}
 .coach .say{width:38px;height:38px;border-radius:12px;background:#fff;font-size:1.1rem;flex:none}
 .label{font-family:var(--display);font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--cocoa-soft);display:flex;justify-content:space-between;align-items:center}
 .label span{font-family:var(--body);text-transform:none;letter-spacing:0;font-weight:800;font-size:.85rem}
 
+.striprow{display:flex;gap:8px;align-items:stretch}
+.striprow .strip{flex:1 1 auto;min-width:0}
+.undobtn{flex:none;width:58px;min-height:58px;border-radius:16px;background:#fff;font-size:1.9rem;font-weight:700;line-height:1;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);display:grid;place-items:center}
+.undobtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
 .strip{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:flex-start;min-height:72px;background:rgba(255,226,154,.25);border-radius:18px;padding:8px}
 .pslot{min-width:64px;height:64px;border-radius:18px;border:3px dashed rgba(59,42,31,.3);display:grid;place-items:center;position:relative;background:rgba(255,226,154,.35)}
 .pslot.filled{border-style:solid;border-color:var(--mint);background:#E4FBF5;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
@@ -107,27 +119,43 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 @keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .pslot.ghost .pblk{opacity:.35;filter:grayscale(.6)}
 .pslot.ghost.next .pblk{opacity:.55}
-.pblk{width:58px;height:58px;border-radius:15px;font-size:2rem;line-height:1;display:grid;place-items:center;transition:transform .15s,background .15s}
-.pblk.mini{width:44px;height:44px;font-size:1.5rem;border-radius:12px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14)}
+.pblk{width:58px;height:58px;border-radius:15px;font-size:2rem;line-height:1;display:grid;place-items:center;padding:4px;transition:transform .15s,background .15s}
+.pblk.mini{width:44px;height:44px;font-size:1.5rem;border-radius:12px;padding:3px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14)}
+.ghrep{display:grid;place-items:center;gap:2px;line-height:1}
+.ghrep .mi{width:1.6em;height:1.6em}
+.ghrep .ghb{display:flex;gap:2px}
+.ghrep .ghb .mi{width:1em;height:1em}
 .pblk.cur,.mini.cur{background:var(--sun);transform:scale(1.12);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--sun)}
 .pslot.rep{height:auto;min-width:96px;padding:6px;border-style:solid;border-color:#B48CFF;background:#F1E9FF;display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .pslot.rep.open{border-color:#7C4DFF;box-shadow:0 0 0 3px rgba(124,77,255,.25)}
 .pslot.rep.cur{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--sun)}
 .rephead{display:flex;align-items:center;gap:4px}
-.repopen{flex:1;font-size:1.1rem;font-weight:700;border-radius:10px;padding:4px 6px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14);text-align:left;white-space:nowrap}
+.repopen{flex:1;min-width:44px;height:44px;font-size:1.1rem;font-weight:700;border-radius:10px;padding:3px 6px;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.14);display:grid;place-items:center;white-space:nowrap}
+.repopen .ico{width:38px;height:38px}
 .repn{font-size:1.15rem;font-weight:700;border-radius:10px;padding:4px 8px;background:#7C4DFF;color:#fff;box-shadow:0 2px 0 #4F2BB8;font-variant-numeric:tabular-nums;white-space:nowrap}
 .repx{width:30px;height:30px;border-radius:10px;background:#FFE7E0;color:var(--ketchup-dark);font-weight:700}
 .repcount{font-family:var(--display);font-weight:700;font-size:.8rem;color:#4F2BB8;min-width:2.2em;text-align:center}
+.repcount:empty{display:none}
 .repbody{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;min-height:48px;background:rgba(255,255,255,.55);border-radius:12px;padding:4px}
 .mini.empty{width:44px;height:44px;border-radius:12px;border:3px dashed #B48CFF;display:inline-block;animation:nudge 1s infinite}
 .repdone{border-radius:10px;padding:6px 8px;background:var(--mint);color:#fff;font-weight:700;box-shadow:0 3px 0 var(--mint-dark);font-size:1rem}
 .repdone:active{transform:translateY(2px);box-shadow:0 1px 0 var(--mint-dark)}
 @keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
 
-.palette{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:10px}
-.blk{background:#fff;border-radius:18px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:88px;transition:transform .15s}
+.controls{display:flex;flex-direction:column;gap:12px}
+.palette{display:grid;justify-content:center;gap:8px}
+/* arrows mode: D-pad of four compass arrows, Robo face in the middle */
+.palette.dpad{--pad:80px;grid-template-columns:repeat(3,var(--pad));grid-template-rows:repeat(3,var(--pad));grid-template-areas:". u ." "l c r" ". d ."}
+.dpad .blk{min-height:0;width:100%;height:100%;padding:6%;justify-content:center}
+.dpad .blk .em{width:82%;height:82%}
+.dpad .blk[data-t="U"]{grid-area:u}.dpad .blk[data-t="D"]{grid-area:d}.dpad .blk[data-t="L"]{grid-area:l}.dpad .blk[data-t="R"]{grid-area:r}
+.dcenter{grid-area:c;display:grid;place-items:center;padding:18%;opacity:.55}
+/* robot mode: Turn left · Forward · Turn right, then Repeat · Until wall */
+.palette.robopad{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.robopad .blk{flex:0 0 calc((100% - 16px)/3);max-width:118px;min-height:76px}
+.blk{background:#fff;border-radius:18px;padding:6px 4px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);min-height:64px;transition:transform .15s}
 .blk:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06)}
-.blk .em{font-size:2.2rem;line-height:1}
+.blk .em{width:48px;height:48px;line-height:1}
 .blk .nm{font-size:.8rem;font-weight:800;color:var(--cocoa-soft);text-align:center;line-height:1.1}
 .blk.rep{background:#F1E9FF;box-shadow:0 4px 0 #B48CFF,0 0 0 2px rgba(124,77,255,.15)}
 .blk.rep.armed{background:#7C4DFF;color:#fff}
@@ -136,14 +164,19 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 .blk.new::after{content:"NEW";position:absolute;right:-6px;top:-8px;background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;font-size:.65rem;padding:2px 7px;border-radius:999px;letter-spacing:.08em}
 .blk.nope{animation:nope .4s}
 @keyframes nope{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#panel.running .palette,#panel.running .strip{pointer-events:none;opacity:.75}
+#panel.running .palette,#panel.running .strip,#panel.running .undobtn{pointer-events:none;opacity:.75}
 
 .bigbtn{width:100%;min-height:44px;padding:16px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.3rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);letter-spacing:.01em}
 .bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
 .bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
 .bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
 .bigbtn:disabled{opacity:.6;transform:none}
-.bigbtn.pulse{animation:runpulse 1.6s infinite ease-in-out}
+/* the big green GO button */
+.gobtn{flex:1 1 auto;max-width:380px;min-height:68px;padding:6px 26px;border-radius:24px;background:var(--mint);color:#fff;font-family:var(--display);font-weight:700;font-size:2rem;letter-spacing:.05em;box-shadow:0 6px 0 var(--mint-dark);display:inline-flex;align-items:center;justify-content:center;gap:12px}
+.gobtn .play{width:1.15em;height:1.15em;flex:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
+.gobtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--mint-dark)}
+.gobtn:disabled{opacity:.6;transform:none}
+.gobtn.pulse{animation:runpulse 1.6s infinite ease-in-out}
 @keyframes runpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03);box-shadow:0 6px 0 var(--mint-dark),0 0 0 6px rgba(47,191,166,.25)}}
 .nudge{animation:nudgebig .5s 3!important;outline:4px solid var(--mint);outline-offset:3px;border-radius:18px}
 @keyframes nudgebig{0%,100%{transform:scale(1)}50%{transform:scale(1.1) rotate(-3deg)}}
@@ -151,9 +184,8 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 .subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem}
 .subbtn.glow{background:#FFF6D6;box-shadow:0 3px 0 #D89A00,0 0 0 2px rgba(216,154,0,.3);animation:nudge 1.2s infinite}
 .rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.runrow{display:flex;gap:8px;align-items:stretch}
-.runrow .bigbtn{flex:1;width:auto}
-.runrow .subbtn{flex:none;min-width:52px;font-size:1.2rem;padding:8px 12px}
+.runrow{display:flex;gap:8px;align-items:stretch;justify-content:center}
+.runrow .subbtn{flex:none;width:64px;min-height:64px;font-size:1.7rem;padding:0;display:grid;place-items:center;border-radius:18px}
 
 /* ---------- overlays ---------- */
 #overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
@@ -172,7 +204,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 .lv .num{font-family:var(--display);font-weight:700;font-size:.8rem;color:var(--cocoa-soft);text-transform:uppercase;letter-spacing:.1em}
 .lv .ttl{font-family:var(--display);font-weight:700;font-size:1.05rem;line-height:1.1}
 .lv .ops{display:flex;gap:4px;margin-top:auto;flex-wrap:wrap}
-.lv .ops span{font-family:var(--display);font-weight:700;background:var(--butter);border-radius:8px;padding:1px 6px;font-size:.95rem}
+.lv .ops span{background:var(--butter);border-radius:8px;padding:2px;width:28px;height:28px;display:inline-grid;place-items:center}
 .lv .lvstars{font-size:.9rem;letter-spacing:.05em}
 .lv.locked{opacity:.55;cursor:not-allowed}
 .lv.locked::after{content:"🔒";position:absolute;right:10px;top:10px;font-size:1.2rem}
@@ -183,44 +215,86 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 /* ---------- compact phones: portrait fits in ~one screen ---------- */
 @media (max-width:900px){
   #app{gap:8px;padding-block:8px 12px}
-  #scene{width:min(100%,calc(40vh*var(--ar)));border-radius:18px}
-  #panel{padding:10px;gap:8px;min-height:0;border-radius:18px}
-  .coach{padding:8px 10px;gap:8px;border-radius:12px}
+  #scene{width:min(100%,calc(36vh*var(--ar)));border-radius:18px}
+  #app[data-mode="arrows"] #scene{width:min(100%,calc(30vh*var(--ar)))}
+  #topbar{gap:6px}
+  .chip{padding:2px 9px;font-size:.8rem}
+  #panel{padding:10px;gap:6px;min-height:0;border-radius:18px}
+  .coach{padding:7px 10px;gap:8px;border-radius:12px}
   .coach .face{font-size:1.4rem}
-  .coach p{font-size:.92rem}
+  .coach .face .demo{width:2.6rem;height:2.6rem}
+  .coach p{font-size:.85rem;line-height:1.25}
   .coach .say{width:34px;height:34px;font-size:1rem}
-  .strip{min-height:60px;gap:6px;padding:6px}
-  .pslot{min-width:52px;height:52px;border-radius:14px;border-width:2px}
-  .pblk{width:46px;height:46px;font-size:1.6rem;border-radius:12px}
+  .striprow{gap:6px}
+  .undobtn{width:56px;min-height:56px;font-size:1.7rem;border-radius:14px}
+  .strip{min-height:56px;gap:6px;padding:5px}
+  .pslot{min-width:46px;height:46px;border-radius:12px;border-width:2px}
+  .pblk{width:42px;height:42px;font-size:1.6rem;border-radius:11px;padding:2px}
   .pslot.rep{min-width:84px;padding:4px;gap:4px}
-  .palette{grid-template-columns:repeat(var(--items,3),1fr);gap:6px}
-  .blk{min-height:56px;padding:6px 2px 4px;border-radius:14px}
-  .blk .em{font-size:1.7rem}
-  .blk .nm{font-size:.68rem}
+  .rephead{gap:3px}
+  .repopen{height:38px;min-width:38px;padding:2px 4px}
+  .repopen .ico{width:32px;height:32px}
+  .repn{font-size:1rem;padding:3px 7px}
+  .repbody{min-height:44px;padding:3px;gap:4px}
+  .mini.empty,.pblk.mini{width:40px;height:40px}
+  .repdone{padding:4px 8px;font-size:.9rem}
+  .controls{gap:6px}
+  .palette,.palette.robopad{gap:6px}
+  .palette.dpad{--pad:64px}
+  .robopad .blk{flex-basis:calc((100% - 12px)/3);min-height:64px}
+  .blk{min-height:64px;padding:4px 2px 3px;border-radius:14px}
+  .blk .em{width:40px;height:40px}
+  .blk .nm{font-size:.66rem}
   .bigbtn{padding:10px 14px;font-size:1.15rem;border-radius:16px;min-height:46px}
-  .runrow .subbtn{min-width:46px;padding:6px 10px}
-  .label{font-size:.72rem}
+  .gobtn{min-height:64px;font-size:1.7rem;border-radius:20px}
+  .label{display:none}
+}
+@media (max-width:900px) and (max-height:720px){
+  #app[data-mode="robot"] #scene{width:min(100%,calc(32vh*var(--ar)))}
 }
 /* ---------- landscape phones: scene left, compact controls right ---------- */
 @media (max-height:520px) and (min-width:640px){
-  #app{gap:6px;padding-block:6px 8px}
+  #app{gap:5px;padding-block:4px 4px}
   #topbar{gap:8px}
   .logo .sign{font-size:.95rem;padding:2px 10px}
   .logo .brand{display:none}
   .chip{padding:3px 10px;font-size:.8rem}
   .iconbtn{width:44px;height:44px;font-size:1.1rem;border-radius:12px}
-  #stage{grid-template-columns:minmax(0,1fr) 300px;gap:10px}
-  #scene{width:min(100%,calc((100vh - 74px)*var(--ar)))}
-  #panel{padding:8px;gap:6px}
-  .coach{padding:6px 8px}
-  .coach p{font-size:.82rem}
+  #stage{grid-template-columns:minmax(0,1fr) 324px;gap:10px}
+  #scene,#app[data-mode] #scene{width:min(100%,calc((100vh - 66px)*var(--ar)))}
+  #panel{padding:7px;gap:5px}
+  .coach{padding:5px 8px;gap:6px}
+  .coach .face{font-size:1.3rem}
+  .coach .face .demo{width:2.4rem;height:2.4rem}
+  .coach p{font-size:.78rem;line-height:1.25}
+  .coach .say{width:32px;height:32px;font-size:.9rem}
   .label{display:none}
-  .strip{min-height:56px;padding:4px;gap:4px}
-  .pslot{min-width:48px;height:48px}
-  .pblk{width:44px;height:44px;font-size:1.5rem}
-  .blk{min-height:50px;padding:4px 2px 3px}
-  .blk .em{font-size:1.5rem}
-  .blk .nm{font-size:.62rem}
+  .striprow{gap:6px}
+  .undobtn{width:52px;min-height:52px;font-size:1.6rem;border-radius:14px}
+  .strip{min-height:52px;padding:4px;gap:4px}
+  .pslot{min-width:44px;height:44px;border-radius:12px;border-width:2px}
+  .pblk{width:40px;height:40px;font-size:1.5rem;border-radius:10px;padding:2px}
+  .pslot.rep{min-width:84px;padding:3px;gap:3px}
+  .rephead{gap:3px}
+  .repopen{height:36px;min-width:36px;padding:2px 4px}
+  .repopen .ico{width:30px;height:30px}
+  .repn{font-size:.95rem;padding:2px 7px}
+  .repbody{min-height:42px;padding:2px;gap:3px}
+  .mini.empty,.pblk.mini{width:38px;height:38px}
+  .repdone{padding:3px 8px;font-size:.85rem}
+  /* D-pad or robot pad on the left, GO stacked on the right */
+  .controls{flex-direction:row;align-items:stretch;justify-content:center;gap:8px}
+  .palette,.palette.robopad{gap:6px;align-content:start}
+  .palette.dpad{--pad:64px}
+  .palette.robopad{width:216px;flex:none}
+  .robopad .blk{flex-basis:calc((100% - 12px)/3);min-height:64px}
+  .blk{min-height:64px;padding:4px 2px 3px;border-radius:14px}
+  .blk .em{width:40px;height:40px}
+  .blk .nm{font-size:.6rem}
+  .runrow{flex-direction:column;width:76px;flex:none;gap:6px}
+  .runrow .subbtn{width:76px;min-height:64px;border-radius:16px}
+  .gobtn{flex:1 1 auto;width:76px;min-height:64px;max-width:none;padding:4px;font-size:1.35rem;flex-direction:column;gap:0;border-radius:18px}
+  .gobtn .play{width:1.2em;height:1.2em}
   .bigbtn{padding:6px 12px;font-size:1.05rem;min-height:44px}
 }
 
@@ -250,16 +324,18 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
     <div id="scene" aria-label="Maze">
       <div id="grid"></div>
       <div id="paths"></div>
-      <div class="robo" id="robo" aria-label="Robo the robot"><span class="glow"></span><span class="ring"></span><span class="bot">🤖</span></div>
+      <div class="robo" id="robo" aria-label="Robo the robot"><span class="glow"></span><span class="body"><span class="ring"></span><span class="bot">🤖</span></span></div>
       <div id="fx"></div>
     </div>
 
     <div id="panel">
       <div class="coach"><span class="face" id="coach-face">🤖</span><p id="coach-text">Get Robo to the charger!</p><button class="say" id="btn-say" aria-label="Read this out loud">🔊</button></div>
       <div class="label">Robo’s steps <span id="slot-count"></span></div>
-      <div class="strip" id="strip" aria-label="Robo’s steps"></div>
-      <div class="palette" id="palette" aria-label="Blocks"></div>
-      <div class="runrow"><button class="subbtn" id="btn-hint" hidden aria-label="Show a hint">💡</button><button class="bigbtn mint" id="btn-run">▶ Run</button><button class="subbtn" id="btn-clear" aria-label="Clear the program" title="Clear">🗑️</button></div>
+      <div class="striprow"><div class="strip" id="strip" aria-label="Robo’s steps"></div><button class="undobtn" id="btn-undo" aria-label="Take out the last step" title="Take out the last step">↶</button></div>
+      <div class="controls">
+        <div class="palette" id="palette" aria-label="Blocks"></div>
+        <div class="runrow"><button class="subbtn" id="btn-hint" hidden aria-label="Show a hint">💡</button><button class="subbtn" id="btn-clear" aria-label="Clear all the steps" title="Clear all">🧹</button><button class="gobtn" id="btn-run" aria-label="Go! Robo drives"><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 L21 12 L6 21 Z" fill="#fff"/></svg><span>GO</span></button></div>
+      </div>
     </div>
   </div>
 </div>
@@ -278,40 +354,93 @@ const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : m
 /* ---------- data ---------- */
 const DIRS = [{dr:-1,dc:0},{dr:0,dc:1},{dr:1,dc:0},{dr:0,dc:-1}]; // up, right, down, left
 const DIR_NAMES = ['up','right','down','left'];
-const ARROWS = ['↑','→','↓','←'];
-const BLOCKS = {
-  F:{em:'⬆️',name:'Forward',say:'forward'},
-  L:{em:'↩️',name:'Turn left',say:'turn left'},
-  R:{em:'↪️',name:'Turn right',say:'turn right'},
-  U:{em:'⏫',name:'Until wall',say:'go until wall'},
-  REP:{em:'🔁',name:'Repeat',say:'repeat'}
+// Two control modes. "arrows": four compass arrows, each step moves Robo one square in that
+// absolute direction (levels 1–4). "robot": Forward / Turn left / Turn right relative to where
+// Robo is looking, plus Repeat and Until wall (levels 5–12).
+const ARROW_BLOCKS = {
+  U:{name:'Up',say:'up',d:0}, R:{name:'Right',say:'right',d:1}, D:{name:'Down',say:'down',d:2}, L:{name:'Left',say:'left',d:3}
 };
+const ROBOT_BLOCKS = {
+  F:{name:'Forward',say:'forward'},
+  L:{name:'Turn left',say:'turn left'},
+  R:{name:'Turn right',say:'turn right'},
+  U:{name:'Until wall',say:'go until wall'},
+  REP:{name:'Repeat',say:'repeat'}
+};
+const blocksOf = lv => lv.mode==='arrows' ? ARROW_BLOCKS : ROBOT_BLOCKS;
 const MAX_BODY = 5;
+
+/* ---------- icons (inline SVG, no image files) ---------- */
+const Icon = (() => {
+  const C = {mint:'#2FBFA6', sun:'#FFB703', purple:'#7C4DFF', cocoa:'#3B2A1F', wood:'#E0A96D', woodD:'#B97B3F', ketchup:'#F4552F', tin:'#E6EEF5'};
+  const svg = (inner, cls='ico') => `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true" focusable="false">${inner}</svg>`;
+  // a tiny Robo face: antenna, tin head, two eyes, mouth. Centred on (x,y), about s units tall.
+  const face = (x=50, y=50, s=100) => `<g transform="translate(${x} ${y}) scale(${(s/100).toFixed(3)})"><line x1="0" y1="-38" x2="0" y2="-54" stroke="${C.cocoa}" stroke-width="8" stroke-linecap="round"/><circle cx="0" cy="-58" r="9" fill="${C.ketchup}" stroke="${C.cocoa}" stroke-width="5"/><rect x="-42" y="-38" width="84" height="74" rx="20" fill="${C.tin}" stroke="${C.cocoa}" stroke-width="8"/><circle cx="-17" cy="-8" r="9" fill="${C.cocoa}"/><circle cx="17" cy="-8" r="9" fill="${C.cocoa}"/><rect x="-20" y="12" width="40" height="10" rx="5" fill="${C.cocoa}"/></g>`;
+  const ARROW = 'M50 5 L93 48 L68 48 L68 95 L32 95 L32 48 L7 48 Z';
+  // chunky compass arrow pointing in direction d (0 up,1 right,2 down,3 left), Robo face riding in the shaft
+  function arrow(d, withFace=true){
+    const ang = d*90, rad = ang*Math.PI/180, fx = Math.round(50 - 22*Math.sin(rad)), fy = Math.round(50 + 22*Math.cos(rad));
+    return svg(`<path d="${ARROW}" transform="rotate(${ang} 50 50)" fill="${C.mint}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/>${withFace ? face(fx, fy, 38) : ''}`);
+  }
+  // Forward: a big arrow pointing up out of a small Robo
+  function forward(){ return svg(`<path d="M50 3 L90 40 L65 40 L65 66 L35 66 L35 40 L10 40 Z" fill="${C.mint}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/>${face(50, 82, 34)}`); }
+  // Turn: a curved arrow that starts at Robo, goes up and bends to the side he will face afterwards
+  function turn(left){
+    const path = 'M62 78 V44 Q62 24 44 24 H34';
+    const inner = `<path d="${path}" fill="none" stroke="${C.cocoa}" stroke-width="22" stroke-linecap="round"/><path d="${path}" fill="none" stroke="${C.sun}" stroke-width="12" stroke-linecap="round"/><path d="M34 5 L6 24 L34 43 Z" fill="${C.sun}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/>`;
+    return svg(`<g${left ? '' : ' transform="translate(100 0) scale(-1 1)"'}>${inner}</g>${face(left ? 62 : 38, 84, 30)}`);
+  }
+  // Repeat: a loop arrow with the count in a badge
+  function repeat(n){
+    const arc = 'M50 14 A36 36 0 1 1 14 50';
+    return svg(`<path d="${arc}" fill="none" stroke="${C.cocoa}" stroke-width="20" stroke-linecap="round"/><path d="${arc}" fill="none" stroke="${C.purple}" stroke-width="11" stroke-linecap="round"/><path d="M14 24 L0 52 L28 52 Z" fill="${C.purple}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/><circle cx="50" cy="50" r="21" fill="#fff" stroke="${C.purple}" stroke-width="5"/><text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="Fredoka,Nunito,system-ui,sans-serif" font-weight="700" font-size="${n ? 24 : 30}" fill="${C.purple}">${n ? '×'+n : '×'}</text>`);
+  }
+  // Until wall: an arrow running into a little brick wall
+  function until(){
+    return svg(`<path d="M4 36 H40 V16 L68 50 L40 84 V64 H4 Z" fill="${C.mint}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/><rect x="70" y="6" width="26" height="88" rx="4" fill="${C.wood}" stroke="${C.cocoa}" stroke-width="5"/><path d="M70 28 H96 M70 50 H96 M70 72 H96 M83 6 V28 M83 50 V72 M76 28 V50 M90 28 V50 M76 72 V94 M90 72 V94" stroke="${C.woodD}" stroke-width="3"/>`);
+  }
+  // play triangle for GO; demo Robo (arrow above his head, whole body rotates)
+  function demo(){
+    return `<svg class="demo" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><g class="demo-rot"><g class="demo-mv"><path d="M50 2 L76 28 L61 28 L61 36 L39 36 L39 28 L24 28 Z" fill="${C.mint}" stroke="${C.cocoa}" stroke-width="6" stroke-linejoin="round"/>${face(50, 66, 34)}</g></g></svg>`;
+  }
+  const mi = s => `<span class="mi">${s}</span>`;
+  return {face:(x,y,s)=>svg(face(x,y,s)), arrow, forward, turn, repeat, until, demo, mi};
+})();
+function blockIcon(t, lv, n){
+  if(lv.mode==='arrows') return Icon.arrow(ARROW_BLOCKS[t].d, true);
+  if(t==='F') return Icon.forward();
+  if(t==='L') return Icon.turn(true);
+  if(t==='R') return Icon.turn(false);
+  if(t==='U') return Icon.until();
+  return Icon.repeat(n || 2);
+}
+
 // map legend: # wall · . floor · S start · E charging dock · o crumb
+// arrows-mode solutions use absolute moves U/D/L/R; robot-mode solutions use F/L/R/U and {rep,body}
 const LEVELS = [
-  {title:'First Steps', dir:1, slots:2, tip:'Get Robo to the charger! Tap the arrows to tell Robo where to go. Then tap Run.',
-   map:['###','S.E','###'], solution:['F','F']},
-  {title:'One Turn', dir:1, slots:5, tip:'Robo needs to turn! Tap Turn right to make Robo look a new way.',
-   map:['S.o','##.','##E'], solution:['F','F','R','F','F']},
-  {title:'Turn Left', dir:0, slots:7, tip:'This time Robo turns left. Look at the red arrow. It shows where Robo is looking!',
-   map:['Eo..','###o','###.','###S'], solution:['F','F','F','L','F','F','F']},
-  {title:'Zig Zag', dir:1, slots:9, tip:'A zig zag! Go, turn, go, turn.',
-   map:['S.##','#o##','#.o.','###E'], solution:['F','R','F','F','L','F','F','R','F']},
-  {title:'Repeat!', dir:1, slots:1, tip:'Only one box! Tap Repeat. Tap the number until it says 4. Then tap Forward. Then tap Done and Run.',
+  {title:'First Steps', mode:'arrows', dir:1, slots:2, tip:'Get Robo to the charger! Tap the arrows to tell Robo where to go. Then tap GO.',
+   map:['###','S.E','###'], solution:['R','R']},
+  {title:'Right and Down', mode:'arrows', dir:1, slots:4, tip:'Robo goes right, then down. Tap the arrows in order. Then tap GO.',
+   map:['S.o','##.','##E'], solution:['R','R','D','D']},
+  {title:'Up and Left', mode:'arrows', dir:0, slots:6, tip:'Go up three times. Then go left three times. Grab the crumbs!',
+   map:['Eo..','###o','###.','###S'], solution:['U','U','U','L','L','L']},
+  {title:'Zig Zag', mode:'arrows', dir:1, slots:6, tip:'A zig zag! Right, down, down, right, right, down.',
+   map:['S.##','#o##','#.o.','###E'], solution:['R','D','D','R','R','D']},
+  {title:'Repeat!', mode:'robot', dir:1, slots:1, tip:'New buttons! Forward goes the way Robo looks. Only one box, so tap Repeat. Tap the number until it says 4. Then tap Forward. Then tap Done and GO.',
    map:['#####','#####','S..oE','#####','#####'], solution:[{rep:4,body:['F']}]},
-  {title:'Stairs', dir:0, slots:2, tip:'Stairs! Put Forward, Turn right, Forward, Turn left inside a Repeat.',
+  {title:'Stairs', mode:'robot', dir:0, slots:2, tip:'Stairs! Tap Turn to see Robo turn. Put Forward, Turn right, Forward, Turn left inside a Repeat.',
    map:['###.E','##.o#','#o.##','..###','S####'], solution:[{rep:4,body:['F','R','F','L']}]},
-  {title:'Cookie Corners', dir:1, slots:2, tip:'Cookie corners! Four Forwards and one Turn right, three times.',
+  {title:'Cookie Corners', mode:'robot', dir:1, slots:2, tip:'Cookie corners! Four Forwards and one Turn right, three times.',
    map:['S.o..','####.','####o','####.','E.o..'], solution:[{rep:3,body:['F','F','F','F','R']}]},
-  {title:'Twisty Halls', dir:0, slots:5, tip:'Long halls and turns! Use Repeat for the long halls.',
+  {title:'Twisty Halls', mode:'robot', dir:0, slots:5, tip:'Long halls and turns! Use Repeat for the long halls.',
    map:['######','...o..','.####.','o####o','.####.','S####E'], solution:[{rep:4,body:['F']},'R',{rep:5,body:['F']},'R',{rep:4,body:['F']}]},
-  {title:'Until the Wall', dir:1, slots:3, tip:'New block! Until wall makes Robo drive until it gets to a wall.',
+  {title:'Until the Wall', mode:'robot', dir:1, slots:3, tip:'New block! Until wall makes Robo drive until it gets to a wall.',
    map:['S.o..#','####.#','####.#','####o#','####.#','####E#'], solution:['U','R','U']},
-  {title:'Long Halls', dir:0, slots:7, tip:'Lots of long halls. Until wall, then turn. Again and again!',
+  {title:'Long Halls', mode:'robot', dir:0, slots:7, tip:'Lots of long halls. Until wall, then turn. Again and again!',
    map:['...o..','.####.','o####.','.#Eo..','.#####','S#####'], solution:['U','R','U','R','U','R','U']},
-  {title:'Big Maze', dir:0, slots:9, tip:'A big maze! Do one hall at a time. Which way does Robo turn?',
+  {title:'Big Maze', mode:'robot', dir:0, slots:9, tip:'A big maze! Do one hall at a time. Which way does Robo turn?',
    map:['..o.##E','.##.##.','.#o..o.','o######','.######','.######','S######'], solution:['U','R','U','R','U','L','U','L','U']},
-  {title:'Grand Finale', dir:2, slots:5, tip:'The last one! Try Until wall and Turn left inside a Repeat.',
+  {title:'Grand Finale', mode:'robot', dir:2, slots:5, tip:'The last one! Try Until wall and Turn left inside a Repeat.',
    map:['S######','.######','.#..o..','o#.###.','.#E###o','.#####.','...o...'], solution:[{rep:4,body:['U','L']},'U']}
 ];
 const PRAISE = ['Robo is charged up!','Super coder!','You did it!','Amazing program!','High five! 🙌','Brilliant!','Beep boop, perfect!'];
@@ -426,7 +555,7 @@ let progress = Object.assign({unlocked:1, stars:{}}, Save.load());
 const el = {
   scene:$('#scene'), stage:$('#stage'), grid:$('#grid'), paths:$('#paths'), robo:$('#robo'), fx:$('#fx'), panel:$('#panel'),
   coachText:$('#coach-text'), coachFace:$('#coach-face'), strip:$('#strip'), palette:$('#palette'), slotCount:$('#slot-count'),
-  btnRun:$('#btn-run'), btnHint:$('#btn-hint'), btnClear:$('#btn-clear'),
+  btnRun:$('#btn-run'), btnHint:$('#btn-hint'), btnClear:$('#btn-clear'), btnUndo:$('#btn-undo'),
   lvlChip:$('#lvl-chip'), runsChip:$('#runs-chip'), crumbChip:$('#crumb-chip'), overlay:$('#overlay'), card:$('#card')
 };
 
@@ -434,7 +563,7 @@ const el = {
 function parseLevel(L, n){
   const rows = L.map.length, cols = L.map[0].length;
   const cells = L.map.map(r => r.split(''));
-  const lv = {n, title:L.title, tip:L.tip, dir:L.dir, slots:L.slots, rows, cols, cells, crumbs:[], solution:L.solution, solProg:toProgram(L.solution)};
+  const lv = {n, title:L.title, tip:L.tip, mode:L.mode==='arrows'?'arrows':'robot', dir:L.dir, slots:L.slots, rows, cols, cells, crumbs:[], solution:L.solution, solProg:toProgram(L.solution)};
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
     const ch = cells[r][c];
     if(ch==='S') lv.start = {r,c};
@@ -469,17 +598,25 @@ function simulate(lv, prog){
   };
   for(const s of flatten(prog)){
     if(done) break;
-    if(s.op==='F'){ if(!fwd()){ bonk = true; break; } }
+    if(lv.mode==='arrows'){
+      // absolute move: face that way, then step
+      if(!ARROW_BLOCKS[s.op]){ bonk = true; break; }
+      d = ARROW_BLOCKS[s.op].d;
+      if(!fwd()){ bonk = true; break; }
+    }
+    else if(s.op==='F'){ if(!fwd()){ bonk = true; break; } }
     else if(s.op==='L') d = (d+3)%4;
     else if(s.op==='R') d = (d+1)%4;
     else if(s.op==='U'){ while(!done && fwd()){} }
   }
   return {ok:done, bonk, moves, crumbs:got, end:{r,c,d}};
 }
-// verify every level's stored solution at load
+// verify every level's stored solution at load (arrows levels: only U/D/L/R; robot levels: F/L/R/U/REP)
 LEVELS.forEach((L,i) => {
   const lv = parseLevel(L, i+1);
   if(!lv.start || !lv.dock){ console.warn(`Robo Maze: level ${i+1} is missing a start or dock`); return; }
+  const ok = lv.mode==='arrows' ? lv.solProg.every(b => ARROW_BLOCKS[b.t]) : lv.solProg.every(b => ROBOT_BLOCKS[b.t] && (b.t!=='REP' || b.body.every(bb => ROBOT_BLOCKS[bb.t] && bb.t!=='REP')));
+  if(!ok) console.warn(`Robo Maze: level ${i+1} (${L.title}) solution uses blocks that do not exist in ${lv.mode} mode`);
   const res = simulate(lv, lv.solProg);
   if(!res.ok) console.warn(`Robo Maze: level ${i+1} (${L.title}) solution does not reach the dock`, res);
   if(lv.solProg.length > L.slots) console.warn(`Robo Maze: level ${i+1} solution needs ${lv.solProg.length} slots but only ${L.slots} are shown`);
@@ -495,8 +632,31 @@ let sittingDone = 0; // levels finished this sitting (memory only, never saved)
 
 let coachSpoken = '';
 function coach(text, face, speak=true, spoken){
+  stopDemo();
   coachLine = text; coachSpoken = spoken || text; el.coachText.textContent = text; if(face) el.coachFace.textContent = face;
   if(speak) Voice.say(coachSpoken);
+}
+
+/* ---------- "Robo turns" demo (first time robot mode appears, level 5) ---------- */
+let demoId = 0, demoTimers = [];
+function stopDemo(){
+  if(!G || !G.demo) return;
+  demoId++; G.demo = false; demoTimers.forEach(clearTimeout); demoTimers = [];
+  el.coachFace.textContent = '🤖';
+}
+function runTurnsDemo(){
+  const id = ++demoId; G.demo = true; demoTimers.forEach(clearTimeout); demoTimers = [];
+  const at = (ms, fn) => demoTimers.push(setTimeout(() => { if(G && G.demo && demoId===id) fn(); }, ms));
+  const line = t => { coachLine = t; coachSpoken = t; el.coachText.textContent = t; };
+  const svg = () => el.coachFace.querySelector('.demo');
+  const go = () => { const s = svg(); if(!s) return; s.classList.remove('go'); void s.getBoundingClientRect(); s.classList.add('go'); Sound.whirr(0.4); };
+  el.coachFace.innerHTML = Icon.demo();
+  line('Watch Robo turn!');
+  Voice.say('Watch Robo turn! Forward goes the way Robo looks. Turn right makes Robo look right.');
+  at(1500, () => { line('Forward goes the way Robo looks.'); go(); });
+  at(3000, () => { line('Turn right makes Robo look right.'); const s = svg(); if(s) s.querySelector('.demo-rot').style.transform = 'rotate(90deg)'; Sound.turn(); });
+  at(4500, () => { line('Now Forward goes that way!'); go(); });
+  at(6000, () => { G.demo = false; demoTimers = []; el.coachFace.textContent = '🤖'; coach(`Level ${G.n}: ${G.lv.title}. ${G.lv.tip}`, '🤖'); });
 }
 function toast(text, mint){
   const t = document.createElement('div'); t.className='toast'+(mint?' mint':''); t.textContent=text; el.fx.appendChild(t); setTimeout(()=>t.remove(),1600);
@@ -533,8 +693,17 @@ function placeRobo(instant){
   const lv = G.lv, {r,c,d} = G.robo;
   if(instant){ el.robo.style.transition = 'none'; }
   el.robo.style.left = pct(c/lv.cols*100); el.robo.style.top = pct(r/lv.rows*100);
-  el.robo.querySelector('.ring').style.transform = `rotate(${d*90}deg)`;
+  setRoboHeading(d);
   if(instant){ void el.robo.offsetWidth; el.robo.style.transition = ''; }
+}
+function setRoboHeading(d){ el.robo.querySelector('.body').style.transform = `rotate(${d*90}deg)`; }
+// robot mode: tapping a Turn block shows Robo turning that way on the maze for a moment, then back
+let previewT = null;
+function previewTurn(type){
+  if(!G || G.running) return;
+  clearTimeout(previewT);
+  setRoboHeading((G.robo.d + (type==='L' ? 3 : 1)) % 4); Sound.turn();
+  previewT = setTimeout(() => { if(G && !G.running) setRoboHeading(G.robo.d); }, 300 + (reduced ? 0 : 220));
 }
 function resetRobo(){
   G.robo = {r:G.lv.start.r, c:G.lv.start.c, d:G.lv.dir};
@@ -546,7 +715,7 @@ function resetRobo(){
 function showPath(){
   const res = simulate(G.lv, G.lv.solProg);
   const lv = G.lv;
-  el.paths.innerHTML = res.moves.map((m,i) => `<div class="arrow" style="left:${m.c/lv.cols*100}%;top:${m.r/lv.rows*100}%;width:${100/lv.cols}%;height:${100/lv.rows}%;animation-delay:${i*0.08}s">${ARROWS[m.d]}</div>`).join('');
+  el.paths.innerHTML = res.moves.map((m,i) => `<div class="arrow" style="left:${m.c/lv.cols*100}%;top:${m.r/lv.rows*100}%;width:${100/lv.cols}%;height:${100/lv.rows}%;animation-delay:${i*0.08}s">${Icon.arrow(m.d, false)}</div>`).join('');
   G.hintOn = true;
 }
 function updateChips(){
@@ -557,20 +726,21 @@ function updateChips(){
 
 /* ---------- program strip + palette ---------- */
 function blockHTML(b, i, j){
-  const B = BLOCKS[b.t];
+  const B = blocksOf(G.lv)[b.t];
   const jj = j===undefined ? '' : ` data-j="${j}"`;
-  return `<button class="pblk ${j===undefined?'':'mini'}" data-i="${i}"${jj} aria-label="${B.name}, tap to remove">${B.em}</button>`;
+  return `<button class="pblk ${j===undefined?'':'mini'}" data-i="${i}"${jj} aria-label="${B.name}, tap to remove">${blockIcon(b.t, G.lv)}</button>`;
 }
 function repHTML(b, i, open){
   return `<div class="pslot rep ${open?'open':''}" data-rep="${i}">
-    <div class="rephead"><button class="repopen" data-repopen="${i}" aria-label="Repeat block, tap to ${open?'close':'open'}">🔁</button><button class="repn" data-repn="${i}" aria-label="Repeat ${b.n} times, tap to change">×${b.n}</button><span class="repcount" data-repcount="${i}"></span><button class="repx" data-repx="${i}" aria-label="Remove this repeat">✕</button></div>
+    <div class="rephead"><button class="repopen" data-repopen="${i}" aria-label="Repeat block, tap to ${open?'close':'open'}">${Icon.repeat(b.n)}</button><button class="repn" data-repn="${i}" aria-label="Repeat ${b.n} times, tap to change">×${b.n}</button><span class="repcount" data-repcount="${i}"></span><button class="repx" data-repx="${i}" aria-label="Remove this repeat">✕</button></div>
     <div class="repbody">${b.body.map((bb,j)=>blockHTML(bb,i,j)).join('')}${open && b.body.length<MAX_BODY ? '<span class="mini empty" aria-hidden="true"></span>' : ''}</div>
     ${open ? `<button class="repdone" data-repdone="${i}">✓ Done</button>` : ''}
   </div>`;
 }
 function ghostHTML(b, i, next){
-  const inner = b.t==='REP' ? `<span style="font-size:1.1rem;line-height:1.1">🔁×${b.n}<br>${b.body.map(bb=>BLOCKS[bb.t].em).join('')}</span>` : BLOCKS[b.t].em;
-  return `<div class="pslot ghost ${next?'next':''}"><button class="pblk" data-ghost="${i}" ${next?'':'disabled'} aria-label="Hint block: ${b.t==='REP'?'repeat':BLOCKS[b.t].name}${next?', tap to add':''}">${inner}</button></div>`;
+  const B = blocksOf(G.lv);
+  const inner = b.t==='REP' ? `<span class="ghrep">${Icon.mi(Icon.repeat(b.n))}<span class="ghb">${b.body.map(bb=>Icon.mi(blockIcon(bb.t, G.lv))).join('')}</span></span>` : blockIcon(b.t, G.lv);
+  return `<div class="pslot ghost ${next?'next':''}"><button class="pblk" data-ghost="${i}" ${next?'':'disabled'} aria-label="Hint block: ${b.t==='REP'?'repeat':B[b.t].name}${next?', tap to add':''}">${inner}</button></div>`;
 }
 function renderStrip(){
   const lv = G.lv; let html = '';
@@ -586,20 +756,33 @@ function renderStrip(){
   updateChips();
 }
 function renderPalette(){
-  const lv = G.lv;
-  const items = ['F','L','R'];
+  const lv = G.lv, B = blocksOf(lv);
+  $('#app').dataset.mode = lv.mode;
+  if(lv.mode==='arrows'){
+    // D-pad: Up on top, Left / Robo / Right in the middle, Down at the bottom
+    el.palette.className = 'palette dpad';
+    el.palette.innerHTML = ['U','L','R','D'].map(t => `<button class="blk" data-t="${t}" aria-label="${B[t].name}"><span class="em">${blockIcon(t, lv)}</span></button>`).join('') + `<div class="dcenter" aria-hidden="true">${Icon.face(50, 54, 90)}</div>`;
+    return;
+  }
+  el.palette.className = 'palette robopad';
+  const items = ['L','F','R'];
   if(lv.canRep) items.push('REP');
   if(lv.canU) items.push('U');
-  el.palette.style.setProperty('--cols', items.length<=3?3:items.length===4?2:3); el.palette.style.setProperty('--items', items.length);
-  el.palette.innerHTML = items.map(t => `<button class="blk ${t==='REP'?'rep':''} ${(t==='REP'&&lv.n===5)||(t==='U'&&lv.n===9)?'new':''}" data-t="${t}" aria-label="${BLOCKS[t].name}"><span class="em">${BLOCKS[t].em}</span><span class="nm">${BLOCKS[t].name}</span></button>`).join('');
+  el.palette.innerHTML = items.map(t => `<button class="blk ${t==='REP'?'rep':''} ${(t==='REP'&&lv.n===5)||(t==='U'&&lv.n===9)?'new':''}" data-t="${t}" aria-label="${B[t].name}"><span class="em">${blockIcon(t, lv)}</span><span class="nm">${B[t].name}</span></button>`).join('');
 }
 function full(){
   Sound.oops();
   const b = el.palette.querySelector('.blk'); if(b){ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); }
-  coach(G.open!==null ? 'That Repeat is full! Tap Done.' : 'All the boxes are full! Tap a block to take it out. Or tap Run.', '🤔');
+  coach(G.open!==null ? 'That Repeat is full! Tap Done.' : 'All the boxes are full! Tap a block to take it out. Or tap GO.', '🤔');
 }
+// arrows mode accepts U/D/L/R; robot mode accepts F/L/R/U/REP/END
 function addBlock(type, n){
   if(!G || G.running || G.done) return false;
+  if(G.lv.mode==='arrows'){
+    if(!ARROW_BLOCKS[type]) return false;
+    if(G.program.length >= G.lv.slots){ full(); return false; }
+    G.program.push({t:type}); Sound.pop(); renderStrip(); return true;
+  }
   if(type==='END'){ G.open = null; renderStrip(); return true; }
   if(type==='REP'){
     if(G.open!==null){ G.open = null; Sound.pop(); renderStrip(); return true; }
@@ -608,7 +791,7 @@ function addBlock(type, n){
     Sound.pop(); coach('Tap the number to pick how many times. Then tap blocks to put them inside. Tap Done when you are finished.', '🔁');
     renderStrip(); return true;
   }
-  if(!BLOCKS[type]) return false;
+  if(!ROBOT_BLOCKS[type]) return false;
   if(G.open!==null){
     const rep = G.program[G.open];
     if(rep.body.length >= MAX_BODY){ full(); return false; }
@@ -617,7 +800,9 @@ function addBlock(type, n){
     if(G.program.length >= G.lv.slots){ full(); return false; }
     G.program.push({t:type});
   }
-  Sound.pop(); renderStrip(); return true;
+  Sound.pop(); renderStrip();
+  if(type==='L' || type==='R') previewTurn(type);
+  return true;
 }
 function removeLast(){
   if(!G || G.running) return;
@@ -631,7 +816,7 @@ function fillGhost(i){
   if(s.t==='REP'){ G.program.push({t:'REP', n:s.n, body:s.body.map(b=>({t:b.t}))}); G.open = null; }
   else G.program.push({t:s.t});
   Sound.pop(); renderStrip();
-  if(G.program.length === G.lv.solProg.length) coach('All filled in! Now tap Run.', '🤖');
+  if(G.program.length === G.lv.solProg.length) coach('All filled in! Now tap GO.', '🤖');
 }
 el.palette.addEventListener('click', e => {
   const b = e.target.closest('.blk'); if(!b) return;
@@ -652,14 +837,16 @@ el.strip.addEventListener('click', e => {
     Sound.pop(); renderStrip();
   }
 });
-el.btnClear.addEventListener('click', () => { if(!G || G.running) return; G.program = []; G.open = null; Sound.pop(); renderStrip(); coach('All clear! Tap the arrows to start again.', '🤖', false); });
-el.btnHint.addEventListener('click', () => { if(!G) return; showPath(); Sound.ding(); coach('Here is the way! Follow the green arrows. Which way does Robo look first?', '💡'); });
+el.btnClear.addEventListener('click', () => { if(!G || G.running || G.done) return; G.program = []; G.open = null; Sound.pop(); renderStrip(); coach(G.lv.mode==='arrows' ? 'All clear! Tap the arrows to start again.' : 'All clear! Tap Forward or Turn to start again.', '🤖', false); });
+el.btnUndo.addEventListener('click', () => { if(!G || G.running || G.done) return; removeLast(); });
+el.btnHint.addEventListener('click', () => { if(!G) return; showPath(); Sound.ding(); coach(G.lv.mode==='arrows' ? 'Here is the way! Follow the green arrows. Tap the same arrows in order.' : 'Here is the way! Follow the green arrows. Which way does Robo look first?', '💡'); });
 el.btnRun.addEventListener('click', () => { Sound.ensure(); runProgram(); });
+// keyboard: arrows mode ↑↓←→ add absolute steps; robot mode ↑ = Forward, ← → = turns
+const KEYS = {arrows:{ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}, robot:{ArrowUp:'F',ArrowLeft:'L',ArrowRight:'R'}};
 document.addEventListener('keydown', e => {
   if(!G || el.overlay.classList.contains('on')) return;
-  if(e.key==='ArrowUp'){ e.preventDefault(); addBlock('F'); }
-  else if(e.key==='ArrowLeft'){ e.preventDefault(); addBlock('L'); }
-  else if(e.key==='ArrowRight'){ e.preventDefault(); addBlock('R'); }
+  const t = KEYS[G.lv.mode][e.key];
+  if(t){ e.preventDefault(); addBlock(t); }
   else if(e.key==='Enter'){ e.preventDefault(); runProgram(); }
   else if(e.key==='Backspace'){ e.preventDefault(); removeLast(); }
 });
@@ -694,19 +881,27 @@ async function moveForward(myRun){
 async function runProgram(){
   if(!G || G.running || G.done) return;
   if(G.open!==null){ G.open = null; renderStrip(); }
-  if(!G.program.length){ Sound.oops(); coach('Tap some arrows first. Then tap Run!', '🤔'); return; }
+  if(!G.program.length){ Sound.oops(); coach(G.lv.mode==='arrows' ? 'Tap some arrows first. Then tap GO!' : 'Tap Forward first. Then tap GO!', '🤔'); return; }
   if(G.program.some(b => b.t==='REP' && !b.body.length)){ Sound.oops(); coach('Your Repeat is empty! Tap it to open it. Then put blocks inside.', '🤔'); return; }
   run++; const myRun = run;
+  clearTimeout(previewT);
   G.running = true; G.runs++; el.panel.classList.add('running'); el.btnRun.disabled = true;
   resetRobo(); renderStrip();
   coach('Beep boop! Robo is going…', '🤖', false);
   const steps = flatten(G.program);
+  const arrows = G.lv.mode==='arrows';
   let outcome = 'short';
   await wait(300);
   for(const s of steps){
     if(run!==myRun) return;
     highlight(s);
-    if(s.op==='F'){
+    if(arrows){
+      // absolute step: Robo turns to face that way, then drives one square
+      const nd = ARROW_BLOCKS[s.op].d;
+      if(nd !== G.robo.d){ G.robo.d = nd; setRoboHeading(nd); Sound.turn(); await wait(stepMs*0.4); if(run!==myRun) return; }
+      const ok = await moveForward(myRun); if(run!==myRun) return;
+      if(!ok){ outcome = 'bonk'; break; }
+    } else if(s.op==='F'){
       const ok = await moveForward(myRun); if(run!==myRun) return;
       if(!ok){ outcome = 'bonk'; break; }
     } else if(s.op==='L' || s.op==='R'){
@@ -730,14 +925,15 @@ async function runProgram(){
 function atDock(){ return G.robo.r===G.lv.dock.r && G.robo.c===G.lv.dock.c; }
 function endRun(){ G.running = false; el.panel.classList.remove('running'); el.btnRun.disabled = false; renderStrip(); }
 async function bonk(myRun){
-  const d = DIRS[G.robo.d]; const p = roboCenter();
-  el.robo.style.setProperty('--bx', d.dc*30+'%'); el.robo.style.setProperty('--by', d.dr*30+'%');
+  const p = roboCenter();
+  // the sprite body is rotated to face the way Robo drives, so "forward" is always up in its own frame
+  el.robo.style.setProperty('--bx', '0%'); el.robo.style.setProperty('--by', '-30%');
   el.robo.classList.add('bonk'); Sound.fart(); el.stage.classList.add('shake'); setTimeout(()=>el.stage.classList.remove('shake'),700);
   for(let i=0;i<7;i++) spark(p.x, p.y, pick(['⚡','✨','💨','⚙️','💥']), 14);
   puff(p.x-6, p.y+2); puff(p.x+2, p.y+4);
   toast('BONK!');
   G.fails++;
-  coach(pick(OOPS)+' Robo bumped into a wall. Take a block out, or add a turn.', '🤖');
+  coach(pick(OOPS)+(G.lv.mode==='arrows' ? ' Robo bumped into a wall. Take an arrow out, or try a different arrow.' : ' Robo bumped into a wall. Take a block out, or add a turn.'), '🤖');
   afterFail();
   await wait(900); if(run!==myRun) return;
   el.robo.classList.remove('bonk'); endRun();
@@ -785,7 +981,7 @@ function finishLevel(){
     <div class="stars">${[1,2,3].map(i=>`<span class="${i<=stars?'lit':''}" style="animation-delay:${i*0.2}s">⭐</span>`).join('')}</div>
     <p>${msg}</p>
     ${allCrumbs ? '<div class="fact bonus">🍪 Cookie bonus! Robo got every crumb!</div>' : ''}
-    <div class="fact">Solved in <b>${G.runs}</b> run${G.runs===1?'':'s'} · <b>${G.program.length}</b> block${G.program.length===1?'':'s'}${usedRep?' · used <b>🔁 Repeat</b>':''} · 🍪 <b>${G.got.size}</b> of <b>${G.lv.crumbs.length}</b></div>
+    <div class="fact">Solved in <b>${G.runs}</b> run${G.runs===1?'':'s'} · <b>${G.program.length}</b> block${G.program.length===1?'':'s'}${usedRep?' · used <b>Repeat</b>':''} · 🍪 <b>${G.got.size}</b> of <b>${G.lv.crumbs.length}</b></div>
     ${last ? '<div class="fact">🏆 You finished every level! You’re a Robo Maze master!</div>' : ''}
     ${breakTime ? doneBtn(true) : nextBtn(true)}
     <div class="rowbtns">${breakTime ? nextBtn(false) : ''}<button class="subbtn" id="btn-replay">Play it again</button>${breakTime ? '' : doneBtn(false)}</div>`, 'complete');
@@ -808,12 +1004,19 @@ function startLevel(n){
   n = Math.max(1, Math.min(LEVELS.length, n));
   run++;
   const lv = parseLevel(LEVELS[n-1], n);
-  G = {n, lv, program:[], open:null, running:false, done:false, runs:0, fails:0, ghost:false, hintOn:false, robo:{r:lv.start.r,c:lv.start.c,d:lv.dir}, got:new Set()};
+  stopDemo(); clearTimeout(previewT);
+  G = {n, lv, program:[], open:null, running:false, done:false, runs:0, fails:0, ghost:false, hintOn:false, demo:false, robo:{r:lv.start.r,c:lv.start.c,d:lv.dir}, got:new Set()};
   el.fx.innerHTML = ''; el.robo.classList.remove('driving','bonk','charge','think');
   el.btnHint.hidden = true; el.btnHint.classList.remove('glow'); el.btnRun.disabled = false; el.panel.classList.remove('running');
   drawMaze(); renderPalette(); renderStrip(); updateChips();
   hideOverlay();
-  coach(`Level ${n}: ${lv.title}. ${lv.tip}`, '🤖');
+  const firstRobot = lv.mode==='robot' && LEVELS[n-2] && LEVELS[n-2].mode==='arrows';
+  if(firstRobot && !progress.turnsDemo){
+    // first time the Forward / Turn buttons appear: a short "Robo turns" demo, then the level tip
+    progress.turnsDemo = true; Save.save(progress);
+    coach(`Level ${n}: ${lv.title}.`, '🤖', false);
+    runTurnsDemo();
+  } else coach(`Level ${n}: ${lv.title}. ${lv.tip}`, '🤖');
   armIdle();
 }
 
@@ -830,7 +1033,7 @@ function showTitle(){
   run++; previewLevel(Math.min(progress.unlocked, LEVELS.length)); G = null;
   showOverlay(`<div class="hero">🤖🧱⚡</div><h1>Robo Maze</h1>
     <p>Robo needs a charge! Tap arrow blocks to drive Robo through the maze to the charger. Grab cookie crumbs on the way!</p>
-    <div class="fact">Learn <b>⬆️</b> steps in order · <b>↪️</b> turns · <b>🔁</b> repeats</div>
+    <div class="fact">Learn ${Icon.mi(Icon.arrow(1))} steps in order · ${Icon.mi(Icon.turn(false))} turns · ${Icon.mi(Icon.repeat(0))} repeats</div>
     <button class="bigbtn" id="btn-play">Play! 🤖</button>
     <div class="rowbtns"><button class="subbtn" id="btn-choose">Choose a level</button><button class="subbtn" id="btn-grownups">For grown-ups</button></div>
     <p style="font-size:.85rem">Tip: tap any message to hear it read out loud.</p>`, 'title');
@@ -841,14 +1044,15 @@ function showTitle(){
 function showGrownups(){
   run++; G = null;
   const rows = LEVELS.map((L,i)=>`<li><b>${i+1}. ${L.title}</b> (${L.map.length}×${L.map[0].length}) — ${[
-    'a straight run: two Forward blocks in order','the first turn: Turn right changes where Robo faces','Turn left, and reading the direction marker','alternating turns: a longer sequence','loops: only one slot, so Repeat ×4 is needed','a pattern inside a loop (Forward, Turn right, Forward, Turn left)','a bigger pattern repeated three times','mixing loops with single turns','sensing: Until wall drives until Robo reaches a wall','chaining Until wall and turns','a long maze combining every block','loops with Until wall inside'][i]}</li>`).join('');
+    'plain arrows: two Right arrows in order','arrows in order: right, right, down, down','a longer list of arrows: up three times, then left three times','a zig zag of six arrows','new buttons: Forward goes the way Robo is looking. Only one slot, so Repeat ×4 is needed','turns inside a loop (Forward, Turn right, Forward, Turn left)','a bigger pattern repeated three times','mixing loops with single turns','sensing: Until wall drives until Robo reaches a wall','chaining Until wall and turns','a long maze combining every block','loops with Until wall inside'][i]}</li>`).join('');
   showOverlay(`<h2>For grown-ups</h2>
     <p>Robo Maze introduces three beginner coding ideas: <b>sequencing</b> (steps in order), <b>turns</b> (left and right are relative to Robo), and <b>loops</b> (Repeat ×N). Levels 9–12 add a simple <b>sensing</b> block, Until wall.</p>
+    <p><b>Two kinds of buttons.</b> Early levels (1–4) use plain arrows ${Icon.mi(Icon.arrow(0))}${Icon.mi(Icon.arrow(1))}: tap Up, Down, Left or Right and Robo goes that way on the screen, one square per arrow. From level 5 the buttons change to Forward ${Icon.mi(Icon.forward())}, Turn left ${Icon.mi(Icon.turn(true))} and Turn right ${Icon.mi(Icon.turn(false))}. Forward goes the way Robo is looking, and a turn changes where he looks. That is real programming: the steps are relative to the robot, not to the screen. Tapping a Turn button makes Robo on the maze show the turn for a moment, and the first time level 5 opens a short animation shows Robo turning.</p>
     <div class="fact" style="text-align:left;font-weight:700"><ul style="margin:0;padding-left:1.2em;line-height:1.5">${rows}</ul></div>
     <p><b>Hints:</b> the empty slots show how many blocks the shortest solution needs. After two runs that miss, a 💡 button draws the path on the maze. After four, the answer appears as faded blocks the child taps to fill in. There are no lives and no failure state: every run ends with encouragement, and the child always earns at least one star.</p>
     <p><b>Privacy:</b> nothing leaves the device. Progress and the sound/voice settings are kept in this browser only. Read-aloud uses the device’s built-in voice; sounds are generated on the device.</p>
     <p><b>Wholesome, not addictive:</b> there are no streaks, timers, countdowns, daily rewards, notifications or random prizes. Stars come only from how many tries a level took. The game never moves to the next level by itself, every finish card offers “All done for today”, and after three levels in one sitting it suggests a break. Celebrations are short and silly (bonks, wobbles and the odd toot), never mean.</p>
-    <p><b>Tips:</b> tap any message to hear it again. Tap ⛶ for full screen on a tablet. Arrow keys, Enter and Backspace also work.</p>
+    <p><b>Tips:</b> tap any message to hear it again. Tap ⛶ for full screen on a tablet. Arrow keys also work (in arrow levels they add arrows; later, ↑ is Forward and ← → are turns), Enter is GO and Backspace takes out the last step.</p>
     <div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`, 'grownups');
   $('#btn-title').addEventListener('click', showTitle);
 }
@@ -857,7 +1061,7 @@ function showLevels(){
   let cards='';
   for(let n=1;n<=LEVELS.length;n++){
     const L = LEVELS[n-1], locked = n > progress.unlocked, st = progress.stars[n]||0;
-    const ops = ['⬆️'].concat(n>=2?['↪️']:[], n>=5?['🔁']:[], n>=9?['⏫']:[]);
+    const ops = (L.mode==='arrows' ? [Icon.arrow(1)] : [Icon.forward(), Icon.turn(false)]).concat(n>=5?[Icon.repeat(0)]:[], n>=9?[Icon.until()]:[]);
     cards += `<button class="lv ${locked?'locked':''}" data-n="${n}" ${locked?'disabled aria-disabled="true"':''}><span class="num">Level ${n} · ${L.map.length}×${L.map[0].length}</span><span class="ttl">${L.title}</span><span class="lvstars">${st?'⭐'.repeat(st):(locked?'':'Not played yet')}</span><span class="ops">${ops.map(o=>`<span>${o}</span>`).join('')}</span></button>`;
   }
   showOverlay(`<h2>Choose a level</h2><p>Each maze gets a little bigger. Finish one to unlock the next!</p><div class="levels">${cards}</div><div class="rowbtns"><button class="subbtn" id="btn-title">Back</button></div>`, 'levels');
@@ -908,7 +1112,7 @@ if(window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.cl
 // debug hooks for automated testing
 window.__game = {
   startLevel, addBlock, run: runProgram, removeLast, showLevels, showTitle,
-  get state(){ return G ? {level:G.n, program:G.program, open:G.open, running:G.running, done:G.done, runs:G.runs, fails:G.fails, ghost:G.ghost, hintOn:G.hintOn, robo:Object.assign({}, G.robo), crumbs:G.got.size, slots:G.lv.slots} : null; },
+  get state(){ return G ? {level:G.n, mode:G.lv.mode, program:G.program, open:G.open, running:G.running, done:G.done, runs:G.runs, fails:G.fails, ghost:G.ghost, hintOn:G.hintOn, demo:!!G.demo, robo:Object.assign({}, G.robo), crumbs:G.got.size, slots:G.lv.slots} : null; },
   levels: LEVELS, simulate:(n, tokens)=>simulate(parseLevel(LEVELS[n-1], n), toProgram(tokens)),
   get stepMs(){ return stepMs; }, set stepMs(v){ stepMs = Math.max(10, +v||450); },
   get idleMs(){ return idleMs; }, set idleMs(v){ idleMs = Math.max(100, +v||14000); armIdle(); },

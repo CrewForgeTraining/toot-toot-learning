@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body>
+<title>Robo Goes Boom (Story)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root{
+  --cream:#FFF4DC; --butter:#FFE29A; --ketchup:#F4552F; --ketchup-dark:#C9391A;
+  --mint:#2FBFA6; --mint-dark:#1E8F7B; --sky:#BDE8FF; --cocoa:#3B2A1F; --cocoa-soft:#6E5546;
+  --wood:#E0A96D; --wood-dark:#B97B3F; --floor-a:#FBE3BF; --floor-b:#F3C89A; --white:#FFFDF8;
+  --sun:#FFC83D; --heat-cool:#5CC8FF; --heat-warm:#FFB703; --heat-hot:#FF3B3B; --grass:#8BD36F;
+  --shadow: 0 6px 0 rgba(59,42,31,.16);
+  --display: 'Fredoka','Nunito',system-ui,sans-serif;
+  --body: 'Nunito','Fredoka',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--cream);color:var(--cocoa);font-family:var(--body);font-size:16px;line-height:1.35;-webkit-tap-highlight-color:transparent;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button{font-family:var(--display);color:var(--cocoa);cursor:pointer;border:0;background:none;font-size:1rem;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:4px solid #2A7BFF;outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+
+#app{max-width:1280px;margin:0 auto;padding-block:8px 10px;padding-inline:16px;display:flex;flex-direction:column;gap:10px;height:100%}
+
+/* ---------- top bar ---------- */
+#topbar{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex:none}
+.logo{font-family:var(--display);font-weight:700;font-size:1.2rem;display:flex;align-items:center;gap:8px;flex:none}
+@media (max-width:540px){.logo{display:none}}
+.logo .sign{background:var(--ketchup);color:#fff;padding:3px 12px;border-radius:14px;box-shadow:0 4px 0 var(--ketchup-dark);transform:rotate(-2deg);display:inline-block;white-space:nowrap}
+.chip{background:var(--white);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem;box-shadow:0 3px 0 rgba(59,42,31,.12);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;min-height:44px;font-family:var(--display)}
+.chip:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+.spacer{flex:1}
+.iconbtn{width:44px;height:44px;border-radius:14px;background:var(--white);box-shadow:0 3px 0 rgba(59,42,31,.12);font-size:1.3rem;display:grid;place-items:center;flex:none}
+.iconbtn.off{opacity:.45;text-decoration:line-through}
+.iconbtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(59,42,31,.12)}
+
+/* ---------- book layout ---------- */
+#book{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
+#scene{position:relative;flex:none;width:min(100%,calc(38vh*1.6));aspect-ratio:16/10;margin-inline:auto;container-type:inline-size;overflow:hidden;border-radius:22px;background:#F9E7C8;box-shadow:var(--shadow);--k:.66}
+#panel{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+#textwrap{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.txt{background:#fff;border-radius:18px;padding:12px 14px;font-size:1.12rem;font-weight:800;line-height:1.4;box-shadow:0 4px 0 rgba(59,42,31,.1);text-wrap:pretty;cursor:pointer}
+.txt .w{border-radius:6px;padding:0 1px;transition:background .12s}
+.txt .w.on{background:var(--butter);box-shadow:0 0 0 3px var(--butter)}
+.txt .ka{font-family:var(--display);color:var(--ketchup);font-size:1.2em}
+.txt.prompt{background:var(--butter);box-shadow:0 4px 0 rgba(59,42,31,.12)}
+.txt.prompt .w.on{background:#fff;box-shadow:0 0 0 3px #fff}
+.txt.small{font-size:1rem;padding:10px 12px}
+.hint{background:#E4FBF5;border-radius:14px;padding:8px 12px;font-weight:800;color:var(--mint-dark);font-size:.95rem;text-align:center}
+.hint .pic{display:block;font-size:1.6rem;letter-spacing:.05em;line-height:1.2}
+.opts{display:grid;grid-template-columns:1fr;gap:8px}
+.opt{min-height:52px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:10px;padding:8px 14px;text-align:left}
+.opt .em{font-size:1.7rem;line-height:1}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.14)}
+.nums{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.num{width:54px;height:54px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.16);font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+.num:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.16)}
+.num.reveal{background:var(--mint);color:#fff;box-shadow:0 4px 0 var(--mint-dark);animation:okpulse 1s infinite}
+.num.nope{animation:wiggle .4s}
+@keyframes okpulse{50%{transform:scale(1.08);box-shadow:0 4px 0 var(--mint-dark),0 0 0 6px rgba(47,191,166,.35)}}
+@keyframes wiggle{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px) rotate(-3deg)}75%{transform:translateX(6px) rotate(3deg)}}
+.tray{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.part{width:56px;height:56px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.16);font-size:1.8rem;display:grid;place-items:center;position:relative}
+.part.sel{background:var(--butter);box-shadow:0 4px 0 rgba(59,42,31,.16),0 0 0 4px var(--mint)}
+.part.used{opacity:.3;pointer-events:none}
+.part:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.16)}
+#controls{display:flex;align-items:center;justify-content:center;gap:10px;flex:none}
+.arrow{width:52px;height:52px;border-radius:16px;background:#fff;box-shadow:0 4px 0 rgba(59,42,31,.16);font-size:1.5rem;display:grid;place-items:center}
+.arrow:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(59,42,31,.16)}
+.arrow[disabled]{opacity:.35;pointer-events:none}
+#btn-play{width:64px;height:64px;border-radius:22px;background:var(--ketchup);color:#fff;box-shadow:0 6px 0 var(--ketchup-dark);font-size:1.9rem;display:grid;place-items:center}
+#btn-play:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+#btn-play.paused{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+body.title #controls,body.title #dots{visibility:hidden}
+#dots{display:flex;gap:5px;justify-content:center;flex:none;padding:2px 0}
+#dots i{width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(59,42,31,.12);display:block;transition:transform .2s,background .2s}
+#dots i.done{background:var(--butter)}
+#dots i.now{background:var(--ketchup);transform:scale(1.3)}
+#dots i.now.done{background:var(--ketchup)}
+
+@media (orientation:portrait){
+  /* the picture grows to fill the space between the top bar and the controls (up to a square), text under it, controls pinned at the bottom */
+  #scene{flex:999 1 auto;min-height:190px;max-height:100vw;width:100%;aspect-ratio:auto}
+  #panel{flex:1 1 auto;min-height:0}
+  #textwrap{flex:1 1 auto}
+}
+@media (orientation:landscape){
+  #book{flex-direction:row;align-items:stretch}
+  #scene{width:min(100%,calc((100vh - 84px)*1.6));margin-inline:0;align-self:flex-start}
+  #panel{flex:1;min-width:0}
+}
+@media (orientation:landscape) and (max-height:560px){
+  #app{padding-block:4px 6px;gap:6px}
+  #topbar{gap:6px}.logo .sign{font-size:.95rem;padding:2px 10px}.chip{padding:2px 10px;font-size:.8rem;min-height:44px}.iconbtn{width:44px;height:44px;font-size:1.1rem}
+  #scene{width:min(100%,calc((100vh - 70px)*1.6))}
+  .txt{font-size:.92rem;padding:8px 10px;line-height:1.35}.txt.small{font-size:.85rem}
+  .opt{min-height:44px;font-size:.95rem;padding:4px 10px}.opt .em{font-size:1.3rem}
+  .num{width:46px;height:46px;font-size:1.25rem}.part{width:48px;height:48px;font-size:1.5rem}
+  .arrow{width:44px;height:44px;font-size:1.2rem}#btn-play{width:52px;height:52px;font-size:1.5rem;border-radius:18px}
+  .hint{padding:5px 8px;font-size:.85rem}.hint .pic{font-size:1.3rem}
+  #dots i{width:9px;height:9px}
+}
+@media (orientation:portrait) and (max-width:600px){
+  #app{padding-block:6px 8px;gap:8px}
+  #topbar{gap:6px}.logo .sign{font-size:1rem;padding:3px 10px}.chip{padding:4px 10px;font-size:.85rem}
+  #scene{width:calc(100% + 32px);margin-inline:-16px;max-height:100vw;border-radius:18px}
+  .txt{font-size:1.02rem;padding:10px 12px}
+}
+@media (orientation:portrait) and (max-height:700px){.txt{font-size:.95rem}}
+
+/* ---------- scene art (from the picture book) ---------- */
+.wall{position:absolute;inset:0 0 58% 0;background:repeating-linear-gradient(90deg,#FFE9BC 0 calc(6cqw*var(--k,1)),#FFF2D6 calc(6cqw*var(--k,1)) calc(12cqw*var(--k,1)))}
+.trim{position:absolute;left:0;right:0;top:41.2%;height:1.3%;background:var(--wood-dark)}
+.floor{position:absolute;left:0;right:0;top:42.5%;bottom:0;background:repeating-conic-gradient(var(--floor-a) 0 25%,var(--floor-b) 0 50%) 0 0/calc(10cqw*var(--k,1)) calc(10cqw*var(--k,1))}
+.door{position:absolute;left:4%;top:12%;width:14%;height:30.3%;background:#D2742E;border:calc(.8cqw*var(--k,1)) solid #8E4415;border-bottom:0;border-radius:calc(7cqw*var(--k,1)) calc(7cqw*var(--k,1)) 0 0;z-index:2}
+.door::after{content:"";position:absolute;right:12%;top:52%;width:calc(2cqw*var(--k,1));height:calc(2cqw*var(--k,1));border-radius:50%;background:var(--sun)}
+.door .sign{position:absolute;left:50%;top:calc(-1.8cqw*var(--k,1));transform:translate(-50%,-100%);background:#fff;border-radius:calc(1.2cqw*var(--k,1));padding:calc(.3cqw*var(--k,1)) calc(1.4cqw*var(--k,1));font-family:var(--display);font-weight:700;font-size:calc(2.6cqw*var(--k,1));white-space:nowrap;color:var(--ketchup);box-shadow:0 calc(.4cqw*var(--k,1)) 0 rgba(59,42,31,.12)}
+.scene.dooropen .door{background:linear-gradient(var(--sky) 0 62%,var(--grass) 62%)}
+.scene.dooropen .door::after{display:none}
+.scene.dooropen .door::before{content:"";position:absolute;right:98%;top:-3%;width:34%;height:106%;background:#D2742E;border:calc(.7cqw*var(--k,1)) solid #8E4415;border-radius:calc(1cqw*var(--k,1)) 0 0 calc(1cqw*var(--k,1));transform:skewY(-14deg);transform-origin:right top;box-shadow:calc(.4cqw*var(--k,1)) 0 0 rgba(59,42,31,.25)}
+.bell{position:absolute;left:19%;top:8.5%;font-size:calc(5cqw*var(--k,1));line-height:1;z-index:3;transform:rotate(15deg)}
+.bell i{position:absolute;left:110%;top:0;font-style:normal;font-family:var(--display);font-weight:700;font-size:calc(2.6cqw*var(--k,1));color:var(--cocoa-soft);white-space:nowrap;transform:rotate(-15deg)}
+.bell.ring{animation:ring .6s 2}
+@keyframes ring{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-15deg)}}
+.window{position:absolute;left:28%;top:8%;width:24%;height:19%;background:linear-gradient(#9FDBFF,#DFF3FF);border:calc(1cqw*var(--k,1)) solid #fff;border-radius:calc(3cqw*var(--k,1));box-shadow:0 calc(.5cqw*var(--k,1)) 0 rgba(59,42,31,.12)}
+.window::before{content:"";position:absolute;right:9%;top:10%;width:calc(6cqw*var(--k,1));height:calc(6cqw*var(--k,1));border-radius:50%;background:var(--sun);box-shadow:0 0 calc(2.5cqw*var(--k,1)) rgba(255,200,61,.8)}
+.window::after{content:"☁️";position:absolute;left:7%;bottom:8%;font-size:calc(4cqw*var(--k,1));line-height:1}
+.scene.evening .window{background:linear-gradient(#FFB080,#FFE0A0)}
+.scene.evening .window::before{background:#FF8A3D;top:45%}
+.kitchen{position:absolute;left:57%;top:7%;width:38%;height:30%;background:#5A3A2A;border-radius:calc(3.5cqw*var(--k,1));padding:calc(1.4cqw*var(--k,1));display:flex;flex-direction:column;z-index:2}
+.kitchen .hatch{flex:1;background:#FFF6E3;border-radius:calc(2.4cqw*var(--k,1));position:relative;overflow:hidden}
+.kitchen .chef{position:absolute;left:8%;bottom:-8%;font-size:calc(11cqw*var(--k,1));line-height:1}
+.kitchen .stove{position:absolute;right:8%;bottom:2%;font-size:calc(7cqw*var(--k,1));line-height:1}
+.kitchen .orderup{position:absolute;left:50%;top:7%;transform:translateX(-50%);background:var(--ketchup);color:#fff;font-family:var(--display);font-weight:700;font-size:calc(2.4cqw*var(--k,1));padding:calc(.4cqw*var(--k,1)) calc(1.8cqw*var(--k,1));border-radius:999px;letter-spacing:.06em;white-space:nowrap}
+.kitchen .counter{height:calc(3cqw*var(--k,1));background:var(--wood);border-radius:0 0 calc(1.8cqw*var(--k,1)) calc(1.8cqw*var(--k,1));margin-top:calc(1cqw*var(--k,1));box-shadow:0 calc(.6cqw*var(--k,1)) 0 var(--wood-dark)}
+.scene.nochef .chef{display:none}
+.table{position:absolute;left:33%;top:47%;width:32%;height:8.5%;background:repeating-conic-gradient(#E8503A 0 25%,#FFF8EC 0 50%) 0 0/calc(4cqw*var(--k,1)) calc(4cqw*var(--k,1));border-radius:50%;box-shadow:0 calc(.8cqw*var(--k,1)) 0 #C63D2A,0 calc(1.4cqw*var(--k,1)) calc(1.4cqw*var(--k,1)) rgba(59,42,31,.15);z-index:3}
+.table::after{content:"";position:absolute;left:44%;top:80%;width:12%;height:120%;background:var(--wood-dark);border-radius:0 0 calc(1cqw*var(--k,1)) calc(1cqw*var(--k,1));z-index:-1}
+.table .foot{position:absolute;left:30%;top:190%;width:40%;height:calc(3.5cqw*var(--k,1));background:var(--wood-dark);border-radius:50%;z-index:-2}
+.table .on{position:absolute;left:50%;top:calc(-4cqw*var(--k,1));transform:translateX(-50%);font-size:calc(7cqw*var(--k,1));line-height:1;white-space:nowrap}
+.table .on.sm{font-size:calc(5cqw*var(--k,1));top:calc(-2.5cqw*var(--k,1))}
+.c{position:absolute;line-height:1;font-size:calc(15cqw*var(--k,1));z-index:4;filter:drop-shadow(0 calc(.8cqw*var(--k,1)) 0 rgba(59,42,31,.18))}
+.c.sm{font-size:calc(11cqw*var(--k,1))}.c.xs{font-size:calc(8cqw*var(--k,1))}.c.lg{font-size:calc(20cqw*var(--k,1))}
+.flip{display:inline-block;transform:scaleX(-1)}
+.robo{position:absolute;font-size:calc(22cqw*var(--k,1));line-height:1;z-index:5;width:1em;text-align:center}
+.robo .bot{display:inline-block;position:relative;filter:drop-shadow(0 calc(.6cqw*var(--k,1)) 0 rgba(59,42,31,.2))}
+.robo .wheels{display:block;font-size:.3em;letter-spacing:-.35em;margin-top:-.3em;opacity:.85;text-align:center;padding-right:.35em}
+.robo .broom{position:absolute;right:-28%;bottom:2%;font-size:.62em;transform:rotate(-14deg);transform-origin:bottom}
+.robo .hat{position:absolute;left:50%;top:-.55em;transform:translateX(-50%);font-size:.7em;line-height:1}
+.robo .hat.balloon{top:-1.05em;font-size:.8em;animation:bob 2s infinite ease-in-out}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-.15em)}}
+.robo .glow{position:absolute;left:50%;top:50%;width:150%;height:150%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,59,59,var(--h,0)) 0%,rgba(255,183,3,calc(var(--h,0)*.45)) 45%,transparent 70%);z-index:-1}
+.robo .cheek{position:absolute;top:56%;width:.17em;height:.1em;border-radius:50%;background:rgba(255,80,80,var(--h,0));filter:blur(.02em)}
+.robo .cheek.l{left:14%}.robo .cheek.r{right:14%}
+.robo .steam{position:absolute;font-size:.42em;line-height:1;opacity:.9;animation:steamy 1.4s infinite ease-in-out}
+@keyframes steamy{0%,100%{opacity:.5}50%{opacity:1;translate:0 -.1em}}
+.robo .sweat{position:absolute;font-size:.28em;line-height:1}
+.robo.sweep .bot{animation:sweepy .3s infinite alternate}
+@keyframes sweepy{from{transform:translateX(-.05em) rotate(-2deg)}to{transform:translateX(.05em) rotate(2deg)}}
+.robo.wobble .bot{animation:wob .15s infinite alternate}
+@keyframes wob{from{transform:translateX(-.04em) rotate(-4deg)}to{transform:translateX(.04em) rotate(4deg)}}
+.bub{position:absolute;background:#fff;border-radius:calc(3.2cqw*var(--k,1));padding:calc(1.6cqw*var(--k,1)) calc(2.4cqw*var(--k,1));font-family:var(--display);font-weight:700;font-size:calc(3.6cqw*var(--k,1));line-height:1.15;box-shadow:0 calc(.6cqw*var(--k,1)) 0 rgba(59,42,31,.12);white-space:nowrap;z-index:6;color:var(--cocoa);text-align:center}
+.bub::after{content:"";position:absolute;left:calc(3.5cqw*var(--k,1));bottom:calc(-2cqw*var(--k,1));border:calc(2cqw*var(--k,1)) solid transparent;border-top-color:#fff;border-bottom:0}
+.bub.r::after{left:auto;right:calc(3.5cqw*var(--k,1))}
+.bub.big{font-size:calc(4.4cqw*var(--k,1))}
+.bub.sm{font-size:calc(3cqw*var(--k,1));padding:calc(1.2cqw*var(--k,1)) calc(1.8cqw*var(--k,1))}
+.bub em{font-style:normal;color:var(--ketchup)}
+.puff{position:absolute;width:calc(8cqw*var(--k,1));height:calc(8cqw*var(--k,1));border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(214,232,120,.95),rgba(170,200,80,.65) 55%,rgba(150,180,60,0) 74%);z-index:4;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:calc(2.2cqw*var(--k,1));color:#5d7a1d;font-style:italic;animation:puffy 1.6s infinite ease-in-out}
+.puff.sm{width:calc(5.5cqw*var(--k,1));height:calc(5.5cqw*var(--k,1));font-size:calc(1.7cqw*var(--k,1))}
+.puff.lg{width:calc(11cqw*var(--k,1));height:calc(11cqw*var(--k,1));font-size:calc(2.8cqw*var(--k,1))}
+@keyframes puffy{0%,100%{transform:scale(1)}50%{transform:scale(1.12) translateY(-4%)}}
+.crumb{position:absolute;width:calc(1.6cqw*var(--k,1));height:calc(1.25cqw*var(--k,1));border-radius:40% 60% 50% 50%;background:#8A5A2B;box-shadow:inset 0 0 0 calc(.3cqw*var(--k,1)) #B8803F;z-index:3}
+.crumbtap{position:absolute;width:clamp(44px,12cqw,64px);height:clamp(44px,12cqw,64px);transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;z-index:8;padding:0}
+.crumbtap::before{content:"";width:46%;height:36%;border-radius:40% 60% 50% 50%;background:#8A5A2B;box-shadow:inset 0 0 0 calc(.5cqw*var(--k,1)) #B8803F,0 calc(.3cqw*var(--k,1)) 0 rgba(59,42,31,.18);transition:transform .2s}
+.crumbtap.hit::before{transform:scale(.6);opacity:.5}
+.crumbtap .n{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:clamp(16px,5cqw,28px);color:#fff;text-shadow:0 2px 0 var(--ketchup-dark);opacity:0;transform:scale(0)}
+.crumbtap.hit .n{opacity:1;transform:scale(1);transition:transform .25s cubic-bezier(.2,1.6,.4,1),opacity .1s;background:var(--ketchup);border-radius:50%;inset:22%}
+.crumbtap.last .n{background:var(--mint)}
+.sp{position:absolute;font-size:calc(5cqw*var(--k,1));line-height:1;z-index:7}
+.sp.twinkle{animation:twinkle 1.2s infinite alternate}
+@keyframes twinkle{from{opacity:.4;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+.zip{position:absolute;height:calc(.7cqw*var(--k,1));border-radius:999px;background:rgba(59,42,31,.28);z-index:4}
+.spring{position:absolute;width:calc(3.2cqw*var(--k,1));height:calc(9cqw*var(--k,1));border-radius:calc(1.6cqw*var(--k,1));background:repeating-linear-gradient(-60deg,#C9D2DA 0 calc(.9cqw*var(--k,1)),#7E8A96 calc(.9cqw*var(--k,1)) calc(1.8cqw*var(--k,1)));box-shadow:inset 0 0 0 calc(.3cqw*var(--k,1)) #5C6670,0 calc(.4cqw*var(--k,1)) 0 rgba(59,42,31,.2);z-index:5}
+.gear{position:absolute;font-size:calc(6cqw*var(--k,1));line-height:1;z-index:5}
+.burst{position:absolute;border-radius:50%;background:repeating-conic-gradient(from 0deg,#FF8A3D 0 11.25deg,var(--sun) 11.25deg 22.5deg);display:grid;place-items:center;z-index:5}
+.burst::before{content:"";position:absolute;inset:18%;border-radius:50%;background:#FFF1B8;opacity:.9}
+.burst .word{position:relative;font-family:var(--display);font-weight:700;color:var(--ketchup);font-size:calc(9cqw*var(--k,1));line-height:1;text-shadow:calc(.4cqw*var(--k,1)) calc(.4cqw*var(--k,1)) 0 #fff;transform:rotate(-8deg);letter-spacing:.02em}
+.burst.sm .word{font-size:calc(4cqw*var(--k,1))}
+.burst.pop{animation:burstin .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes burstin{from{transform:translate(-50%,-52%) scale(0)}to{transform:translate(-50%,-52%) scale(1)}}
+.heat{position:absolute;left:7%;top:2.4%;width:86%;height:calc(4.2cqw*var(--k,1));background:#fff;border-radius:999px;box-shadow:inset 0 0 0 calc(.5cqw*var(--k,1)) rgba(59,42,31,.15);z-index:8;overflow:hidden}
+.heat i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--heat-cool),var(--heat-warm) 55%,var(--heat-hot));border-radius:999px}
+.heat b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:calc(2.6cqw*var(--k,1));color:var(--cocoa);letter-spacing:.06em}
+.mark{position:absolute;font-family:var(--display);font-weight:700;font-size:calc(6cqw*var(--k,1));line-height:1;color:var(--ketchup);z-index:6;text-shadow:calc(.3cqw*var(--k,1)) calc(.3cqw*var(--k,1)) 0 #fff}
+.plant{position:absolute;font-size:calc(9cqw*var(--k,1));line-height:1;z-index:2}
+.shake{animation:shake .6s}
+@keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,4px)}40%{transform:translate(8px,-4px)}60%{transform:translate(-6px,-3px)}80%{transform:translate(6px,3px)}}
+.giggle{animation:giggle .5s 3}
+@keyframes giggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) translateY(-4%)}75%{transform:rotate(8deg) translateY(-4%)}}
+.sceneturn{animation:turn .35s ease-out}
+@keyframes turn{from{opacity:0;transform:scale(.96) rotate(.6deg)}to{opacity:1;transform:none}}
+.sceneturn.back{animation-name:turnback}
+@keyframes turnback{from{opacity:0;transform:scale(.96) rotate(-.6deg)}to{opacity:1;transform:none}}
+/* find Benny */
+.doortap{position:absolute;left:0;top:8%;width:22%;height:36%;z-index:9;border-radius:12px;cursor:pointer;padding:0}
+.doortap.glow{box-shadow:0 0 0 4px var(--mint),0 0 18px var(--mint);animation:okpulse 1s infinite}
+.benny{transition:transform .5s cubic-bezier(.2,1.4,.4,1),left .5s;z-index:1}
+.benny.found{z-index:7;transform:translate(60%,10%) rotate(-8deg) scale(1.15)}
+.benny.peek{z-index:7;transform:translate(35%,0)}
+.tapmark{position:absolute;font-size:calc(7cqw*var(--k,1));line-height:1;z-index:10;pointer-events:none;animation:bounce .6s infinite alternate}
+@keyframes bounce{from{translate:0 0}to{translate:0 -20%}}
+/* rebuild */
+.slot{position:absolute;width:clamp(44px,11cqw,72px);height:clamp(44px,11cqw,72px);transform:translate(-50%,-50%);border-radius:50%;border:3px dashed rgba(59,42,31,.35);background:rgba(255,255,255,.35);display:grid;place-items:center;font-size:clamp(22px,6cqw,40px);line-height:1;z-index:9;padding:0}
+.slot .ghost{opacity:.3;filter:grayscale(1)}
+.slot.glow{border-color:var(--mint);box-shadow:0 0 0 4px rgba(47,191,166,.4),0 0 16px var(--mint);animation:okpulse 1s infinite}
+.slot.filled{border-style:solid;border-color:var(--mint);background:#fff}
+.slot.filled .ghost{opacity:1;filter:none;animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.slot.nope{animation:wiggle .4s}
+
+/* ---------- overlays ---------- */
+#overlay{position:fixed;inset:0;background:rgba(59,42,31,.55);display:none;place-items:center;padding:16px;z-index:100;overflow:auto}
+#overlay.on{display:grid}
+.card{background:var(--cream);border-radius:28px;padding:22px 20px;max-width:560px;width:100%;box-shadow:0 10px 0 rgba(59,42,31,.25);text-align:center;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 32px);overflow:auto}
+.card h1{font-size:clamp(1.9rem,7vw,3rem);color:var(--ketchup);text-shadow:0 4px 0 #fff;font-weight:700}
+.card h2{font-size:clamp(1.4rem,5vw,2.1rem);font-weight:700}
+.card p{margin:0;font-weight:700;font-size:1rem;color:var(--cocoa-soft);max-width:46ch;margin-inline:auto}
+.card .hero{font-size:clamp(2.8rem,11vw,5rem);line-height:1;letter-spacing:-.1em}
+.card .kicker{font-family:var(--display);font-weight:700;color:var(--mint-dark);letter-spacing:.08em;text-transform:uppercase;font-size:.85rem}
+.bigbtn{width:100%;padding:14px 18px;border-radius:20px;background:var(--ketchup);color:#fff;font-size:1.25rem;font-weight:700;box-shadow:0 6px 0 var(--ketchup-dark);min-height:52px}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ketchup-dark)}
+.bigbtn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-dark)}
+.bigbtn.mint:active{box-shadow:0 2px 0 var(--mint-dark)}
+.subbtn{padding:10px 14px;border-radius:14px;background:#fff;font-weight:700;box-shadow:0 3px 0 rgba(59,42,31,.14),0 0 0 2px rgba(59,42,31,.06);font-size:1rem;min-height:44px}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.fact{background:#fff;border-radius:16px;padding:10px 14px;font-weight:800;color:var(--cocoa)}
+.fact b{color:var(--ketchup)}
+#grownups{text-align:left;font-size:.92rem}#grownups ul{margin:6px 0 0;padding-left:18px}#grownups li{margin-bottom:4px}
+.endrobo{font-size:clamp(3.5rem,14vw,6rem);line-height:1;position:relative;display:inline-block}
+.endrobo .top{position:absolute;left:50%;top:-.6em;transform:translateX(-50%);font-size:.65em}
+@media (orientation:landscape) and (max-height:560px){.card{padding:12px 14px;gap:8px}.card .hero{font-size:2.4rem}.card h1{font-size:1.7rem}.card h2{font-size:1.2rem}.card p{font-size:.85rem}.bigbtn{padding:9px 14px;font-size:1.05rem;min-height:44px}.endrobo{font-size:3rem}}
+
+.nudge{animation:nudge .55s 4 !important;outline:4px solid var(--mint);outline-offset:3px;border-radius:16px}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.crumbtap.nudge,.slot.nudge{border-radius:50%;animation:nudge2 .55s 4 !important}
+@keyframes nudge2{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div id="app">
+  <div id="topbar">
+    <div class="logo"><span class="sign">Robo Goes Boom</span></div>
+    <button class="chip" id="btn-mode" aria-label="Switch reading mode" title="Reading mode">🔊 Read to me</button>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btn-sound" aria-label="Sound on or off" title="Sound">🔊</button>
+    <button class="iconbtn" id="btn-voice" aria-label="Read aloud on or off" title="Read aloud">🗣️</button>
+    <button class="iconbtn" id="btn-full" aria-label="Full screen" title="Full screen">⛶</button>
+    <button class="iconbtn" id="btn-home" aria-label="Back to the start" title="Start">🏠</button>
+  </div>
+  <div id="book">
+    <div id="scene" class="scene diner" aria-label="Story picture"></div>
+    <div id="panel">
+      <div id="textwrap">
+        <div class="txt" id="text" role="button" tabindex="0" aria-label="Story text, tap to hear it"></div>
+        <div id="extra"></div>
+      </div>
+      <div id="controls">
+        <button class="arrow" id="btn-prev" aria-label="Back a page">◀</button>
+        <button id="btn-play" aria-label="Play or pause">⏸</button>
+        <button class="arrow" id="btn-next" aria-label="Next page">▶</button>
+      </div>
+      <div id="dots" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+<div id="overlay"><div class="card" id="card"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms,150) : ms));
+
+/* ---------- recorded voice clips (line id -> audio data URI). Empty = browser voice. ---------- */
+const VOICE_CLIPS = {};
+
+/* ---------- the book text (ids match docs/voice-script-3-robo-goes-boom.md) ---------- */
+const BOOK = [
+  'This is Robo. Robo is the cleaning robot at the Toot Toot Diner. Robo loves to clean!',
+  'Ding-a-ling! The door opens. “Table for one, please!” says Benny Bear.',
+  'Today the kids are helping. They bring Benny a big stack of pancakes. Nom, nom, nom! Crumbs go everywhere.',
+  '“Thank you!” says Benny. And he toots all the way out the door. Toot! Toot! Toot!',
+  'Robo zooms over. Sweep, sweep, sweep! BONK! Robo bumps the wall and farts out a little spark. “Excuse me!”',
+  'Ding-a-ling! Here come Rosie, Felix and Freddy. The kids serve faster and faster. More plates! More crumbs! More toots!',
+  'Penny Pig ate a whole pie! Can you count the crumbs she left behind?',
+  'Robo sweeps as fast as he can. He is getting warm. His cheeks turn red, and little puffs of steam come out of his ears.',
+  '“Robo, are you OK?” asks Rosie Rabbit. Everyone stops. Everyone worries.',
+  '“It’s OK to get too hot sometimes,” says Robo. “But I need help. Can we slow down, please?”',
+  'Just then, one last plate zooms by. Robo wobbles. Robo rattles. Robo goes… KA-BOOM!',
+  'Gears here. Springs there. A wheel rolls under the table. It is very, very quiet.',
+  'Then Freddy Frog giggles. Then everyone giggles! Everyone except Benny. Where is Benny Bear? Can you find him?',
+  'Everyone helps. Felix finds the gears. Rosie finds the springs. The chef finds the wheel… in a pie!',
+  'Click! Clack! Robo is back. “I went boom,” says Robo. “And that’s OK. Messes are part of trying.”',
+  '“And friends help you build again,” says Benny Bear. Then everyone toots all the way home. Toot! Toot! The end.'
+];
+const CHOICES = [
+  {id:'C1', text:'What do the kids bring Benny next? More pancakes, a pie, or a giant milkshake?', opts:[['🥞','More pancakes'],['🥧','A pie'],['🥤','A giant milkshake']]},
+  {id:'C2', text:'What should everyone do? Slow down, bring Robo an ice cube, or sing Robo a cool-down song?', opts:[['🐢','Slow down'],['🧊','Bring Robo an ice cube'],['🎶','Sing Robo a cool-down song']]},
+  {id:'C3', text:'How should Robo come back together? Click clack, with a balloon on top, or with a fancy hat?', opts:[['🔧','Click clack'],['🎈','With a balloon on top'],['🎩','With a fancy hat']]}
+];
+const EXTRA = {
+  e1a:{id:'E1', text:'The kids bring a tower of pancakes. Wobble… wobble… SPLAT! Pancakes everywhere! Benny toots a happy toot.'},
+  e1b:{id:'E2', text:'The kids bring a big berry pie. Benny dives in face first. Pie face! “Mmm,” says Benny, and toots a berry toot.'},
+  e1c:{id:'E3', text:'The kids bring a giant milkshake. Slurp! Now Benny has a milkshake moustache. Toot! A bubbly toot.'},
+  e2a:{id:'E4', text:'Everyone slows down. Slow plates. Slow crumbs. Even slow toots. Robo cools down a little bit.'},
+  e2b:{id:'E5', text:'Felix brings Robo an ice cube. “Ahh,” says Robo. Sssss! The ice cube melts. Robo is a little less hot.'},
+  e2c:{id:'E6', text:'Everyone sings the cool-down song. “Cool down, Robo, cool down. Slow down, Robo, slow down.” Robo hums along.'}
+};
+const X = {
+  X1:'Benny’s bill. Pancakes are $3. Juice is $2. How much is that?',
+  X2:'Count them all. Three pancakes and two juices.',
+  X3:'It’s 5! Tap the 5.',
+  X4:'Five dollars! Thank you, Benny!',
+  X5:'Tap each crumb to count it.',
+  X6:'How many crumbs?',
+  X7:'Look at the numbers. The last number is how many.',
+  X8:'It’s 10! Tap the 10.',
+  X9:'Ten crumbs! Penny Pig was hungry!',
+  X10:'Where is Benny Bear? Tap where he is hiding.',
+  X11:'Not there! Peek behind the door.',
+  X12:'There he is! Tap Benny.',
+  X13:'Peekaboo! Benny was behind the door!',
+  X14:'Put Robo back together. Tap a part, then tap where it goes.',
+  X15:'Not there. Look for the glowing spot.',
+  X16:'Tap the glowing spot.',
+  X17:'Click! Clack! Robo is back!',
+  X18:'Nice work! Now tap the arrow to keep reading.'
+};
+const T = {
+  T1:'Robo Goes Boom. A Toot Toot Diner story.',
+  T2:'The end! Read it again, or all done for today?',
+  T3:'Great work today! Stretch your arms, go find a book, and read it to someone you love. Robo will be here when you come back.',
+  T4:'Tap the arrow to turn the page.'
+};
+
+/* ---------- scene builders (art from the picture book) ---------- */
+const ROBO = (style, inner, look, cls='') => `<div class="robo ${cls}" style="${style}"><span class="bot">${look==='balloon'?'<span class="hat balloon">🎈</span>':look==='hat'?'<span class="hat">🎩</span>':''}🤖${inner||''}</span><span class="wheels">⚫⚫</span></div>`;
+const HOT = (h) => `<span class="glow"></span>`;
+const crumbs = pos => pos.map(p=>`<div class="crumb" style="left:${p[0]}%;top:${p[1]}%"></div>`).join('');
+const BACKDROP = '<div class="wall"></div><div class="trim"></div><div class="floor"></div><div class="door"><span class="sign">OPEN</span></div><div class="window"></div><div class="kitchen"><div class="hatch"><span class="orderup">KITCHEN</span><span class="chef">👩‍🍳</span><span class="stove">🍳</span></div><div class="counter"></div></div>';
+const SCENES = {
+  p1:{cls:'', html:()=>`<div class="table"><span class="on sm">🌼</span><span class="foot"></span></div>${ROBO('left:30%;top:36%;font-size:calc(30cqw*var(--k,1))','<span class="broom">🧹</span>',null,'sweep')}<div class="bub" style="left:23%;top:24%">I love to clean!</div><div class="sp twinkle" style="left:14%;top:52%">✨</div><div class="sp twinkle" style="left:70%;top:63%">✨</div><div class="sp twinkle" style="left:22%;top:72%;font-size:calc(3.5cqw*var(--k,1))">✨</div><div class="sp twinkle" style="left:82%;top:48%;font-size:calc(3.5cqw*var(--k,1))">✨</div><div class="plant" style="left:86%;top:59%">🪴</div>`},
+  p2:{cls:'dooropen', html:()=>`<div class="bell ring">🔔<i>ding-a-ling!</i></div><div class="table"><span class="on sm">🌼</span><span class="foot"></span></div><div class="c lg" style="left:5%;top:22%;z-index:3">🐻</div><div class="bub" style="left:23%;top:32%">Table for one, please!</div>${ROBO('left:76%;top:50%;font-size:calc(16cqw*var(--k,1))','<span class="broom">🧹</span>')}<div class="c xs" style="left:56%;top:52%">🧒</div><div class="c xs" style="left:66%;top:56%">👧</div>`},
+  p3:{cls:'', html:()=>`<div class="table"><span class="on">🥞</span><span class="foot"></span></div><div class="c" style="left:40%;top:26%;z-index:2">🐻</div><div class="bub r sm" style="left:58%;top:22%">Nom nom nom!</div><div class="c sm" style="left:14%;top:47%">🧒</div><div class="sp" style="left:24%;top:50%;font-size:calc(6cqw*var(--k,1))">🍽️</div><div class="c sm" style="left:70%;top:50%"><span class="flip">👧</span></div><div class="sp" style="left:64%;top:53%;font-size:calc(6cqw*var(--k,1))">🧃</div><div class="zip" style="left:4%;top:56%;width:calc(8cqw*var(--k,1))"></div><div class="zip" style="left:3%;top:58.5%;width:calc(5cqw*var(--k,1))"></div>${crumbs([[36,60],[44,64],[52,59],[60,66],[40,70],[56,71],[31,66],[48,68]])}`},
+  e1a:{cls:'', html:()=>`<div class="table" style="transform:rotate(-3deg)"><span class="on">🥞🥞</span><span class="foot"></span></div><div class="c" style="left:40%;top:24%;z-index:2">🐻</div><div class="burst sm pop" style="left:50%;top:48%;width:calc(24cqw*var(--k,1));height:calc(24cqw*var(--k,1));z-index:6"><span class="word">SPLAT!</span></div><div class="sp" style="left:26%;top:56%;font-size:calc(7cqw*var(--k,1));transform:rotate(-20deg)">🥞</div><div class="sp" style="left:62%;top:62%;font-size:calc(7cqw*var(--k,1));transform:rotate(25deg)">🥞</div><div class="sp" style="left:16%;top:70%;font-size:calc(6cqw*var(--k,1))">🥞</div><div class="sp" style="left:74%;top:72%;font-size:calc(6cqw*var(--k,1));transform:rotate(-40deg)">🥞</div><div class="sp" style="left:44%;top:74%;font-size:calc(5cqw*var(--k,1))">🍯</div><div class="c sm" style="left:6%;top:46%">🧒</div><div class="c sm" style="left:80%;top:44%"><span class="flip">👧</span></div><div class="puff" style="left:56%;top:32%">toot!</div>${crumbs([[30,64],[54,68],[38,72],[66,66]])}`},
+  e1b:{cls:'', html:()=>`<div class="table"><span class="on">🥧</span><span class="foot"></span></div><div class="c lg" style="left:36%;top:22%;z-index:2">🐻</div><div class="sp" style="left:44%;top:32%;font-size:calc(9cqw*var(--k,1));z-index:5;transform:rotate(-10deg)">🫐</div><div class="sp" style="left:52%;top:36%;font-size:calc(5cqw*var(--k,1));z-index:5">🫐</div><div class="sp" style="left:40%;top:40%;font-size:calc(5cqw*var(--k,1));z-index:5">🍓</div><div class="bub r sm" style="left:60%;top:20%">Mmm!</div><div class="c sm" style="left:8%;top:48%">🧒</div><div class="c sm" style="left:76%;top:50%"><span class="flip">👧</span></div><div class="bub sm" style="left:4%;top:38%">Pie face!</div><div class="puff" style="left:22%;top:60%">toot!</div>${crumbs([[30,64],[54,68],[38,72],[66,66],[46,62]])}`},
+  e1c:{cls:'', html:()=>`<div class="table"><span class="on">🥤</span><span class="foot"></span></div><div class="c lg" style="left:36%;top:22%;z-index:2">🐻</div><div class="mark" style="left:44%;top:41%;font-size:calc(7cqw*var(--k,1));color:#fff;text-shadow:0 0 0 #fff,calc(.3cqw*var(--k,1)) calc(.3cqw*var(--k,1)) 0 #C9D2DA;z-index:5">〰</div><div class="bub r sm" style="left:60%;top:20%">Slurp!</div><div class="c sm" style="left:8%;top:48%">🧒</div><div class="c sm" style="left:76%;top:50%"><span class="flip">👧</span></div><div class="bub sm" style="left:2%;top:38%">Moustache!</div><div class="sp twinkle" style="left:64%;top:56%;font-size:calc(4cqw*var(--k,1))">🫧</div><div class="sp twinkle" style="left:26%;top:62%;font-size:calc(4cqw*var(--k,1))">🫧</div><div class="sp twinkle" style="left:58%;top:70%;font-size:calc(3cqw*var(--k,1))">🫧</div><div class="puff" style="left:22%;top:66%">toot!</div>`},
+  p4:{cls:'dooropen', html:()=>`<div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div><div class="c lg" style="left:6%;top:24%;z-index:3"><span class="flip">🐻</span></div><div class="bub" style="left:26%;top:14%">Thank you!</div><div class="puff lg" style="left:26%;top:38%">toot!</div><div class="puff" style="left:36%;top:47%">toot!</div><div class="puff sm" style="left:44%;top:56%">toot!</div><div class="puff sm" style="left:50%;top:50%"></div>${ROBO('left:72%;top:46%;font-size:calc(18cqw*var(--k,1))','<span class="broom">🧹</span>')}<div class="bub r sm" style="left:70%;top:35%">Bye bye!</div>${crumbs([[38,62],[46,66],[54,61],[60,68],[42,71],[33,67]])}`},
+  p5:{cls:'', html:()=>`<div class="table"><span class="on sm">🌼</span><span class="foot"></span></div><div class="burst sm pop" style="left:15%;top:52%;width:calc(22cqw*var(--k,1));height:calc(22cqw*var(--k,1))"><span class="word">BONK!</span></div>${ROBO('left:12%;top:40%;font-size:calc(24cqw*var(--k,1));transform:rotate(-12deg)','<span class="broom">🧹</span>',null,'wobble')}<div class="bub" style="left:38%;top:30%">Excuse me!</div><div class="puff" style="left:28%;top:62%"></div><div class="sp twinkle" style="left:31%;top:58%;transform:rotate(20deg)">⚡</div><div class="sp twinkle" style="left:36%;top:66%;font-size:calc(3.5cqw*var(--k,1))">✨</div><div class="sp twinkle" style="left:25%;top:69%;font-size:calc(3.5cqw*var(--k,1))">✨</div>${crumbs([[52,62],[60,66],[70,61],[78,68],[64,71]])}<div class="c sm" style="left:74%;top:44%">🐻</div><div class="c xs" style="left:62%;top:50%">🧒</div>`},
+  p6:{cls:'dooropen', html:()=>`<div class="bell ring">🔔<i>ding-a-ling!</i></div><div class="table"><span class="on">🍔🍟</span><span class="foot"></span></div><div class="c" style="left:4%;top:24%;z-index:3">🐰</div><div class="c sm" style="left:17%;top:31%;z-index:3">🦊</div><div class="c sm" style="left:26%;top:38%;z-index:3">🐸</div><div class="c sm" style="left:38%;top:28%;z-index:2">🐻</div><div class="c xs" style="left:68%;top:46%">👧</div><div class="sp" style="left:76%;top:49%;font-size:calc(6cqw*var(--k,1))">🍽️</div><div class="zip" style="left:58%;top:54%;width:calc(9cqw*var(--k,1))"></div><div class="zip" style="left:57%;top:57%;width:calc(6cqw*var(--k,1))"></div><div class="c xs" style="left:50%;top:56%"><span class="flip">🧒</span></div><div class="sp" style="left:46%;top:60%;font-size:calc(6cqw*var(--k,1))">🥤</div><div class="zip" style="left:60%;top:63%;width:calc(9cqw*var(--k,1))"></div>${ROBO('left:80%;top:56%;font-size:calc(15cqw*var(--k,1))','<span class="broom">🧹</span>',null,'sweep')}<div class="puff sm" style="left:2%;top:46%">toot</div><div class="puff sm" style="left:88%;top:42%">toot</div>${crumbs([[30,62],[36,68],[42,70],[22,66],[70,66],[34,64],[80,70]])}`},
+  p7:{cls:'', html:()=>`<div class="table"><span class="on">🥧</span><span class="foot"></span></div><div class="c lg" style="left:38%;top:18%;z-index:2">🐷</div><div class="bub r sm" style="left:60%;top:14%">Yum!</div>${ROBO('left:82%;top:24%;font-size:calc(13cqw*var(--k,1))','')}<div class="bub sm" style="left:78%;top:15%">Oh my!</div>`},
+  p8:{cls:'', html:()=>`<div class="heat"><i style="width:72%"></i><b>HEAT 72%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:30%;top:32%;font-size:calc(32cqw*var(--k,1));--h:.6',HOT()+'<span class="cheek l"></span><span class="cheek r"></span><span class="steam" style="left:-10%;top:12%;transform:rotate(-40deg)">💨</span><span class="steam" style="right:-12%;top:10%;transform:scaleX(-1) rotate(-40deg)">💨</span><span class="sweat" style="right:2%;top:32%">💧</span><span class="broom">🧹</span>',null,'sweep')}<div class="zip" style="left:12%;top:60%;width:calc(10cqw*var(--k,1))"></div><div class="zip" style="left:10%;top:63%;width:calc(7cqw*var(--k,1))"></div><div class="zip" style="left:8%;top:66%;width:calc(4cqw*var(--k,1))"></div>${crumbs([[72,62],[80,66],[66,69],[86,60]])}<div class="c xs" style="left:80%;top:46%"><span class="flip">🐰</span></div>`},
+  p9:{cls:'', html:()=>`<div class="heat"><i style="width:88%"></i><b>HEAT 88%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:36%;top:30%;font-size:calc(28cqw*var(--k,1));--h:.8',HOT()+'<span class="cheek l"></span><span class="cheek r"></span><span class="steam" style="left:-10%;top:10%;transform:rotate(-40deg)">💨</span><span class="steam" style="right:-12%;top:8%;transform:scaleX(-1) rotate(-40deg)">💨</span><span class="sweat" style="right:0;top:30%">💧</span><span class="sweat" style="left:2%;top:38%">💧</span>')}<div class="c" style="left:8%;top:44%">🐰</div><div class="bub" style="left:6%;top:31%">Robo, are you OK?</div><div class="c sm" style="left:66%;top:44%"><span class="flip">🦊</span></div><div class="c sm" style="left:80%;top:52%"><span class="flip">🐸</span></div><div class="c xs" style="left:24%;top:62%">🧒</div><div class="c xs" style="left:62%;top:62%"><span class="flip">👧</span></div><div class="mark" style="left:74%;top:34%">?</div><div class="mark" style="left:88%;top:44%">!</div>`},
+  e2a:{cls:'', html:()=>`<div class="heat"><i style="width:80%"></i><b>HEAT 80%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:40%;top:32%;font-size:calc(26cqw*var(--k,1));--h:.5',HOT()+'<span class="cheek l"></span><span class="cheek r"></span><span class="steam" style="right:-12%;top:8%;transform:scaleX(-1) rotate(-40deg)">💨</span>')}<div class="c sm" style="left:6%;top:44%">🐢</div><div class="bub sm" style="left:4%;top:33%">Sloooow…</div><div class="c xs" style="left:22%;top:60%">🧒</div><div class="sp" style="left:30%;top:62%;font-size:calc(5cqw*var(--k,1))">🍽️</div><div class="c xs" style="left:74%;top:58%"><span class="flip">👧</span></div><div class="c sm" style="left:82%;top:40%"><span class="flip">🐰</span></div><div class="puff sm" style="left:86%;top:62%">t…o…o…t</div>`},
+  e2b:{cls:'', html:()=>`<div class="heat"><i style="width:78%"></i><b>HEAT 78%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:40%;top:32%;font-size:calc(26cqw*var(--k,1));--h:.5',HOT()+'<span class="cheek l"></span><span class="cheek r"></span><span class="hat" style="font-size:.5em;top:-.35em">🧊</span><span class="steam" style="left:-14%;top:0;transform:rotate(-40deg)">💦</span>')}<div class="bub r" style="left:52%;top:20%">Ahh… sssss!</div><div class="c sm" style="left:10%;top:46%">🦊</div><div class="bub sm" style="left:8%;top:36%">Ice cube!</div><div class="c xs" style="left:74%;top:58%"><span class="flip">🐸</span></div><div class="c xs" style="left:24%;top:64%">🧒</div><div class="sp twinkle" style="left:64%;top:60%;font-size:calc(4cqw*var(--k,1))">💧</div>`},
+  e2c:{cls:'', html:()=>`<div class="heat"><i style="width:79%"></i><b>HEAT 79%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:40%;top:32%;font-size:calc(26cqw*var(--k,1));--h:.5',HOT()+'<span class="cheek l"></span><span class="cheek r"></span>')}<div class="bub r sm" style="left:56%;top:24%">Hmm hmm hmm</div><div class="c sm" style="left:4%;top:42%">🐰</div><div class="c sm" style="left:16%;top:52%">🦊</div><div class="c xs" style="left:28%;top:62%">🐸</div><div class="c xs" style="left:74%;top:56%"><span class="flip">🧒</span></div><div class="c xs" style="left:84%;top:46%"><span class="flip">👧</span></div><div class="sp twinkle" style="left:8%;top:30%">🎵</div><div class="sp twinkle" style="left:24%;top:38%;font-size:calc(4cqw*var(--k,1))">🎶</div><div class="sp twinkle" style="left:80%;top:32%">🎵</div><div class="sp twinkle" style="left:66%;top:64%;font-size:calc(4cqw*var(--k,1))">🎶</div>`},
+  p10:{cls:'', html:()=>`<div class="heat"><i style="width:95%"></i><b>HEAT 95%</b></div><div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div>${ROBO('left:58%;top:36%;font-size:calc(26cqw*var(--k,1));--h:.9',HOT()+'<span class="cheek l"></span><span class="cheek r"></span><span class="steam" style="left:-10%;top:10%;transform:rotate(-40deg)">💨</span><span class="steam" style="right:-12%;top:8%;transform:scaleX(-1) rotate(-40deg)">💨</span><span class="sweat" style="right:0;top:30%">💧</span>')}<div class="bub big r" style="left:18%;top:14%">It’s OK to get too hot<br>sometimes. But I need<br><em>help</em>, please!</div><div class="c sm" style="left:6%;top:46%">🐰</div><div class="c sm" style="left:20%;top:54%">🐻</div><div class="c xs" style="left:36%;top:64%">🧒</div><div class="c xs" style="left:8%;top:66%">👧</div><div class="c sm" style="left:84%;top:54%"><span class="flip">🦊</span></div>`},
+  p11:{cls:'nochef', html:()=>`<div class="heat"><i style="width:100%"></i><b>HEAT 100%</b></div><div class="table" style="transform:rotate(4deg)"><span class="on sm">🍽️</span><span class="foot"></span></div><div class="burst pop" style="left:50%;top:50%;width:calc(80cqw*var(--k,1));height:calc(80cqw*var(--k,1));transform:translate(-50%,-52%)"><span class="word" style="position:absolute;top:15%;left:50%;transform:translateX(-50%) rotate(-6deg)">KA-BOOM!</span></div>${ROBO('left:50%;top:50%;transform:translate(-50%,-22%) rotate(8deg);font-size:calc(24cqw*var(--k,1));--h:1;z-index:6',HOT()+'<span class="cheek l"></span><span class="cheek r"></span>',null,'wobble')}<div class="gear" style="left:14%;top:30%;transform:rotate(-25deg);font-size:calc(8cqw*var(--k,1))">⚙️</div><div class="gear" style="left:78%;top:26%;transform:rotate(30deg);font-size:calc(7cqw*var(--k,1))">⚙️</div><div class="gear" style="left:22%;top:66%;transform:rotate(15deg)">🔩</div><div class="gear" style="left:72%;top:64%;transform:rotate(-20deg)">🔧</div><div class="gear" style="left:84%;top:46%;transform:rotate(40deg)">🪛</div><div class="gear" style="left:8%;top:50%">⚫</div><div class="spring" style="left:30%;top:22%;transform:rotate(-40deg)"></div><div class="spring" style="left:66%;top:70%;transform:rotate(50deg)"></div><div class="sp twinkle" style="left:36%;top:18%">✨</div><div class="sp twinkle" style="left:60%;top:16%">🔥</div><div class="sp" style="left:12%;top:60%">💨</div><div class="sp twinkle" style="left:86%;top:60%">✨</div><div class="sp twinkle" style="left:40%;top:72%">⚡</div><div class="c xs" style="left:2%;top:40%;z-index:7">🧒</div><div class="sp" style="left:9%;top:40%;font-size:calc(6cqw*var(--k,1));z-index:7">🍽️</div>`},
+  p12:{cls:'', html:()=>`<div class="table"><span class="on sm">🍽️</span><span class="foot"></span></div><div class="robo" style="left:44%;top:46%;font-size:calc(18cqw*var(--k,1));transform:rotate(-14deg);z-index:6"><span class="bot">🤖</span></div><div class="bub sm" style="left:58%;top:38%">. . .</div><div class="gear" style="left:12%;top:60%;transform:rotate(-25deg);font-size:calc(7cqw*var(--k,1))">⚙️</div><div class="gear" style="left:80%;top:56%;transform:rotate(30deg);font-size:calc(7cqw*var(--k,1))">⚙️</div><div class="gear" style="left:28%;top:70%;transform:rotate(15deg)">🔩</div><div class="gear" style="left:64%;top:70%;transform:rotate(-20deg)">🔧</div><div class="gear" style="left:70%;top:60%">🪛</div><div class="gear" style="left:46%;top:60%;font-size:calc(5cqw*var(--k,1));z-index:2">⚫</div><div class="spring" style="left:20%;top:52%;transform:rotate(70deg)"></div><div class="spring" style="left:88%;top:66%;transform:rotate(-30deg)"></div><div class="sp" style="left:50%;top:38%;font-size:calc(4cqw*var(--k,1));z-index:7">💨</div><div class="c sm" style="left:2%;top:40%">🐰</div><div class="c sm" style="left:14%;top:30%">🦊</div><div class="c sm" style="left:76%;top:36%"><span class="flip">🐸</span></div><div class="c xs" style="left:88%;top:28%"><span class="flip">🐷</span></div><div class="c xs" style="left:28%;top:40%">🧒</div><div class="c xs" style="left:66%;top:44%"><span class="flip">👧</span></div><div class="bub sm" style="left:8%;top:22%">. . .</div><div class="bub sm r" style="left:80%;top:16%">. . .</div>`},
+  p13:{cls:'', html:()=>`<div class="c sm benny" id="benny" style="left:10%;top:18%">🐻</div><div class="table"><span class="on sm">🥧</span><span class="foot"></span></div><div class="robo" style="left:44%;top:46%;font-size:calc(16cqw*var(--k,1));transform:rotate(-10deg);z-index:6"><span class="bot">🤖</span></div><div class="c sm gig" style="left:2%;top:46%">🐸</div><div class="bub sm" style="left:1%;top:35%">Hee hee!</div><div class="c sm gig" style="left:16%;top:54%">🐰</div><div class="bub sm" style="left:20%;top:44%">Ha ha!</div><div class="c sm gig" style="left:30%;top:34%">🦊</div><div class="c xs gig" style="left:60%;top:42%"><span class="flip">🐷</span></div><div class="c sm gig" style="left:72%;top:50%"><span class="flip">🐵</span></div><div class="bub sm r" style="left:70%;top:38%">Hee hee!</div><div class="c sm gig" style="left:84%;top:36%"><span class="flip">🦁</span></div><div class="c xs gig" style="left:34%;top:62%">🧒</div><div class="c xs gig" style="left:56%;top:64%"><span class="flip">👧</span></div><div class="gear" style="left:26%;top:72%;transform:rotate(15deg)">🔩</div><div class="gear" style="left:66%;top:72%;transform:rotate(-20deg)">⚙️</div><div class="spring" style="left:90%;top:64%;transform:rotate(-30deg)"></div>`},
+  p14:{cls:'nochef', html:()=>`<div class="table"><span class="on">🥧</span><span class="foot"></span></div><div class="c sm" style="left:52%;top:28%;z-index:2">👩‍🍳</div><div class="bub r sm" style="left:60%;top:18%">Found the wheel!</div><div class="robo" id="robo14" style="left:24%;top:36%;font-size:calc(22cqw*var(--k,1))"><span class="bot">🤖</span></div><div class="c sm" style="left:62%;top:58%">🦊</div><div class="c sm" style="left:76%;top:50%"><span class="flip">🐰</span></div><div class="c xs" style="left:88%;top:42%"><span class="flip">🐸</span></div><div class="bub sm" style="left:60%;top:48%">Ha ha!</div>`},
+  p15:{cls:'', html:(look)=>`<div class="table"><span class="on sm">🌼</span><span class="foot"></span></div>${ROBO('left:36%;top:34%;font-size:calc(28cqw*var(--k,1))','<span class="broom">🧹</span>',look)}<div class="bub big r" style="left:4%;top:16%">I went boom.<br>And that’s OK!</div><div class="sp twinkle" style="left:30%;top:36%">✨</div><div class="sp twinkle" style="left:66%;top:40%">✨</div><div class="sp twinkle" style="left:34%;top:70%;font-size:calc(3.5cqw*var(--k,1))">✨</div><div class="sp twinkle" style="left:62%;top:66%;font-size:calc(3.5cqw*var(--k,1))">✨</div><div class="mark" style="left:14%;top:56%;font-size:calc(5cqw*var(--k,1))">Click!</div><div class="mark" style="left:74%;top:60%;font-size:calc(5cqw*var(--k,1))">Clack!</div><div class="c sm" style="left:2%;top:62%">🐻</div><div class="c xs" style="left:16%;top:68%">🐰</div><div class="c xs" style="left:74%;top:48%"><span class="flip">🦊</span></div><div class="c sm" style="left:84%;top:60%"><span class="flip">🐸</span></div><div class="sp" style="left:80%;top:42%;font-size:calc(6cqw*var(--k,1))">🎉</div><div class="sp" style="left:10%;top:46%;font-size:calc(6cqw*var(--k,1))">🎉</div>`},
+  p16:{cls:'dooropen evening', html:(look)=>`<div class="table"><span class="on sm">🌼</span><span class="foot"></span></div><div class="c" style="left:5%;top:20%;z-index:3"><span class="flip">🐻</span></div><div class="bub" style="left:24%;top:22%">Friends help you<br>build again!</div><div class="c sm" style="left:19%;top:41%"><span class="flip">🐰</span></div><div class="c sm" style="left:31%;top:46%"><span class="flip">🦊</span></div><div class="c xs" style="left:42%;top:54%"><span class="flip">🐸</span></div><div class="c xs" style="left:50%;top:60%"><span class="flip">🐷</span></div><div class="c xs" style="left:59%;top:54%"><span class="flip">🐵</span></div><div class="c xs" style="left:68%;top:62%"><span class="flip">🦁</span></div><div class="puff" style="left:17%;top:52%">toot!</div><div class="puff sm" style="left:28%;top:60%">toot!</div><div class="puff sm" style="left:40%;top:68%">toot!</div><div class="puff sm" style="left:52%;top:72%">toot!</div><div class="puff sm" style="left:66%;top:74%">toot!</div><div class="puff sm" style="left:76%;top:70%">toot!</div>${ROBO('left:78%;top:36%;font-size:calc(18cqw*var(--k,1))','<span class="broom">🧹</span>',look)}<div class="bub r sm" style="left:74%;top:27%">Bye bye!</div>`}
+};
+
+/* ---------- sound (all synthesized, no files) ---------- */
+const Sound = (() => {
+  let ctx = null, enabled = true;
+  function ensure(){
+    if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx = null; } }
+    if(ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {type='sine', gain=0.2, slide=null, delay=0} = o;
+    const t = c.currentTime + delay;
+    const osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide, t+dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    osc.connect(g).connect(c.destination); osc.start(t); osc.stop(t+dur+0.05);
+  }
+  function noise(dur, o={}){
+    const c = ensure(); if(!c || !enabled) return;
+    const {gain=0.3, from=3000, to=200, delay=0} = o;
+    const t = c.currentTime + delay;
+    const len = Math.floor(c.sampleRate*dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2-1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t+dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  // toot: base pitch per character (bear low, frog high...), wobbly sawtooth through a lowpass
+  function toot(base=80, dur=0.4, delay=0){
+    const c = ensure(); if(!c || !enabled) return;
+    const t = c.currentTime + delay;
+    const o = c.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base*0.6, t+dur);
+    const lfo = c.createOscillator(); lfo.type='sine'; lfo.frequency.value = 14+base/10;
+    const lg = c.createGain(); lg.gain.value = base*0.35; lfo.connect(lg).connect(o.frequency);
+    const f = c.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 300+base*2; f.Q.value = 6;
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(f).connect(g).connect(c.destination); o.start(t); lfo.start(t); o.stop(t+dur+0.05); lfo.stop(t+dur+0.05);
+  }
+  return {
+    ensure, get enabled(){ return enabled; }, set enabled(v){ enabled = v; },
+    pop(){ tone(600,0.08,{type:'triangle',gain:0.12,slide:900}); },
+    count(n){ tone(440*Math.pow(1.06,n),0.14,{type:'triangle',gain:0.12,slide:440*Math.pow(1.06,n)*1.5}); },
+    ding(){ tone(1046,0.3,{gain:0.15}); tone(1568,0.45,{gain:0.1,delay:0.1}); tone(1046,0.3,{gain:0.12,delay:0.3}); tone(1568,0.5,{gain:0.09,delay:0.4}); },
+    yay(){ [523,659,784,1046].forEach((f,i)=>tone(f,0.16,{type:'triangle',gain:0.13,delay:i*0.08})); },
+    oops(){ tone(330,0.16,{type:'triangle',gain:0.1}); tone(262,0.22,{type:'triangle',gain:0.1,delay:0.15}); },
+    bonk(){ tone(180,0.18,{type:'square',gain:0.18,slide:60}); noise(0.12,{gain:0.15,from:1200,to:200}); },
+    spark(){ noise(0.15,{gain:0.12,from:8000,to:2500}); tone(2400,0.12,{type:'square',gain:0.05,slide:900}); },
+    steam(){ noise(0.7,{gain:0.07,from:6000,to:1500}); },
+    hiss(){ noise(1.1,{gain:0.08,from:7000,to:2000}); },
+    boom(){ noise(1.5,{gain:0.5,from:4000,to:60}); tone(70,1,{type:'sine',gain:0.45,slide:30}); },
+    giggle(){ [660,880,740,990,820].forEach((f,i)=>tone(f,0.09,{type:'sine',gain:0.1,slide:f*1.3,delay:i*0.11})); },
+    click(){ tone(1800,0.04,{type:'square',gain:0.12,slide:900}); noise(0.03,{gain:0.1,from:5000,to:1500}); },
+    clack(){ tone(900,0.06,{type:'square',gain:0.12,slide:400}); noise(0.05,{gain:0.12,from:3000,to:800}); },
+    clickclack(){ this.click(); setTimeout(()=>this.clack(),160); setTimeout(()=>this.click(),320); setTimeout(()=>this.clack(),460); },
+    chomp(){ noise(0.09,{gain:0.1,from:1200,to:300}); tone(160+Math.random()*60,0.08,{type:'square',gain:0.04}); },
+    splat(){ noise(0.25,{gain:0.2,from:900,to:150}); tone(120,0.2,{type:'triangle',gain:0.1,slide:50}); },
+    slurp(){ tone(300,0.5,{type:'sawtooth',gain:0.05,slide:1200}); noise(0.5,{gain:0.05,from:2000,to:4000}); },
+    song(){ [523,587,659,523,659,587,523].forEach((f,i)=>tone(f,0.22,{type:'triangle',gain:0.1,delay:i*0.22})); },
+    toot(who='bear', n=1){
+      const base = {bear:70, rabbit:140, fox:110, frog:190, pig:95, monkey:160, lion:60, robo:120, all:90}[who] || 90;
+      for(let i=0;i<n;i++) toot(base*(1+i*0.12), 0.3+Math.random()*0.15, i*0.4);
+    }
+  };
+})();
+
+/* ---------- read-aloud ---------- */
+const Voice = (() => {
+  let enabled = true, voice = null;
+  const has = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function pickVoice(){
+    if(!has) return;
+    const vs = speechSynthesis.getVoices();
+    voice = vs.find(v=>/^en/i.test(v.lang) && /Google US|Samantha|Karen|Zira|Aria|Jenny|Female/i.test(v.name)) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  if(has){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function clean(text){
+    let t = String(text);
+    t = t.replace(/\bKA[- ]?BOOM\b/gi, 'kaboom').replace(/\bKa[- ]ching\b/gi, 'ka ching');
+    const N = '(\\$?\\d+)';
+    t = t.replace(new RegExp(N+'\\s*[×x]\\s*'+N,'g'), '$1 times $2').replace(/×/g, ' times ');
+    t = t.replace(/÷/g, ' divided by ');
+    t = t.replace(new RegExp(N+'\\s*\\+\\s*'+N,'g'), '$1 plus $2').replace(/\+/g, ' and ');
+    t = t.replace(new RegExp(N+'\\s*[−–-]\\s*'+N,'g'), '$1 take away $2');
+    t = t.replace(/−/g, ' take away ').replace(/[–—]/g, ' ').replace(/(\S)-(\S)/g, '$1 $2');
+    t = t.replace(/\$(\d+)/g, '$1 dollars');
+    t = t.replace(/=\s*\?/g, ' equals what?').replace(/=/g, ' equals ');
+    t = t.replace(/[✓✔]/g, ' the green check ').replace(/→/g, ' to ').replace(/&/g, ' and ').replace(/[·•]/g, ', ').replace(/…/g, ', ');
+    t = t.replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E0020}-\u{E007F}]/gu, ' ');
+    t = t.replace(/[^\p{L}\p{N}\s.,!?'’:%]/gu, ' ');
+    return t.replace(/\s+/g, ' ').replace(/\s([.,!?])/g, '$1').replace(/^[\s.,]+/, '').trim();
+  }
+  return {
+    has, get voice(){ return voice; },
+    get enabled(){ return enabled; }, set enabled(v){ enabled = v; if(!v && has){ try{ speechSynthesis.cancel(); }catch(e){} } },
+    clean
+  };
+})();
+
+/* ---------- narration: say(id, text, wordEls) -> Promise({done|cancelled}); highlights words as spoken ---------- */
+let sayToken = 0, currentAudio = null;
+function estimateMs(text){ const t = Voice.clean(text); return 60 + t.length*70 + (t.match(/[.,!?]/g)||[]).length*220; }
+function say(id, text, words=[]){
+  const token = ++sayToken;
+  stopSpeech();
+  const alive = () => token === sayToken;
+  const clearWords = () => words.forEach(w=>w.classList.remove('on'));
+  // spoken string built from the same words so onboundary offsets map back to word spans
+  const spoken = []; const offsets = [];
+  let pos = 0;
+  words.forEach((w,i)=>{ const c = Voice.clean(w.textContent); if(!c){ offsets.push(-1); return; } offsets.push(pos); spoken.push(c); pos += c.length+1; });
+  const utterText = words.length ? spoken.join(' ') : Voice.clean(text);
+  function lightIdx(i){ words.forEach((w,j)=>w.classList.toggle('on', j===i)); }
+  function lightChar(ch){ let best=-1; offsets.forEach((o,i)=>{ if(o>=0 && o<=ch) best=i; }); if(best>=0) lightIdx(best); }
+  // timer-based sweep, proportional to word length
+  let timers = [];
+  function sweep(totalMs){
+    const lens = words.map(w=>Math.max(1, Voice.clean(w.textContent).length+1)); const sum = lens.reduce((a,b)=>a+b,0)||1;
+    let t = 0; words.forEach((w,i)=>{ timers.push(setTimeout(()=>{ if(alive()) lightIdx(i); }, t)); t += totalMs*lens[i]/sum; });
+  }
+  const stopTimers = () => { timers.forEach(clearTimeout); timers = []; };
+  return new Promise(res => {
+    const finish = ok => { if(!alive()) return; stopTimers(); clearWords(); res({done:ok, cancelled:!ok}); };
+    cancelCurrent = () => { stopTimers(); clearWords(); if(alive()) res({done:false, cancelled:true}); };
+    const est = estimateMs(text);
+    if(!Voice.enabled){ // read-aloud off: quick silent sweep so the words still light up
+      sweep(Math.min(est*0.3, 900)); timers.push(setTimeout(()=>finish(true), Math.min(est*0.3, 900)+50)); return;
+    }
+    if(VOICE_CLIPS[id]){
+      try{
+        const a = new Audio(VOICE_CLIPS[id]); currentAudio = a;
+        a.addEventListener('loadedmetadata', ()=>{ if(alive()) sweep((isFinite(a.duration)?a.duration*1000:est)); });
+        a.addEventListener('ended', ()=>finish(true)); a.addEventListener('error', ()=>finish(true));
+        a.play().catch(()=>finish(true)); return;
+      }catch(e){}
+    }
+    if(!Voice.has){ sweep(est); timers.push(setTimeout(()=>finish(true), est+50)); return; }
+    let boundaries = false, ended = false; const t0 = performance.now();
+    sweep(est); // fallback pacing until the browser gives us word boundaries
+    const done = () => { ended = true; if(!boundaries && performance.now()-t0 < est*0.3){ timers.push(setTimeout(()=>finish(true), Math.max(50, est-(performance.now()-t0)))); return; } finish(true); }; // a silent or broken voice: keep the timed sweep so the words still light up
+    try{
+      const u = new SpeechSynthesisUtterance(utterText); u.rate = 0.9; u.pitch = 1.05; if(Voice.voice) u.voice = Voice.voice;
+      u.onboundary = e => { if(!alive()) return; if(!boundaries){ boundaries = true; stopTimers(); } if(e.name==='word' || e.charIndex!=null) lightChar(e.charIndex); };
+      u.onend = done;
+      u.onerror = done;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+      timers.push(setTimeout(()=>{ if(!ended) finish(true); }, est*1.6+1500)); // safety: never wait forever on a silent voice
+    }catch(e){ finish(true); }
+  });
+}
+let cancelCurrent = () => {};
+function stopSpeech(){ cancelCurrent(); cancelCurrent = () => {}; if(Voice.has){ try{ speechSynthesis.cancel(); }catch(e){} } if(currentAudio){ try{ currentAudio.pause(); }catch(e){} currentAudio = null; } }
+
+/* ---------- bookmark + settings ---------- */
+const Save = {
+  load(){ try{ return JSON.parse(localStorage.getItem('tootRoboStory')||'{}'); }catch(e){ return {}; } },
+  save(p){ try{ localStorage.setItem('tootRoboStory', JSON.stringify(p)); }catch(e){} }
+};
+let saved = Object.assign({sound:true, voice:true}, Save.load());
+function persist(){ if(S.screen==='book'){ saved.id = S.id; saved.choices = S.choices.slice(); saved.mode = S.mode; } Save.save(saved); }
+function clearBookmark(){ delete saved.id; delete saved.choices; delete saved.mode; Save.save(saved); }
+
+/* ---------- state ---------- */
+const el = { scene:$('#scene'), text:$('#text'), extra:$('#extra'), prev:$('#btn-prev'), next:$('#btn-next'), play:$('#btn-play'), dots:$('#dots'), overlay:$('#overlay'), card:$('#card'), mode:$('#btn-mode'), textwrap:$('#textwrap') };
+const S = { screen:'title', mode:'read', id:'p1', index:0, choices:[null,null,null], playing:true, challenge:null, look:'normal', seq:[] };
+const LOOKS = ['normal','balloon','hat'];
+function buildSeq(){
+  const s = ['p1','p2','p3','c1']; if(S.choices[0]!=null) s.push('e1'+'abc'[S.choices[0]]);
+  s.push('p4','p5','p6','p7','p8','p9','c2'); if(S.choices[1]!=null) s.push('e2'+'abc'[S.choices[1]]);
+  s.push('p10','p11','p12','p13','p14','c3','p15','p16','end'); S.seq = s; return s;
+}
+function bookPageOf(id){ // which of the 16 dots a sequence entry belongs to
+  if(id[0]==='p') return +id.slice(1); if(id==='c1'||id[0]==='e'&&id[1]==='1') return 3; if(id==='c2'||id[0]==='e'&&id[1]==='2') return 9; if(id==='c3') return 14; return 16;
+}
+function lineFor(id){
+  if(id[0]==='p') return {lid:'B'+id.slice(1), text:BOOK[+id.slice(1)-1]};
+  if(id[0]==='c') return {lid:CHOICES[+id[1]-1].id, text:CHOICES[+id[1]-1].text};
+  if(id[0]==='e') return {lid:EXTRA[id].id, text:EXTRA[id].text};
+  return {lid:'T2', text:T.T2};
+}
+const CHALLENGE_PAGES = {p3:'bill', p7:'crumbs', p13:'benny', p14:'rebuild'};
+
+/* ---------- idle nudge ---------- */
+let lastAction = performance.now(), nudge = null;
+function setNudge(targets, text){ nudge = targets ? {targets, text} : null; lastAction = performance.now(); }
+['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, ()=>{ lastAction = performance.now(); }, {passive:true}));
+setInterval(()=>{
+  if(S.screen!=='book' || !nudge || el.overlay.classList.contains('on')) return;
+  if(performance.now() - lastAction < 14000) return;
+  lastAction = performance.now();
+  const els = typeof nudge.targets === 'function' ? nudge.targets() : nudge.targets;
+  els.filter(Boolean).forEach(t => { t.classList.remove('nudge'); void t.offsetWidth; t.classList.add('nudge'); setTimeout(()=>t.classList.remove('nudge'), 2200); });
+  if(nudge.text) say(nudge.text.id, nudge.text.text, []);
+}, 1000);
+
+/* ---------- rendering ---------- */
+function words(text){ // split into tappable word spans, keeping the KA-BOOM flourish
+  return text.split(/(\s+)/).map(w => /^\s+$/.test(w) ? w : `<span class="w${/KA-BOOM|The end\.?/.test(w)?' ka':''}">${w.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`).join('');
+}
+function renderDots(){
+  const now = bookPageOf(S.id);
+  el.dots.innerHTML = Array.from({length:16},(_,i)=>`<i class="${i+1<now?'done':''}${i+1===now?' now':''}"></i>`).join('');
+}
+function setPlayBtn(){
+  const readMode = S.mode==='read';
+  el.play.textContent = readMode ? (S.playing ? '⏸' : '▶') : '🔊';
+  el.play.classList.toggle('paused', readMode && !S.playing);
+  el.play.setAttribute('aria-label', readMode ? (S.playing ? 'Pause' : 'Play') : 'Read this page to me');
+  el.mode.textContent = readMode ? '🔊 Read to me' : '📖 I read';
+}
+let run = 0;
+function render(dir){
+  const myRun = ++run; stopSpeech(); setNudge(null); S.challenge = null;
+  buildSeq(); S.index = S.seq.indexOf(S.id); if(S.index<0){ S.index = 0; S.id = 'p1'; }
+  if(S.id==='end'){ showEnd(); return; }
+  hideOverlay();
+  const id = S.id, line = lineFor(id);
+  // scene
+  const sc = SCENES[id] || SCENES[id[0]==='c' ? ({c1:'p3',c2:'p9',c3:'p14'})[id] : 'p1'];
+  el.scene.className = 'scene diner ' + (sc.cls||'');
+  el.scene.innerHTML = BACKDROP + sc.html(S.look);
+  if(!reduced){ el.scene.classList.remove('sceneturn','back'); void el.scene.offsetWidth; el.scene.classList.add('sceneturn'); if(dir<0) el.scene.classList.add('back'); }
+  // text
+  el.text.className = 'txt' + (id[0]==='c' ? ' prompt' : '');
+  el.text.innerHTML = words(line.text); el.text.dataset.lid = line.lid; el.text.dataset.text = line.text;
+  el.extra.innerHTML = '';
+  el.prev.disabled = S.index===0; el.next.disabled = false;
+  renderDots(); setPlayBtn(); persist();
+  el.textwrap.scrollTop = 0;
+  pageSounds(id);
+  if(id[0]==='c') renderChoice(+id[1]-1);
+  if(CHALLENGE_PAGES[id]) prepChallenge(CHALLENGE_PAGES[id]);
+  narratePage(myRun);
+}
+function pageSounds(id){
+  const s = {p2:()=>Sound.ding(), p4:()=>Sound.toot('bear',3), p5:()=>{Sound.bonk(); setTimeout(()=>Sound.spark(),350);}, p6:()=>{Sound.ding(); setTimeout(()=>Sound.toot('rabbit',1),800); setTimeout(()=>Sound.toot('frog',1),1300);}, p8:()=>Sound.steam(), p9:()=>Sound.steam(), p10:()=>Sound.steam(), p11:()=>{ Sound.boom(); el.scene.classList.add('shake'); setTimeout(()=>el.scene.classList.remove('shake'),700); }, p13:()=>Sound.giggle(), p15:()=>Sound.clickclack(), p16:()=>{ Sound.toot('all',2); setTimeout(()=>Sound.toot('frog',1),900); setTimeout(()=>Sound.toot('lion',1),1400); },
+    e1a:()=>{ Sound.splat(); setTimeout(()=>Sound.toot('bear',1),700); }, e1b:()=>{ Sound.chomp(); setTimeout(()=>Sound.toot('pig',1),700); }, e1c:()=>{ Sound.slurp(); setTimeout(()=>Sound.toot('frog',1),800); },
+    e2a:()=>{ Sound.toot('lion',1); }, e2b:()=>{ Sound.hiss(); }, e2c:()=>{ Sound.song(); } };
+  if(s[id]) s[id]();
+}
+async function narratePage(myRun){
+  const id = S.id;
+  const wordEls = [...el.text.querySelectorAll('.w')];
+  const wantsVoice = S.mode==='read' ? S.playing : false;
+  if(!wantsVoice){
+    if(S.challenge && S.mode!=='read') { /* self mode: prompt stays visible, child reads it */ }
+    if(S.mode!=='read') setNudge(()=>[S.challenge ? null : el.next].concat(challengeTargets()), S.challenge ? {id:S.challenge.promptId, text:S.challenge.prompt} : (id[0]==='c' ? {id:lineFor(id).lid, text:lineFor(id).text} : null));
+    return;
+  }
+  const r = await say(lineFor(id).lid, lineFor(id).text, wordEls);
+  if(run!==myRun || !r.done) return;
+  if(S.challenge){ await say(S.challenge.promptId, S.challenge.prompt, [...el.extra.querySelectorAll('.w')]); if(run!==myRun) return; setNudge(challengeTargets, {id:S.challenge.promptId, text:S.challenge.prompt}); return; }
+  if(id[0]==='c'){ setNudge(()=>[...el.extra.querySelectorAll('.opt')], {id:lineFor(id).lid, text:lineFor(id).text}); return; }
+  await wait(1500); if(run!==myRun || !S.playing || S.mode!=='read') return;
+  next();
+}
+function challengeTargets(){ if(!S.challenge) return []; return S.challenge.targets ? S.challenge.targets() : []; }
+async function afterChallenge(myRun){ // read mode: keep going after a finished challenge
+  if(S.mode==='read' && S.playing){ await wait(1500); if(run!==myRun || !S.playing) return; next(); }
+  else { setNudge(()=>[el.next], {id:'X18', text:X.X18}); }
+}
+
+/* ---------- navigation ---------- */
+function goIndex(i, dir){ buildSeq(); i = Math.max(0, Math.min(S.seq.length-1, i)); S.id = S.seq[i]; S.index = i; Sound.pop(); render(dir); }
+function next(){ if(S.screen!=='book') return; goIndex(S.index+1, 1); }
+function prev(){ if(S.screen!=='book') return; goIndex(S.index-1, -1); }
+function goTo(page){ // book page number 1..16, or a sequence id
+  if(S.screen!=='book'){ S.screen='book'; }
+  const id = typeof page==='number' ? 'p'+Math.max(1,Math.min(16,page)) : String(page);
+  buildSeq(); if(!S.seq.includes(id)) return; S.id = id; render(1);
+}
+function setMode(m){ S.mode = m==='self' ? 'self' : 'read'; S.playing = true; setPlayBtn(); persist(); if(S.screen==='book') render(0); }
+function togglePlay(){
+  Sound.ensure();
+  if(S.mode==='read'){ S.playing = !S.playing; setPlayBtn(); if(S.playing) render(0); else { stopSpeech(); ++run; } }
+  else { // I read: the button reads this page once
+    const myRun = ++run; const wordEls = [...el.text.querySelectorAll('.w')]; const was = Voice.enabled; Voice.enabled = true;
+    say(el.text.dataset.lid, el.text.dataset.text, wordEls).then(()=>{ Voice.enabled = was; if(run===myRun && S.challenge) say(S.challenge.promptId, S.challenge.prompt, [...el.extra.querySelectorAll('.w')]); });
+  }
+}
+function start(mode, fromBookmark){
+  Sound.ensure(); S.screen = 'book'; S.mode = mode || 'read'; S.playing = true; document.body.classList.remove('title');
+  if(fromBookmark && saved.id){ S.choices = Array.isArray(saved.choices) ? saved.choices.slice(0,3) : [null,null,null]; while(S.choices.length<3) S.choices.push(null); S.look = LOOKS[S.choices[2]] || 'normal'; S.id = saved.id; }
+  else { S.choices = [null,null,null]; S.look = 'normal'; S.id = 'p1'; }
+  buildSeq(); if(!S.seq.includes(S.id)) S.id = 'p1';
+  render(1);
+}
+
+/* ---------- choices ---------- */
+function renderChoice(ci){
+  const ch = CHOICES[ci];
+  el.extra.innerHTML = `<div class="opts">${ch.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="em">${o[0]}</span><span>${o[1]}</span></button>`).join('')}</div>`;
+  el.extra.querySelectorAll('.opt').forEach(b=>b.addEventListener('click', ()=>choose(+b.dataset.i)));
+}
+function choose(i){
+  if(S.screen!=='book' || S.id[0]!=='c') return;
+  const ci = +S.id[1]-1; if(!(i>=0 && i<3)) return;
+  S.choices[ci] = i; if(ci===2) S.look = LOOKS[i];
+  Sound.pop(); persist(); buildSeq(); goIndex(S.index+1, 1);
+}
+
+/* ---------- challenges (tap only; wrong 1 = picture hint, wrong 2 = answer shown to tap) ---------- */
+function hintBox(html){ let h = el.extra.querySelector('.hint'); if(!h){ h = document.createElement('div'); h.className='hint'; el.extra.appendChild(h); } h.innerHTML = html; el.textwrap.scrollTop = el.textwrap.scrollHeight; return h; }
+function promptBox(text){ const p = document.createElement('div'); p.className='txt prompt small'; p.innerHTML = words(text); p.dataset.text = text; el.extra.appendChild(p); return p; }
+function numButtons(from, to, onTap){
+  const d = document.createElement('div'); d.className='nums';
+  for(let n=from;n<=to;n++){ const b = document.createElement('button'); b.className='num'; b.textContent = n; b.dataset.n = n; b.setAttribute('aria-label', String(n)); b.addEventListener('click', ()=>onTap(n, b)); d.appendChild(b); }
+  el.extra.appendChild(d); el.textwrap.scrollTop = el.textwrap.scrollHeight; return d;
+}
+function finishChallenge(lid, text){
+  const myRun = run; const C = S.challenge; C.done = true; setNudge(null); Sound.yay();
+  const p = promptBox(text); p.classList.remove('prompt'); p.style.background = '#E4FBF5';
+  const was = Voice.enabled; if(S.mode==='self') Voice.enabled = true;
+  say(lid, text, [...p.querySelectorAll('.w')]).then(r=>{ Voice.enabled = was; if(run===myRun && r.done){ S.challenge = null; afterChallenge(myRun); } });
+}
+function prepChallenge(kind){
+  const C = S.challenge = {kind, wrong:0, done:false, targets:()=>[]};
+  if(kind==='bill'){
+    C.promptId='X1'; C.prompt=X.X1; C.answer=5;
+    const p = promptBox('Benny’s bill: 🥞 $3 + 🧃 $2 = ?'); p.dataset.text = X.X1; p.dataset.lid='X1';
+    const nums = numButtons(3, 7, n=>answer(n)); C.targets = ()=>[...nums.querySelectorAll('.num')];
+    C.onWrong = (n,b)=>{ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); if(C.wrong===1){ hintBox(`<span class="pic">🥞🥞🥞 🧃🧃</span>${X.X2}`); return {id:'X2',text:X.X2}; } nums.querySelector('[data-n="5"]').classList.add('reveal'); hintBox(`<span class="pic">🥞🥞🥞 🧃🧃 = 5</span>${X.X3}`); C.targets = ()=>[nums.querySelector('[data-n="5"]')]; return {id:'X3',text:X.X3}; };
+    C.onRight = ()=>{ nums.querySelectorAll('.num').forEach(b=>{ b.disabled = true; b.classList.toggle('reveal', b.dataset.n==='5'); }); Sound.count(5); finishChallenge('X4', X.X4); };
+  }
+  if(kind==='crumbs'){
+    C.promptId='X5'; C.prompt=X.X5; C.answer=10; C.counted=0;
+    const pos = [[10,62],[28,66],[46,63],[64,66],[82,62],[10,86],[28,90],[46,87],[64,90],[82,86]];
+    pos.forEach((p,i)=>{ const b = document.createElement('button'); b.className='crumbtap'; b.style.left=p[0]+'%'; b.style.top=p[1]+'%'; b.setAttribute('aria-label','Crumb'); b.innerHTML='<span class="n"></span>'; b.addEventListener('click', ()=>tapCrumb(b)); el.scene.appendChild(b); });
+    C.targets = ()=>[...el.scene.querySelectorAll('.crumbtap:not(.hit)')];
+    C.askHowMany = ()=>{
+      const p = promptBox(X.X6); p.dataset.lid='X6';
+      const nums = numButtons(8, 12, n=>answer(n)); C.targets = ()=>[...nums.querySelectorAll('.num')];
+      C.onWrong = (n,b)=>{ b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); if(C.wrong===1){ hintBox(`<span class="pic">1 2 3 4 5 6 7 8 9 <b>10</b></span>${X.X7}`); el.scene.querySelectorAll('.crumbtap').forEach(c=>c.classList.add('last')); return {id:'X7',text:X.X7}; } nums.querySelector('[data-n="10"]').classList.add('reveal'); hintBox(`<span class="pic">10</span>${X.X8}`); C.targets = ()=>[nums.querySelector('[data-n="10"]')]; return {id:'X8',text:X.X8}; };
+      C.onRight = ()=>{ nums.querySelectorAll('.num').forEach(b=>{ b.disabled = true; b.classList.toggle('reveal', b.dataset.n==='10'); }); finishChallenge('X9', X.X9); };
+      const myRun = run; if(S.mode==='read' && S.playing) say('X6', X.X6, [...p.querySelectorAll('.w')]).then(()=>{ if(run===myRun) setNudge(C.targets, {id:'X6',text:X.X6}); }); else setNudge(C.targets, {id:'X6',text:X.X6});
+    };
+  }
+  if(kind==='benny'){
+    C.promptId='X10'; C.prompt=X.X10;
+    const p = promptBox(X.X10); p.dataset.lid='X10';
+    const door = document.createElement('button'); door.className='doortap'; door.setAttribute('aria-label','The door'); el.scene.appendChild(door);
+    const benny = el.scene.querySelector('#benny');
+    C.targets = ()=>[door];
+    const found = ()=>{ if(C.done) return; benny.classList.remove('peek'); benny.classList.add('found'); door.remove(); el.scene.querySelectorAll('.tapmark').forEach(m=>m.remove()); Sound.toot('bear',1); el.scene.querySelectorAll('.gig').forEach(g=>g.classList.add('giggle')); finishChallenge('X13', X.X13); };
+    door.addEventListener('click', found); benny.addEventListener('click', found); benny.style.cursor='pointer';
+    C.tapDoor = found;
+    const onScene = e=>{ if(S.challenge!==C){ el.scene.removeEventListener('click', onScene); return; } if(C.done || e.target.closest('.doortap') || e.target.closest('#benny')) return; wrongTap(e.target.closest('.c,.robo,.gear,.spring,.table') || null); }; el.scene.addEventListener('click', onScene);
+    const wrongTap = t=>{ C.wrong++; Sound.oops(); if(t){ t.classList.remove('nope'); void t.offsetWidth; t.style.animation='wiggle .4s'; setTimeout(()=>t.style.animation='',450); }
+      if(C.wrong===1){ door.classList.add('glow'); hintBox(`<span class="pic">🚪 👀</span>${X.X11}`); sayHint({id:'X11',text:X.X11}); }
+      else { door.classList.add('glow'); benny.classList.add('peek'); const m = document.createElement('div'); m.className='tapmark'; m.style.left='12%'; m.style.top='4%'; m.textContent='👇'; el.scene.appendChild(m); hintBox(`<span class="pic">🐻👇</span>${X.X12}`); C.targets=()=>[benny]; sayHint({id:'X12',text:X.X12}); } };
+    C.wrongTap = ()=>wrongTap(null);
+  }
+  if(kind==='rebuild'){
+    C.promptId='X14'; C.prompt=X.X14; C.sel=null; C.placed=0;
+    const p = promptBox(X.X14); p.dataset.lid='X14';
+    const PARTS = [['gears','⚙️',8,50],['springs','🔩',46,64],['wheel','⚫',26,84],['broom','🧹',48,34]];
+    const tray = document.createElement('div'); tray.className='tray';
+    PARTS.forEach(([name,em])=>{ const b = document.createElement('button'); b.className='part'; b.dataset.part=name; b.textContent=em; b.setAttribute('aria-label',name); b.addEventListener('click', ()=>tapPart(name)); tray.appendChild(b); });
+    el.extra.appendChild(tray);
+    PARTS.forEach(([name,em,x,y])=>{ const s = document.createElement('button'); s.className='slot'; s.dataset.slot=name; s.style.left=x+'%'; s.style.top=y+'%'; s.innerHTML=`<span class="ghost">${em}</span>`; s.setAttribute('aria-label','Spot for '+name); s.addEventListener('click', ()=>tapPart(name, true)); el.scene.appendChild(s); });
+    C.targets = ()=> C.sel ? [el.scene.querySelector(`.slot[data-slot="${C.sel}"]`)] : [...tray.querySelectorAll('.part:not(.used)')];
+  }
+}
+function sayHint(line){ const myRun = run; const was = Voice.enabled; if(S.mode==='self') Voice.enabled = true; say(line.id, line.text, []).then(()=>{ Voice.enabled = was; if(run===myRun) setNudge(challengeTargets, line); }); setNudge(challengeTargets, line); }
+function answer(n){
+  const C = S.challenge; if(!C || C.done || C.answer==null || !C.onWrong) return;
+  const b = el.extra.querySelector(`.num[data-n="${n}"]`); if(!b) return;
+  if(+n===C.answer){ C.onRight(); return; }
+  C.wrong++; Sound.oops(); const line = C.onWrong(+n, b); if(line) sayHint(line);
+}
+function tapCrumb(b){
+  const C = S.challenge; if(!C || C.kind!=='crumbs' || C.done || b.classList.contains('hit')) return;
+  C.counted++; b.classList.add('hit'); b.querySelector('.n').textContent = C.counted; Sound.count(C.counted);
+  const was = Voice.enabled; if(S.mode==='self') Voice.enabled = true; say('N'+C.counted, String(C.counted), []).then(()=>{ Voice.enabled = was; });
+  if(C.counted===10){ b.classList.add('last'); setTimeout(()=>{ if(S.challenge===C) C.askHowMany(); }, 600); }
+}
+function tapPart(name, isSlot){
+  const C = S.challenge; if(!C || C.done) return;
+  if(C.kind==='crumbs' && name==='crumb'){ const b = el.scene.querySelector('.crumbtap:not(.hit)'); if(b) tapCrumb(b); return; }
+  if(C.kind==='benny'){ if(name==='door'||name==='benny') C.tapDoor(); else C.wrongTap(); return; }
+  if(C.kind!=='rebuild') return;
+  const slot = el.scene.querySelector(`.slot[data-slot="${name}"]`), part = el.extra.querySelector(`.part[data-part="${name}"]`);
+  if(!isSlot){ if(part.classList.contains('used')) return; C.sel = name; el.extra.querySelectorAll('.part').forEach(p=>p.classList.toggle('sel', p===part)); Sound.pop(); el.scene.querySelectorAll('.slot').forEach(s=>s.classList.remove('glow')); if(C.revealed) slot.classList.add('glow'); return; }
+  if(!C.sel){ Sound.oops(); slot.classList.remove('nope'); void slot.offsetWidth; slot.classList.add('nope'); return; }
+  if(slot.classList.contains('filled')) return;
+  if(C.sel===name){
+    slot.classList.add('filled'); slot.classList.remove('glow'); el.extra.querySelector(`.part[data-part="${name}"]`).classList.add('used'); el.extra.querySelectorAll('.part').forEach(p=>p.classList.remove('sel')); C.sel = null; C.placed++;
+    if(C.placed%2) Sound.click(); else Sound.clack();
+    if(C.placed===4){ Sound.clickclack(); const r = el.scene.querySelector('#robo14'); if(r){ r.innerHTML = '<span class="bot">🤖<span class="broom">🧹</span></span><span class="wheels">⚫⚫</span>'; r.classList.add('sweep'); } finishChallenge('X17', X.X17); }
+    return;
+  }
+  C.wrong++; Sound.oops(); slot.classList.remove('nope'); void slot.offsetWidth; slot.classList.add('nope');
+  const right = el.scene.querySelector(`.slot[data-slot="${C.sel}"]`); right.classList.add('glow');
+  if(C.wrong===1){ hintBox(`<span class="pic">${el.extra.querySelector(`.part[data-part="${C.sel}"]`).textContent} 👉 ✨</span>${X.X15}`); sayHint({id:'X15',text:X.X15}); }
+  else { C.revealed = true; hintBox(`<span class="pic">👉 ✨</span>${X.X16}`); sayHint({id:'X16',text:X.X16}); }
+}
+
+/* ---------- overlays ---------- */
+function showOverlay(html){ el.card.innerHTML = html; el.overlay.classList.add('on'); }
+function hideOverlay(){ el.overlay.classList.remove('on'); }
+function showTitle(){
+  ++run; stopSpeech(); S.screen='title'; setNudge(null); document.body.classList.add('title');
+  const hasMark = !!saved.id && saved.id!=='p1';
+  el.scene.className='scene diner'; el.scene.innerHTML = BACKDROP + SCENES.p1.html(); el.text.innerHTML=''; el.extra.innerHTML=''; el.dots.innerHTML='';
+  showOverlay(`<div class="kicker">A Toot Toot Diner story</div><div class="hero">🤖💥</div><h1>Robo Goes Boom</h1>
+    <p>Robo loves to clean. When the diner gets busy, Robo gets hot… and goes KA-BOOM. Friends help him build again.</p>
+    ${hasMark ? `<button class="bigbtn" id="btn-keep">Keep reading ▶</button><p style="font-size:.85rem">Or start over:</p>` : ''}
+    <div class="rowbtns" style="flex-direction:column;gap:10px"><button class="bigbtn${hasMark?' mint':''}" id="btn-read">🔊 Read to me</button><button class="bigbtn mint" id="btn-self">📖 I read</button></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-grownups">For grown-ups</button></div>`);
+  if(hasMark) $('#btn-keep').addEventListener('click', ()=>start(saved.mode||'read', true));
+  $('#btn-read').addEventListener('click', ()=>{ clearBookmark(); start('read'); });
+  $('#btn-self').addEventListener('click', ()=>{ clearBookmark(); start('self'); });
+  $('#btn-grownups').addEventListener('click', showGrownups);
+}
+function showGrownups(){
+  showOverlay(`<h2>For grown-ups</h2>
+    <div class="fact" id="grownups"><b>Two ways to read</b><ul><li><b>Read to me</b>: the story is read aloud, each word lights up as it is spoken, and pages turn by themselves. The big button pauses.</li><li><b>I read</b>: no narration. Your child taps the arrow to turn the page, and the 🔊 button or the text reads a page when they want help.</li></ul>
+    <b style="display:block;margin-top:10px">Three choices</b><ul><li>What Benny eats next, how everyone helps Robo cool down, and how Robo comes back together. Choices change the jokes, never the safety: every path rejoins the story and Robo still goes boom, because that is the point of the book.</li></ul>
+    <b style="display:block;margin-top:10px">Four little challenges</b><ul><li>Adding Benny’s bill (3 + 2), counting ten crumbs, finding Benny, and putting Robo back together. First wrong answer: a picture hint. Second: the answer, to tap. The arrows always work, so nobody gets stuck.</li><li>If your child stops for a while, the instruction is repeated and the thing to tap wiggles.</li></ul>
+    <b style="display:block;margin-top:10px">Built to be put down</b><ul><li>No stars, scores, timers, streaks or rewards. Nothing ever says “come back”. The end card offers “Read it again” and “All done for today”.</li><li>A bookmark (page and choices) and the sound and read-aloud toggles are saved on this device only. Nothing leaves the device. ⛶ makes it full screen on a tablet.</li></ul></div>
+    <div class="rowbtns"><button class="subbtn" id="btn-back">Back</button></div>`);
+  $('#btn-back').addEventListener('click', showTitle);
+}
+function showEnd(){
+  S.screen='end'; setNudge(null); clearBookmark();
+  const top = S.look==='balloon' ? '🎈' : S.look==='hat' ? '🎩' : '';
+  showOverlay(`<div class="endrobo">${top?`<span class="top">${top}</span>`:''}🤖</div><h1>The end</h1><p>Robo went boom. And that’s OK. Friends helped him build again.</p>
+    <button class="bigbtn" id="btn-again">Read it again 📖</button><div class="rowbtns"><button class="subbtn" id="btn-done">All done for today 👋</button></div>`);
+  Sound.toot('all',2); say('T2', T.T2, []);
+  $('#btn-again').addEventListener('click', ()=>{ stopSpeech(); showTitle(); });
+  $('#btn-done').addEventListener('click', showGoodbye);
+}
+function showGoodbye(){
+  ++run; stopSpeech(); S.screen='bye'; setNudge(null);
+  showOverlay(`<div class="hero">👋🤖</div><h2>Great work today!</h2><p>The book is closed for now. Stretch your arms, go find a real book, and read it to someone you love. Robo will be here when you come back.</p><div class="rowbtns"><button class="subbtn" id="btn-title">Back to start</button></div>`);
+  say('T3', T.T3, []);
+  $('#btn-title').addEventListener('click', showTitle);
+}
+
+/* ---------- top bar + controls ---------- */
+function applySettings(){ Sound.enabled = saved.sound !== false; Voice.enabled = saved.voice !== false; $('#btn-sound').classList.toggle('off', !Sound.enabled); $('#btn-sound').textContent = Sound.enabled?'🔊':'🔇'; $('#btn-voice').classList.toggle('off', !Voice.enabled); }
+applySettings();
+$('#btn-sound').addEventListener('click', ()=>{ saved.sound = !(saved.sound !== false); Save.save(saved); applySettings(); if(Sound.enabled){ Sound.ensure(); Sound.pop(); } });
+$('#btn-voice').addEventListener('click', ()=>{ saved.voice = !(saved.voice !== false); Save.save(saved); applySettings(); if(Voice.enabled) say('T0','Read aloud is on.',[]); });
+const fsBtn = $('#btn-full');
+if(document.documentElement.requestFullscreen){ fsBtn.addEventListener('click', ()=>{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }); document.addEventListener('fullscreenchange', ()=>{ fsBtn.textContent = document.fullscreenElement ? '🡼' : '⛶'; }); } else fsBtn.style.display='none';
+$('#btn-home').addEventListener('click', ()=>{ persist(); showTitle(); });
+el.mode.addEventListener('click', ()=>{ Sound.pop(); setMode(S.mode==='read' ? 'self' : 'read'); if(S.screen!=='book') setPlayBtn(); });
+el.prev.addEventListener('click', prev); el.next.addEventListener('click', next); el.play.addEventListener('click', togglePlay);
+function readTapped(box){ // tapping any text re-reads it (even with read-aloud off)
+  if(S.screen!=='book' || !box.dataset.text) return;
+  const myRun = ++run; const was = Voice.enabled; Voice.enabled = true; Sound.ensure();
+  say(box.dataset.lid || 'T0', box.dataset.text, [...box.querySelectorAll('.w')]).then(r=>{ Voice.enabled = was; if(run!==myRun || !r.done) return; if(box===el.text && S.mode==='read' && S.playing){ if(S.challenge && !S.challenge.done) say(S.challenge.promptId, S.challenge.prompt, [...el.extra.querySelectorAll('.w')]); else if(S.id[0]!=='c') wait(1500).then(()=>{ if(run===myRun && S.playing) next(); }); } });
+}
+el.text.addEventListener('click', ()=>readTapped(el.text));
+el.text.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); readTapped(el.text); } });
+el.extra.addEventListener('click', e=>{ const box = e.target.closest('.txt'); if(box) readTapped(box); });
+document.addEventListener('keydown', e=>{ if(S.screen!=='book' || el.overlay.classList.contains('on')) return; if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); if(e.key===' '){ e.preventDefault(); togglePlay(); } });
+// I read mode: tapping the picture turns the page
+el.scene.addEventListener('click', e=>{ if(S.screen!=='book' || S.mode!=='self' || S.challenge || e.target.closest('button')) return; next(); });
+
+/* ---------- boot + debug hooks ---------- */
+showTitle();
+window.__game = {
+  get state(){ return {screen:S.screen, mode:S.mode, id:S.id, index:S.index, page:bookPageOf(S.id), seq:S.seq.slice(), choices:S.choices.slice(), playing:S.playing, look:S.look, challenge:S.challenge ? {kind:S.challenge.kind, wrong:S.challenge.wrong, done:S.challenge.done, counted:S.challenge.counted||0, placed:S.challenge.placed||0, sel:S.challenge.sel||null} : null, overlay:el.overlay.classList.contains('on'), bookmark:Save.load()}; },
+  start, startLevel(n){ start('read'); if(n>1) goTo(n); }, goTo, choose, answer, tapPart, next, prev, togglePlay,
+  mode(m){ setMode(m); }, speech(on){ Voice.enabled = !!on; saved.voice = !!on; applySettings(); }, sound(on){ Sound.enabled = !!on; saved.sound = !!on; applySettings(); },
+  title: showTitle, end: showEnd, goodbye: showGoodbye, say, clean: Voice.clean, VOICE_CLIPS
+};
+})();
+</script>
+
+</body>
+</html>
