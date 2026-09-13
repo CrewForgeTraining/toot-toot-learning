@@ -175,7 +175,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
 </style>
 <style>
 /* ======================================================================
-   Toot Toot Diner — built to docs/design-basis.md (Parts 1–1j).
+   Toot Toot Diner — built to docs/design-basis.md (Parts 1–1j, and the beat rules 6, 6b and 6c of Part 3).
    The engine (toot.css) owns the chrome; this file owns the room and the panel.
    ====================================================================== */
 :root{--heat-cool:#5CC8FF;--heat-warm:#FFB703;--heat-hot:#FF3B3B;--wood-mid:#C98A4B;--red:#E8503A;--red-dark:#C63D2A}
@@ -213,7 +213,7 @@ body{overscroll-behavior:none}
 @media (max-width:600px){#topbar{gap:4px}.toot-app .iconbtn{width:40px;height:40px;font-size:1.05rem;border-radius:12px}.logo{gap:4px}.logo .sign{font-size:.8rem;padding:2px 7px;letter-spacing:0}}
 
 /* ---------- the room (three layers: back wall, the floor with the furniture, a table corner in front) ---------- */
-#scene .room{position:absolute;inset:0;overflow:hidden}
+#scene .room{position:absolute;inset:0;overflow:hidden;--tw:min(46cqh,44cqw);--tl:clamp(3%,15%,50.5% - var(--tw))}   /* the table: as near the middle as the counter allows */
 #scene svg.fx{width:100%;height:auto;display:block;overflow:visible}
 .wall{position:absolute;left:0;right:0;top:0;height:44%;background:repeating-linear-gradient(90deg,#FFE7B8 0 5cqh,#FFEFCB 5cqh 10cqh)}
 .wall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5cqh;background:var(--wood-mid);box-shadow:inset 0 .9cqh 0 #E0A96D,inset 0 -.7cqh 0 #8E5B2E}
@@ -286,10 +286,11 @@ body{overscroll-behavior:none}
 .counter .napkins::after{content:"";position:absolute;left:15%;right:15%;top:-1.4cqh;height:1.8cqh;background:#fff;border:.4cqh solid #3B2A1F;border-radius:.3cqh;transform:rotate(-6deg)}
 .dplate{position:absolute;left:0;bottom:0;width:100%;line-height:0}
 /* furniture on the floor */
-.plant{position:absolute;left:calc(36cqh + 1cqh);bottom:46%;width:15cqh;z-index:1;display:none}
-.booth{position:absolute;left:0;bottom:36%;width:36cqh;z-index:2}
-.chairback{position:absolute;left:calc(5% + 24cqh - 9cqh);bottom:calc(12% + 26cqh);width:18cqh;z-index:3}
-.customer{position:absolute;left:calc(5% + 24cqh - 12cqh);bottom:calc(12% + 22cqh);width:24cqh;z-index:4;line-height:0}
+.plant{position:absolute;left:calc(var(--tl) - 5% + 37cqh);bottom:46%;width:15cqh;z-index:1;display:none}
+.booth{position:absolute;left:calc(var(--tl) - 5%);bottom:36%;width:36cqh;z-index:2}
+.chairback{position:absolute;left:calc(var(--tl) + var(--tw) / 2 - 9cqh);bottom:calc(12% + 26cqh);width:18cqh;z-index:3;transform-origin:90% 100%}
+.customer{position:absolute;left:calc(var(--tl) + var(--tw) / 2 - 12cqh);bottom:calc(12% + 22cqh);width:24cqh;z-index:4;line-height:0}
+.customer.up{z-index:7}                            /* standing beside the table, in front of the chair */
 .customer .who{position:relative;display:block;width:100%;line-height:0}
 .customer .who .toot-char{width:100%}
 .customer .who .em{display:block;font-size:19cqh;line-height:1;text-align:center}
@@ -297,9 +298,11 @@ body{overscroll-behavior:none}
 .customer .friends .toot-char{position:absolute;bottom:2%;width:62%}
 .customer .friends .f0{left:-64%}.customer .friends .f1{right:-64%}.customer .friends .f2{left:-118%;width:54%;bottom:6%}
 .customer .bubble{z-index:8}
-.table{position:absolute;left:5%;bottom:12%;width:48cqh;z-index:5;line-height:0}
+.table{position:absolute;left:var(--tl);bottom:12%;width:var(--tw);z-index:5;line-height:0;transform-origin:96% 100%}
 .table.hot svg{filter:drop-shadow(0 0 1.4cqh rgba(47,191,166,.95))}
-.chair{position:absolute;left:.5%;bottom:9%;width:15cqh;z-index:6}
+.chair{position:absolute;left:calc(var(--tl) - 4.5%);bottom:9%;width:15cqh;z-index:6;transform-origin:90% 100%}
+/* the shock wave of the supersonic toot: a ring that races off to the right */
+.shock{position:absolute;width:12cqh;height:12cqh;border-radius:50%;border:1.5cqh solid rgba(255,255,255,.95);box-shadow:0 0 2.5cqh rgba(255,200,61,.85),inset 0 0 2.5cqh rgba(255,200,61,.6);z-index:30;pointer-events:none;display:none;transform-origin:50% 50%}
 .tstack{position:absolute;width:10cqh;height:2cqh;z-index:6;pointer-events:none}
 .dock{position:absolute;left:72%;bottom:7%;width:22cqh;z-index:6;line-height:0}
 .robo{position:absolute;left:73.5%;bottom:9%;width:19cqh;z-index:7;--heat:0;line-height:0}
@@ -382,6 +385,7 @@ body{overscroll-behavior:none}
 .choice.glow{background:#E4FBF5;box-shadow:0 5px 0 var(--mint-dark),0 0 0 4px var(--mint)}
 .choice.dim{opacity:.35}
 #panel.busy .choice,#panel.busy .mitem{pointer-events:none}
+#panel.asking .choice,#panel.asking .mitem{opacity:.3;transition:opacity .25s}   /* the answers wait until the question has been asked */
 .paybox{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:6px 10px;box-shadow:0 3px 0 rgba(59,42,31,.12);min-height:64px;font-family:var(--display);font-weight:700;font-size:1.15rem}
 .paybox .note{width:66px;flex:none;line-height:0}
 .paybox .owed{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1.05}
@@ -1685,6 +1689,10 @@ window.Toot = Toot;
 const { $, $$, rnd, pick, shuffle, clamp, wait, waitReal, anim, settle, esc, html, reduced } = Toot.util;
 const S = Toot.sound, V = Toot.voice, U = Toot.ui, FX = Toot.fx, C = Toot.cast, PH = Toot.physics;
 const now = () => performance.now();
+/* the beats (ms): nothing advances while a line is spoken; after each awaited line a short breath, then the next thing.
+   speech after any line · bell after the door ding · orderUp after "Order up!" · eat after the eating · thanks after the thank-you ·
+   blast is the supersonic toot and the furniture going over · still the silence after it · quiet the empty diner before the next ding */
+const BEATS = { speech: 450, bell: 600, orderUp: 500, eat: 400, thanks: 500, blast: 2000, still: 600, quiet: 1200 };
 
 /* ---------- personalization (optional: window.TOOT_CONFIG = {childName, avatar, foods:[{name,em}], from}) ----------
    avatar may be a cast name ('fox') or an emoji ('🦄') */
@@ -1741,11 +1749,12 @@ const textOf = segs => (Array.isArray(segs) ? segs : [segs]).map(s => typeof s =
 const idsOf = segs => (Array.isArray(segs) ? segs : [segs]).flatMap(s => typeof s === 'string' ? [] : (s.ids || (s.id ? [s.id] : [])));
 const log = [];
 const note = (type, o) => { log.push(Object.assign({ type, at: Math.round(now()) }, o || {})); if (log.length > 4000) log.splice(0, 1000); };
-let sayToken = 0;
-/* say(segs, {by: castElement}) — plays clip segments as clips, merges the rest into as few browser-voice utterances as possible.
-   The music ducks the moment it starts. A newer say() cancels an older one. */
-async function say(segs, o = {}) {
-  const my = ++sayToken;
+/* ---------- the voice queue: one line at a time, every line awaited to the end, a tap on anything but a bubble skips the current line ----------
+   say(segs, {by: castElement}) plays clip segments as clips and merges the rest into as few browser-voice utterances as possible.
+   It resolves when the line has finished (or was skipped). Lines never overlap: a new say() waits its turn. The music ducks while anything speaks. */
+const VQ = { pending: [], cur: null, seq: 0 };
+function stopTalk(ch) { if (ch && ch._talk) { clearInterval(ch._talk); ch._talk = null; C.mood(ch, ch.dataset.mood || 'neutral'); } }
+function say(segs, o = {}) {
   const list = (Array.isArray(segs) ? segs : [segs]).map(s => typeof s === 'string' ? { t: s } : s).filter(s => s && s.t);
   const merged = [];
   for (const s of list) {
@@ -1753,21 +1762,49 @@ async function say(segs, o = {}) {
     const last = merged[merged.length - 1];
     if (!clip && last && !last.clip) last.t += ' ' + s.t; else merged.push({ t: s.t, ids: clip ? ids : null, clip });
   }
-  const text = textOf(list);
-  note('voice', { text, ids: idsOf(list), by: o.by && o.by.dataset ? o.by.dataset.name : (o.who || '') });
-  if (o.by && o.by.classList && o.by.classList.contains('toot-char') && V.enabled) C.talk(o.by, Math.min(4000, 350 + text.length * 55));
-  AMB.duck(true);
-  try {
-    for (const s of merged) { if (my !== sayToken) return false; await V.say(s.t, Object.assign({}, s.ids ? { ids: s.ids } : {})); }
-  } finally { if (my === sayToken) setTimeout(() => { if (my === sayToken) AMB.duck(false); }, 350); }
-  return my === sayToken;
+  const job = { id: ++VQ.seq, segs: merged, text: textOf(list), ids: idsOf(list), by: o.by || null, who: o.by && o.by.dataset ? o.by.dataset.name : (o.who || ''), replay: !!o.replay, skipped: false, cancelled: false };
+  job.done = new Promise(r => { job.res = r; });
+  VQ.pending.push(job); pump();
+  return job.done;
 }
-/* a speech bubble on a host that speaks its line; tapping the bubble re-reads it */
+async function pump() {
+  if (VQ.cur) return;
+  while (VQ.pending.length) {
+    const job = VQ.pending.shift(); if (job.cancelled) continue;
+    VQ.cur = job; job.startedAt = now();
+    note('voice', { text: job.text, ids: job.ids, by: job.who, replay: job.replay });
+    const ch = job.by && job.by.classList && job.by.classList.contains('toot-char') && V.enabled ? job.by : null;
+    if (ch) C.talk(ch, Math.min(6000, 350 + job.text.length * 55));
+    AMB.duck(true);
+    const skipP = new Promise(r => { job.skip = r; });
+    try { for (const seg of job.segs) { if (job.skipped) break; await Promise.race([V.say(seg.t, seg.ids ? { ids: seg.ids } : {}), skipP]); } }
+    catch (e) { /* the browser voice can throw; the beat goes on */ }
+    stopTalk(ch); VQ.cur = null;
+    note('voice-end', { text: job.text, skipped: job.skipped, ms: Math.round(now() - job.startedAt) });
+    job.res(!job.skipped);
+  }
+  setTimeout(() => { if (!VQ.cur && !VQ.pending.length) AMB.duck(false); }, 350);
+}
+/* skipLine(): the line being spoken ends now (audio stopped, promise resolved); whatever was waiting on it carries on */
+function skipLine() { const j = VQ.cur; if (!j) return false; j.skipped = true; note('voice-skip', { text: j.text }); V.stop(); j.skip(); return true; }
+/* voiceStop(): the queue is emptied and the current line ends (a run is over, or the opening was skipped) */
+function voiceStop() { VQ.pending.forEach(j => { j.cancelled = true; j.res(false); }); VQ.pending.length = 0; skipLine(); V.stop(); }
+const speaking = () => !!VQ.cur;
+/* a speech bubble on a host; tapping the bubble re-plays its line through the queue. Returns the promise of the spoken line. */
 function bubble(host, content, segs, o = {}) {
-  if (content == null) { U.bubble(host, null); return null; }
+  if (content == null) { U.bubble(host, null); return Promise.resolve(false); }
   const b = U.bubble(host, content, segs ? textOf(segs) : null, { speak: false, ids: segs ? idsOf(segs) : null });
-  b.classList.toggle('left', !!o.left);
-  if (segs && !o.silent) say(segs, { by: o.by });
+  b.classList.toggle('left', !!o.left); b._by = o.by || null; b._segs = segs || null;
+  return (segs && !o.silent) ? say(segs, { by: o.by }) : Promise.resolve(true);
+}
+/* the bubbles are made here rather than by the engine, so a tap re-plays the line in turn instead of over the top of another one */
+function ownBubble(host) {
+  const b = html('<div class="bubble" role="button" tabindex="0"></div>'); host.appendChild(b);
+  b.addEventListener('pointerdown', e => {
+    e.stopPropagation(); idleAt = now(); if (!b._speak) return;
+    note('replay', { text: b._speak }); skipLine();
+    say(b._segs && textOf(b._segs) === b._speak ? b._segs : [{ t: b._speak, ids: b._ids || null }], { by: b._by, replay: true });
+  });
   return b;
 }
 
@@ -1855,6 +1892,7 @@ const refs = U.mount({
     <div class="bolt" id="bolt">${SVG.bolt}</div><div class="wheel" id="wheel">${SVG.wheel}</div>
     <div class="plate" id="plate">${SVG.plate}<span class="food" id="food"></span><span class="ring"></span></div>
     <div class="cash" id="cash"></div>
+    <div class="shock" id="shock"></div>
     <div class="fore">${SVG.fore}</div>
     <div class="lights" id="lights"></div>
   </div>`,
@@ -1877,11 +1915,14 @@ refs.topbar.insertAdjacentElement('afterend', heatRow);
 $('#heat-face').appendChild(C.make('robo', { size: 28, autoBlink: false }));
 const el = {
   scene: refs.scene, panel: refs.panel, room: $('#room'), lights: $('#lights'), hatch: $('#hatch'), chefspot: $('#chefspot'), osign: $('#osign'), pass: $('#pass'), counter: $('#counter'), cstack: $('#cstack'),
-  customer: $('#customer'), custBody: $('#cust-body'), friends: $('#friends'), table: $('#table'), crumbs: $('#crumbs'), tstack: $('#tstack'), tcoins: $('#tcoins'),
-  robo: $('#robo'), dock: $('.dock'), bot: $('#bot'), broom: $('#broom'), bolt: $('#bolt'), wheel: $('#wheel'), plate: $('#plate'), food: $('#food'), cash: $('#cash'), heatfill: $('#heatfill'), joke: $('#joke'),
+  customer: $('#customer'), custBody: $('#cust-body'), friends: $('#friends'), table: $('#table'), chair: $('.chair'), chairback: $('.chairback'), crumbs: $('#crumbs'), tstack: $('#tstack'), tcoins: $('#tcoins'),
+  robo: $('#robo'), dock: $('.dock'), bot: $('#bot'), broom: $('#broom'), bolt: $('#bolt'), wheel: $('#wheel'), plate: $('#plate'), food: $('#food'), cash: $('#cash'), shock: $('#shock'), heatfill: $('#heatfill'), joke: $('#joke'),
   slots: $('#slots'), slots2: $('#slots2'), slots3: $('#slots3'), menu: $('#menu'), bill: $('#bill'), chTotal: $('#ch-total'), paybox: $('#paybox'), chChange: $('#ch-change'), sharebox: $('#sharebox'), chShare: $('#ch-share'), restText: $('#rest-text'), endLine: $('#end-line')
 };
 $('#carry-face').appendChild(C.make('chef', { size: 40 }));
+[el.customer, el.robo, el.hatch].forEach(ownBubble);
+/* a tap anywhere but a bubble or the top bar ends the line being spoken; the sequence carries on from there */
+document.addEventListener('pointerdown', e => { const t = e.target; if (t && t.closest && (t.closest('.bubble') || t.closest('#topbar'))) return; skipLine(); }, { capture: true, passive: true });
 
 /* ---------- the cast on stage ---------- */
 const chefChar = C.make('chef'); el.chefspot.appendChild(chefChar);
@@ -1969,9 +2010,83 @@ const AMB = (() => {
   return {
     st, start() { build(); st.running = true; st.fade = 1; }, stop() { st.running = false; },
     duck(v) { st.duck = !!v; }, quiet(v) { st.quiet = !!v; }, level(n) { st.level = n; }, boom(v) { st.boom = !!v; }, fade(v) { st.fade = v; },
-    setMusic(n) { st.music = n; }, get built() { return built; }
+    setMusic(n) { st.music = n; }, get built() { return built; }, get nodes() { return node; }, get ctx() { return ctx; }
   };
 })();
+/* ---------- the toots: their own output, above the voice and the music. A gain of 1.6× the effects (which go straight to the
+   speaker at 1×), never ducked, through a limiter so the big one cannot clip. The eight pool toots are the engine's own recipes
+   (engine/toot.js) played through this bus; supersonicFart is the set piece. Every recipe takes (ctx, dest, t) so it can also be
+   rendered offline to measure. ---------- */
+const FART = (() => {
+  const GAIN = 1.6, CEIL = 0.82;
+  let ctx = null, bus = null;
+  function chain(c) {
+    const g = c.createGain(); g.gain.value = GAIN;
+    const lim = c.createDynamicsCompressor(); lim.threshold.value = -4; lim.knee.value = 1; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.12;
+    const trim = c.createGain(); trim.gain.value = CEIL;
+    g.connect(lim).connect(trim).connect(c.destination); return g;
+  }
+  function out() { const c = S.ensure(); if (!c || !S.enabled) return null; if (ctx !== c) { ctx = c; bus = chain(c); } return { c, dest: bus }; }
+  const osc = (c, type, f, t) => { const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); S.stats.oscillators++; return o; };
+  /* env: the engine's shape (a quick rise, an exponential fall over dur); hold keeps the level up for that fraction of dur before it falls */
+  const env = (c, t, dur, gain, attack, hold = 0) => { const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + (attack || 0.01)); if (hold) g.gain.setValueAtTime(gain, t + dur * hold); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); return g; };
+  function rasp(c, d, t, o = {}) {
+    const { dur = 0.35, base = 80, endMul = 0.55, wobble = 24, depth = 30, gain = 0.4, filter = 360, q = 7, type = 'sawtooth', delay = 0, attack = 0.03, glide = null, hold = 0 } = o; t += delay;
+    const x = osc(c, type, base, t);
+    if (glide) { x.frequency.exponentialRampToValueAtTime(glide, t + dur * 0.4); x.frequency.exponentialRampToValueAtTime(base * endMul, t + dur); } else x.frequency.exponentialRampToValueAtTime(base * endMul, t + dur);
+    const l = osc(c, 'sine', wobble, t), lg = c.createGain(); lg.gain.value = depth; l.connect(lg).connect(x.frequency);
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = filter; f.Q.value = q;
+    x.connect(f).connect(env(c, t, dur, gain, attack, hold)).connect(d); x.start(t); l.start(t); x.stop(t + dur + 0.05); l.stop(t + dur + 0.05);
+  }
+  function nz(c, d, t, dur, o = {}) {
+    const { gain = 0.3, from = 3000, to = 200, delay = 0, type = 'lowpass', q = 1, trem = 0, tremRate = 5, hold = 0 } = o; t += delay;
+    const len = Math.max(1, Math.floor(c.sampleRate * dur)), buf = c.createBuffer(1, len, c.sampleRate), dd = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) dd[i] = Math.random() * 2 - 1;
+    const src = c.createBufferSource(); src.buffer = buf; S.stats.noises++;
+    const f = c.createBiquadFilter(); f.type = type; f.Q.value = q; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(gain, t); if (hold) g.gain.setValueAtTime(gain, t + dur * hold); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    if (trem) { const tg = c.createGain(); tg.gain.value = 1 - trem; const l = osc(c, 'sine', tremRate, t), lg = c.createGain(); lg.gain.value = trem; l.connect(lg).connect(tg.gain); l.start(t); l.stop(t + dur + 0.05); src.connect(f).connect(g).connect(tg).connect(d); }
+    else src.connect(f).connect(g).connect(d);
+    src.start(t);
+  }
+  function tn(c, d, t, freq, dur, o = {}) {
+    const { type = 'sine', gain = 0.2, slide = null, delay = 0, attack = 0.01, hold = 0 } = o; t += delay;
+    const x = osc(c, type, freq, t); if (slide) x.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t + dur);
+    x.connect(env(c, t, dur, gain, attack, hold)).connect(d); x.start(t); x.stop(t + dur + 0.05);
+  }
+  const SYNTH = {
+    fartSqueak: (c, d, t) => rasp(c, d, t, { dur: 0.2, base: 260, endMul: 1.6, wobble: 45, depth: 40, gain: 0.25, filter: 1200, q: 5 }),
+    fartLong: (c, d, t) => rasp(c, d, t, { dur: 1.4, base: 72, endMul: 0.5, wobble: 19, depth: 28, gain: 0.42 }),
+    fartWet: (c, d, t) => { rasp(c, d, t, { dur: 0.5, base: 62, endMul: 0.6, wobble: 31, depth: 50, gain: 0.4, filter: 420, q: 9 }); nz(c, d, t, 0.45, { gain: 0.18, from: 900, to: 150, type: 'bandpass', q: 2 }); },
+    fartMachineGun: (c, d, t) => { for (let i = 0; i < 7; i++) rasp(c, d, t, { dur: 0.07, base: 95 + (i % 2) * 15, endMul: 0.8, wobble: 60, depth: 20, gain: 0.35, delay: i * 0.095, attack: 0.005 }); },
+    fartFoghorn: (c, d, t) => { rasp(c, d, t, { dur: 1.3, base: 46, endMul: 0.85, wobble: 6, depth: 6, gain: 0.5, filter: 240, q: 4, type: 'square', attack: 0.08 }); rasp(c, d, t, { dur: 1.2, base: 69, endMul: 0.85, wobble: 7, depth: 8, gain: 0.2, filter: 300, q: 3, attack: 0.1 }); },
+    fartTiny: (c, d, t) => rasp(c, d, t, { dur: 0.09, base: 170, endMul: 0.7, wobble: 50, depth: 30, gain: 0.16, filter: 700 }),
+    fartDouble: (c, d, t) => { rasp(c, d, t, { dur: 0.18, base: 85, endMul: 0.7, gain: 0.35 }); rasp(c, d, t, { dur: 0.4, base: 66, endMul: 0.5, gain: 0.42, delay: 0.3 }); },
+    fartTrumpet: (c, d, t) => rasp(c, d, t, { dur: 0.75, base: 110, glide: 210, endMul: 0.6, wobble: 12, depth: 14, gain: 0.35, filter: 800, q: 4 }),
+    /* the supersonic one, about two seconds (dur 2.1 with the level held for most of it): a crack like a small sonic boom, a sub-bass ramp from 45 down to 30 Hz, and a long raspy body with a slow wobble */
+    supersonicFart: (c, d, t) => {
+      nz(c, d, t, 0.09, { gain: 1.0, from: 9000, to: 300, type: 'lowpass' }); tn(c, d, t, 140, 0.16, { gain: 0.9, slide: 38, attack: 0.003 }); tn(c, d, t, 1800, 0.04, { type: 'square', gain: 0.3, slide: 300, attack: 0.002 });
+      tn(c, d, t, 45, 2.1, { gain: 0.95, slide: 30, attack: 0.04, hold: 0.72 }); tn(c, d, t, 90, 2.0, { type: 'triangle', gain: 0.4, slide: 60, attack: 0.05, hold: 0.7 });
+      rasp(c, d, t, { dur: 2.0, base: 64, endMul: 0.5, wobble: 5.5, depth: 24, gain: 0.8, filter: 520, q: 9, delay: 0.05, attack: 0.04, hold: 0.72 });
+      rasp(c, d, t, { dur: 1.8, base: 118, endMul: 0.55, wobble: 33, depth: 36, gain: 0.32, filter: 950, q: 5, delay: 0.09, hold: 0.6 });
+      nz(c, d, t, 1.95, { gain: 0.4, from: 720, to: 130, type: 'bandpass', q: 3, delay: 0.06, trem: 0.55, tremRate: 4.5, hold: 0.7 });
+    }
+  };
+  /* play(name): live, through the bus */
+  function play(name) { const o = out(); if (!o || !SYNTH[name]) return false; SYNTH[name](o.c, o.dest, o.c.currentTime); return true; }
+  /* render(name, {raw}) → {peak, rms, seconds}: the recipe rendered offline through the bus (or raw: straight out at 1×, the old level) */
+  async function render(name, o = {}) {
+    const sr = 44100, secs = 2.6, c = new OfflineAudioContext(1, sr * secs, sr);
+    let d; if (o.raw) { d = c.createGain(); d.gain.value = 1; d.connect(c.destination); } else d = chain(c);
+    if (name === 'boom') { nz(c, d, 0.02, 1.5, { gain: 0.6, from: 4000, to: 60 }); tn(c, d, 0.02, 70, 1, { gain: 0.5, slide: 30 }); } else SYNTH[name](c, d, 0.02);
+    const b = await c.startRendering(), x = b.getChannelData(0); let peak = 0, sum = 0, last = 0;
+    for (let i = 0; i < x.length; i++) { const v = Math.abs(x[i]); if (v > peak) peak = v; sum += v * v; if (v > 0.02) last = i; }
+    return { peak, rms: Math.sqrt(sum / x.length), seconds: last / sr };
+  }
+  return { play, render, names: Object.keys(SYNTH), GAIN, get gain() { return bus ? bus.gain.value : GAIN; }, get bus() { return bus; }, effectsGain: 1 };
+})();
+/* toot(): one from the engine's pool of eight, never the same twice running, played loud */
+function toot(name) { const free = S.pools.fart.filter(n => n !== lastToot); name = name || pick(free); lastToot = name; FART.play(name); return name; }
 const musicBtn = $('#btn-music'); refs.topbar.insertBefore(musicBtn, $('#btn-sound'));
 function applyMusic() { const lv = U.progress.data.music == null ? 2 : U.progress.data.music; AMB.setMusic(lv); musicBtn.dataset.level = lv; musicBtn.classList.toggle('off', lv === 0); musicBtn.setAttribute('aria-label', lv === 2 ? 'Music: on. Tap for quieter' : lv === 1 ? 'Music: quiet. Tap for off' : 'Music: off. Tap for on'); }
 musicBtn.addEventListener('click', () => { const lv = U.progress.data.music == null ? 2 : U.progress.data.music; U.progress.data.music = lv === 2 ? 1 : lv === 1 ? 0 : 2; U.progress.save(); applyMusic(); S.ensure(); AMB.start(); if (U.progress.data.music) S.pop(); });
@@ -1981,12 +2096,15 @@ applyMusic();
 class Abort extends Error {}
 let RUN = 0, G = null, sitting = 0, idleAt = now(), lastToot = '';
 const guard = my => p => Promise.resolve(p).then(v => { if (my !== RUN) throw new Abort(); return v; });
-function abortRun() { RUN++; if (G) { G.aborted = true; } G = null; V.stop(); AMB.stop(); el.scene.classList.remove('quiet'); el.panel.classList.add('busy'); U.bubble(el.customer, null); U.bubble(el.robo, null); U.bubble(el.hatch, null); }
+function abortRun() { RUN++; if (G) { G.aborted = true; } G = null; voiceStop(); AMB.stop(); settleFurniture(); el.scene.classList.remove('quiet'); el.panel.classList.add('busy'); U.bubble(el.customer, null); U.bubble(el.robo, null); U.bubble(el.hatch, null); }
 
 /* ---------- geometry ---------- */
 const sceneRect = () => el.scene.getBoundingClientRect();
 function relRect(e) { const s = sceneRect(), r = e.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height, cx: r.left - s.left + r.width / 2, cy: r.top - s.top + r.height / 2, sw: s.width, sh: s.height }; }
-function tableSpot(fx, fy) { const t = relRect(el.table); return { x: t.x + t.w * fx, y: t.y + t.h * fy }; }
+/* layoutRect: where the element sits on the floor, ignoring any pose it is holding (a toppled table is still a table) */
+function layoutRect(e) { const sw = el.room.clientWidth, sh = el.room.clientHeight; return { x: e.offsetLeft, y: e.offsetTop, w: e.offsetWidth, h: e.offsetHeight, cx: e.offsetLeft + e.offsetWidth / 2, cy: e.offsetTop + e.offsetHeight / 2, sw, sh }; }
+function tableSpot(fx, fy) { const t = layoutRect(el.table); return { x: t.x + t.w * fx, y: t.y + t.h * fy }; }
+function settleFurniture() { [el.table, el.chair, el.chairback, el.tstack, el.shock].forEach(settle); el.shock.style.display = 'none'; el.customer.classList.remove('up'); if (G) { G.fallen = null; G.platesFloor = null; } }
 function placeAt(e, x, y) { const r = e.getBoundingClientRect(); e.style.left = Math.round(x - r.width / 2) + 'px'; e.style.top = Math.round(y - r.height / 2) + 'px'; e.style.bottom = 'auto'; }
 async function flyTo(e, x, y, ms = 400, easing = 'cubic-bezier(.3,1.25,.5,1)') {
   const r = relRect(e);
@@ -2007,7 +2125,7 @@ function addCrumbs(n, spread = 0.72) {
     el.crumbs.appendChild(html(`<i class="crumb ${pick(['', 'b', 'c', ''])}" style="left:${(x / sw * 100).toFixed(1)}%;top:${(y / sh * 100).toFixed(1)}%;transform:rotate(${rnd(0, 360)}deg)"></i>`));
   }
 }
-function crumbsNear(radiusFrac) { const t = relRect(el.table), cx = t.cx, cy = t.y + t.h * 0.95, R = t.sw * radiusFrac; return $$('.crumb', el.crumbs).filter(c => { const r = relRect(c); return Math.hypot(r.cx - cx, (r.cy - cy) * 1.6) < R; }); }
+function crumbsNear(radiusFrac) { const t = layoutRect(el.table), cx = t.cx, cy = t.y + t.h * 0.95, R = t.sw * radiusFrac; return $$('.crumb', el.crumbs).filter(c => { const r = relRect(c); return Math.hypot(r.cx - cx, (r.cy - cy) * 1.6) < R; }); }
 function renderStack(container, n) { container.innerHTML = ''; for (let i = 0; i < n; i++) container.appendChild(html(`<span class="dplate" style="bottom:${(i * 1.15).toFixed(2)}cqh;transform:rotate(${(i % 2 ? 1 : -1) * Math.min(i * 2, 8)}deg)">${SVG.dplate}</span>`)); }
 function clearMess() { el.crumbs.innerHTML = ''; G && (G.tplates = 0, G.cplates = 0); renderStack(el.tstack, 0); renderStack(el.cstack, 0); el.tcoins.innerHTML = ''; el.cash.classList.remove('on'); el.bolt.style.display = 'none'; }
 function placeStack() { const p = tableSpot(0.76, 0.22); placeAt(el.tstack, p.x, p.y); }
@@ -2082,23 +2200,84 @@ function walkFrames(style, fromX) {
 async function arrive(cust) {
   const my = RUN, A = guard(my);
   setCustomer(cust); S.ding(); note('ding', { who: cust.who.cast || 'kid' });
+  await A(wait(BEATS.bell));
   const r = relRect(el.customer);
   await A(anim(el.customer, walkFrames(cust.who.persona.walk, -(r.x + r.w + 24)), { duration: 1100, easing: 'ease-out' }));
   if (cust.el) C.look(cust.el, 0, 0.35);
 }
+/* ---------- 11: the set piece, every customer. Ka-ching, up they get, thank you; then the supersonic toot: the room shakes, a shock wave
+   races off to the right, the table and both chairs go over, the plates hit the floor, and the customer is blown out of the door. ---------- */
+function shockWave(x, y) {
+  const s = el.shock, sw = el.room.clientWidth; s.style.display = 'block'; placeAt(s, x, y);
+  return anim(s, [{ transform: 'translate(0,0) scale(.15)', opacity: 1 }, { transform: `translate(${(sw * 0.28).toFixed(0)}px,0) scale(6)`, opacity: .55, offset: .45 }, { transform: `translate(${(sw * 0.55).toFixed(0)}px,0) scale(11)`, opacity: 0 }], { duration: 900, easing: 'cubic-bezier(.1,.6,.3,1)' }).then(() => { s.style.display = 'none'; });
+}
+const pose = (deg, dx, dy = 0) => `translate(${dx.toFixed(0)}px,${dy.toFixed(0)}px) rotate(${deg.toFixed(1)}deg)`;
+/* topple(e, f, ms, delay): over it goes to the right and holds the pose. A chair falls on its side (f.deg about 90°, pivoting on its
+   back foot); the table (f.flip) cartwheels over and lands upside down beside where it stood, legs in the air. */
+function topple(e, f, ms, delay) {
+  const kf = f.flip
+    ? [{ transform: pose(0, 0), easing: 'cubic-bezier(.4,0,.9,.5)' }, { transform: pose(100, f.dx * .5, f.dy * .45), offset: .48, easing: 'ease-in' }, { transform: pose(180, f.dx, f.dy), offset: .74, easing: 'ease-out' }, { transform: pose(181, f.dx, f.dy * 1.08), offset: .86, easing: 'ease-in' }, { transform: pose(180, f.dx, f.dy) }]
+    : [{ transform: pose(0, 0), easing: 'cubic-bezier(.5,0,1,.6)' }, { transform: pose(f.deg * 1.06, f.dx), offset: .5, easing: 'ease-out' }, { transform: pose(f.deg * .93, f.dx), offset: .68, easing: 'ease-in' }, { transform: pose(f.deg * 1.02, f.dx), offset: .84, easing: 'ease-out' }, { transform: pose(f.deg, f.dx) }];
+  return anim(e, kf, { duration: ms, delay: delay || 0, fill: 'forwards' });
+}
+/* standBack(e, f, ms): from the fallen pose to upright with a small settle wobble; then the pose is cleared so nothing is left on the element */
+async function standBack(e, f, ms) {
+  const kf = f.flip
+    ? [{ transform: pose(180, f.dx, f.dy), easing: 'ease-in' }, { transform: pose(100, f.dx * .5, f.dy * .45), offset: .4, easing: 'ease-out' }, { transform: pose(-4, 0), offset: .7 }, { transform: pose(2.5, 0), offset: .84 }, { transform: pose(-1, 0), offset: .93 }, { transform: pose(0, 0) }]
+    : [{ transform: pose(f.deg, f.dx), easing: 'cubic-bezier(.3,0,.2,1)' }, { transform: pose(-4, 0), offset: .62 }, { transform: pose(2.5, 0), offset: .8 }, { transform: pose(-1, 0), offset: .92 }, { transform: pose(0, 0) }];
+  await anim(e, kf, { duration: ms, fill: 'forwards' });
+  settle(e);
+}
+function clunk(low, delay = 0) { S.noise(0.08, { gain: 0.35, from: 1800, to: 200, delay }); S.tone(low || 110, 0.14, { type: 'square', gain: 0.18, slide: 55, delay }); }
+function clatter(delay = 0) { [2600, 2100, 3000, 2400, 1900].forEach((f, i) => S.tone(f, 0.08, { type: 'triangle', gain: 0.12, delay: delay + i * 0.06 })); S.noise(0.35, { gain: 0.25, from: 4000, to: 800, delay }); }
+function platesFly() {
+  if (!G.tplates) return Promise.resolve();
+  const p = relRect(el.tstack), sw = p.sw, sh = p.sh, dx = Math.min(sw * 0.22, sw * 0.95 - p.cx - p.w), dy = sh * 0.9 - p.cy;
+  G.platesFloor = { x: p.cx + dx * 1.1, y: p.cy + dy };
+  clatter(0.5);
+  return anim(el.tstack, [{ transform: 'translate(0,0) rotate(0)', easing: 'ease-out' }, { transform: `translate(${(dx * .55).toFixed(0)}px,${(-sh * .12).toFixed(0)}px) rotate(160deg)`, offset: .4, easing: 'ease-in' }, { transform: `translate(${dx.toFixed(0)}px,${dy.toFixed(0)}px) rotate(350deg)`, offset: .7, easing: 'ease-out' }, { transform: `translate(${(dx * 1.06).toFixed(0)}px,${(dy - sh * .04).toFixed(0)}px) rotate(365deg)`, offset: .84, easing: 'ease-in' }, { transform: `translate(${(dx * 1.1).toFixed(0)}px,${dy.toFixed(0)}px) rotate(372deg)` }], { duration: 850, fill: 'forwards' });
+}
 async function leave(cust) {
-  const my = RUN, A = guard(my), ch = cust.el;
+  const my = RUN, A = guard(my), ch = cust.el, chars = [ch, ...$$('.toot-char', el.friends)].filter(Boolean), t0 = now();
+  /* 1: ka-ching; up they get, to the left of the table; thank you */
   S.coins(); S.tone(2200, 0.25, { type: 'triangle', gain: 0.08, slide: 3200 });
-  say([T('Thank you! Bye bye!', 'D19')], { by: ch });
-  await A(anim(el.customer, [{ transform: 'translateY(0)' }, { transform: 'translateY(-18%)' }], { duration: 220, fill: 'forwards', easing: 'ease-out' }));
-  const t0 = now(); const name = pickPayoff(S.pools.fart.filter(n => n !== lastToot), G.usedToot); lastToot = name; S[name](); note('toot', { name });   /* eight in the pool, never twice in a row, never twice in a day */
-  FX.burstAt(ch || el.customer, { kind: 'puff', ax: 0.72, ay: 0.85, count: 12, dir: [-30, 60], power: 1.1 });
-  if (ch) C.mood(ch, 'silly');
-  if (Math.random() < 0.5) say([T('Pardon me!', 'D33')], { by: ch });
-  const r = relRect(el.customer);
-  await A(anim(el.customer, [{ transform: 'translateY(-18%) rotate(0)' }, { transform: `translate(${-(r.x + r.w + 40)}px,-40%) rotate(-28deg)` }], { duration: 720, easing: 'cubic-bezier(.5,0,.85,.4)', fill: 'forwards' }));
-  note('payoff', { kind: 'exit', name, ms: Math.round(now() - t0) });
-  settle(el.customer); el.customer.style.visibility = 'hidden'; U.bubble(el.customer, null); if (ch) C.mood(ch, 'neutral');
+  const t = layoutRect(el.table), c = relRect(el.customer);
+  const wide = cust.friendNames.length ? (cust.friendNames.length >= 3 ? 1.2 : 0.66) : 0;          /* how far the friends spill out to the left of the box */
+  const cx = Math.max(t.x - c.w * 0.36, c.w * (0.5 + wide) + 4);                                    /* beside the table, but on the screen */
+  const dx = cx - c.cx, dy = (t.y + t.h * 0.97) - (c.y + c.h);
+  el.customer.classList.add('up'); S.pop();
+  await A(anim(el.customer, [{ transform: 'translate(0,0)' }, { transform: `translate(${(dx * .5).toFixed(0)}px,${(dy * .5 - c.h * .2).toFixed(0)}px)`, offset: .5 }, { transform: `translate(${dx.toFixed(0)}px,${dy.toFixed(0)}px)` }], { duration: 320, easing: 'ease-out', fill: 'forwards' }));
+  chars.forEach(x => C.mood(x, 'happy'));
+  await A(bubble(el.customer, 'Thank you! Bye bye!', [T('Thank you! Bye bye!', 'D19')], { by: ch }));
+  await A(wait(BEATS.thanks));
+  /* 2: the supersonic toot. One of the eight pool toots rides on top of it, so no two exits sound quite the same. */
+  const tb = now(); const name = pickPayoff(S.pools.fart.filter(n => n !== lastToot), G.usedToot); lastToot = name;
+  FART.play('supersonicFart'); FART.play(name); note('toot', { name }); note('supersonic', { slot: G.slot, with: name });
+  FX.shake(el.scene, { strength: 16, ms: 900 });
+  const cr = relRect(el.customer); shockWave(cr.x + cr.w * 0.85, cr.cy + cr.h * 0.15);
+  FX.burstAt(ch || el.customer, { kind: 'puff', ax: 0.8, ay: 0.85, count: 24, dir: [-50, 50], power: 1.8 });
+  FX.burstAt(el.table, { kind: 'crumbs', ax: 0.5, ay: 0.35, count: 24, dir: [-110, 10], power: 1.5 }); addCrumbs(6, 0.5);
+  chars.forEach(x => C.mood(x, 'silly'));
+  /* the table's slide to the right is trimmed on a narrow room so the corner that swings widest mid-flip (about 143°) stays inside */
+  const tdx = Math.min(t.w * 0.06, t.sw - 3 - (t.x + 0.96 * t.w + 0.765 * t.w + 0.604 * t.h));
+  G.fallen = { table: { flip: true, dx: tdx, dy: -t.h }, chair: { deg: 96, dx: t.w * 0.3 }, chairback: { deg: 78, dx: t.w * 0.04 } };
+  clunk(130, 0.35); clunk(70, 0.5); clunk(120, 0.62);
+  const furniture = Promise.all([
+    topple(el.chair, G.fallen.chair, 620, 0),
+    topple(el.table, G.fallen.table, 820, 60),
+    topple(el.chairback, G.fallen.chairback, 700, 140),
+    platesFly()
+  ]);
+  const out = anim(el.customer, [{ transform: `translate(${dx.toFixed(0)}px,${dy.toFixed(0)}px) rotate(0)`, easing: 'cubic-bezier(.2,0,.8,.4)' }, { transform: `translate(${(dx - c.w * .5).toFixed(0)}px,${(dy - c.h * .55).toFixed(0)}px) rotate(-25deg)`, offset: .4, easing: 'ease-in' }, { transform: `translate(${(-(c.x + c.w * (1 + wide) + 80)).toFixed(0)}px,${(dy - c.h * .1).toFixed(0)}px) rotate(-60deg)` }], { duration: 780, delay: 60, fill: 'forwards' });
+  chars.forEach((x, i) => { if (i) anim(x, [{ transform: 'rotate(0)' }, { transform: `rotate(${i % 2 ? 40 : -50}deg) translateY(-${20 + i * 10}%)` }], { duration: 700, delay: 60 + i * 40, fill: 'forwards' }); });
+  const line = bubble(el.customer, 'Pardon me!', [T('Pardon me!', 'D33')], { by: ch });
+  await A(Promise.all([furniture, out, line]));
+  const left = BEATS.blast - (now() - tb); if (left > 40) await A(wait(left));
+  note('payoff', { kind: 'exit', name, at: Math.round(tb), ms: Math.round(now() - tb) });   /* timed from the blast: that is the moment the answer paid off */
+  settle(el.customer); chars.forEach(x => { settle(x); C.mood(x, 'neutral'); }); el.customer.style.visibility = 'hidden'; el.customer.classList.remove('up'); U.bubble(el.customer, null);
+  note('gone', { slot: G.slot, friends: cust.friendNames.length, ms: Math.round(now() - t0) });
+  /* 3: a beat of stillness with the furniture on its side. Nothing speaks. */
+  await A(wait(BEATS.still));
 }
 
 /* ---------- gags: something silly happens because they answered. Short, from a pool, never twice in a day. ---------- */
@@ -2124,11 +2303,14 @@ function pickPayoff(pool, used) { const free = pool.filter(n => !used.has(n)); c
 /* ---------- questions: one on screen at a time, the world asks, the screen goes quiet ---------- */
 function openQuestion(q) {
   G.question = Object.assign({ attempts: 0, openedAt: now() }, q); G.questions++;
-  el.panel.classList.remove('busy'); el.scene.classList.add('quiet'); AMB.quiet(true); idleAt = now();
+  el.panel.classList.add('busy', 'asking'); el.scene.classList.add('quiet'); AMB.quiet(true); idleAt = now();
   [el.robo, el.hatch].forEach(h => { const b = h.querySelector(':scope > .bubble'); if (b) { b.style.transition = 'none'; b.classList.remove('show'); setTimeout(() => { b.style.transition = ''; }, 50); } });
   note('question', { q: q.type, answer: q.answer, choices: q.choices });
 }
-function closeQuestion(ok) { const q = G.question; if (!q) return; if (q.attempts === 0) G.firstTry++; G.question = null; el.panel.classList.add('busy'); el.scene.classList.remove('quiet'); AMB.quiet(false); }
+/* the question is asked out loud first; the answers can be tapped only once the line has finished and the breath after it */
+function readyQuestion(q) { if (!G || G.question !== q) return; q.asked = true; el.panel.classList.remove('busy', 'asking'); idleAt = now(); note('asked', { q: q.type }); }
+async function askAloud(q, host, content, segs, by) { bubble(host, content, segs, { by, silent: true }); await say(segs, { by }); if (!G || G.question !== q) return; await wait(BEATS.speech); readyQuestion(q); }
+function closeQuestion(ok) { const q = G.question; if (!q) return; if (q.attempts === 0) G.firstTry++; G.question = null; el.panel.classList.add('busy'); el.panel.classList.remove('asking'); el.scene.classList.remove('quiet'); AMB.quiet(false); }
 function makeChoices(ans, lo, hi) {
   const set = new Set([ans]);
   const tier = ds => shuffle(ds.flatMap(d => [ans - d, ans + d])).filter(v => v >= lo && v <= hi && v !== ans);
@@ -2152,16 +2334,16 @@ function orderSegs(cust) {
 }
 function orderHtml(cust) { const items = cust.order.items; return `${cust.regular ? 'Back for seconds! I’d like' : 'Hi! I’d like'} ${items.map((f, i) => (i === items.length - 1 && items.length > 1 ? 'and ' : '') + `<span class="oi">${f.em}</span>`).join(' ')} please!`; }
 function askOrder(cust) {
-  return new Promise(res => {
-    const need = cust.order.items.map(f => f.id), got = [];
-    fillSlots(el.slots, cust.order.items, false);
-    el.menu.innerHTML = G.menu.map(m => `<button class="mitem" data-id="${m.id}" aria-label="${esc(m.name)}, ${m.price} dollars"><span class="em">${m.em}</span><span class="nm">${esc(m.name)}</span><span class="pr"><small>$</small>${m.price}</span></button>`).join('');
-    U.show('v-order');
-    const segs = orderSegs(cust);
-    openQuestion({ type: 'order', answer: need.slice(), choices: G.menu.map(m => m.id), segs, host: el.customer, by: cust.el });
-    bubble(el.customer, orderHtml(cust), segs, { by: cust.el });
-    G.question.onTap = (id, btn) => {
-      const q = G.question; if (!q || q.type !== 'order') return;
+  const need = cust.order.items.map(f => f.id), got = [];
+  fillSlots(el.slots, cust.order.items, false);
+  el.menu.innerHTML = G.menu.map(m => `<button class="mitem" data-id="${m.id}" aria-label="${esc(m.name)}, ${m.price} dollars"><span class="em">${m.em}</span><span class="nm">${esc(m.name)}</span><span class="pr"><small>$</small>${m.price}</span></button>`).join('');
+  U.show('v-order');
+  const segs = orderSegs(cust);
+  openQuestion({ type: 'order', answer: need.slice(), choices: G.menu.map(m => m.id), segs, host: el.customer, by: cust.el });
+  const q = G.question;
+  const done = new Promise(res => {
+    q.onTap = (id, btn) => {
+      if (G.question !== q || !q.asked) return;
       const food = G.menu.find(m => m.id === id); if (!food) return;
       const slot = $$('.slot', el.slots)[got.length];
       if (need.includes(id) && !got.includes(id)) {
@@ -2178,21 +2360,25 @@ function askOrder(cust) {
       }
     };
   });
+  askAloud(q, el.customer, orderHtml(cust), segs, cust.el);
+  return done;
 }
 function askNumber(spec) {
-  return new Promise(res => {
-    const choices = makeChoices(spec.answer, spec.lo, spec.hi);
-    spec.container.innerHTML = choices.map(v => `<button class="choice" data-v="${v}" aria-label="${v} dollars"><small>$</small>${v}</button>`).join('');
-    openQuestion({ type: spec.kind, answer: spec.answer, choices, segs: spec.segs, host: spec.host, by: spec.by });
-    bubble(spec.host, spec.bubbleHtml, spec.segs, { by: spec.by });
-    G.question.onTap = async (v, btn) => {
-      const q = G.question; if (!q || q.type !== spec.kind) return;
+  const choices = makeChoices(spec.answer, spec.lo, spec.hi);
+  spec.container.innerHTML = choices.map(v => `<button class="choice" data-v="${v}" aria-label="${v} dollars"><small>$</small>${v}</button>`).join('');
+  openQuestion({ type: spec.kind, answer: spec.answer, choices, segs: spec.segs, host: spec.host, by: spec.by });
+  const q = G.question;
+  const done = new Promise(res => {
+    q.onTap = async (v, btn) => {
+      if (G.question !== q || !q.asked) return;
       if (v === spec.answer) { note('answer', { q: spec.kind, ok: true, attempts: q.attempts }); closeQuestion(true); $$('.choice', spec.container).forEach(b => b.classList.toggle('glow', b === btn)); res({ attempts: q.attempts }); return; }
       q.attempts++; if (spec.cust) spec.cust.wrong = true; note('answer', { q: spec.kind, ok: false, v, attempts: q.attempts });
       btn.classList.add('dim');
       try { if (q.attempts === 1) await spec.hint1(); else if (q.attempts === 2) await spec.hint2(); else await say([T('Here it is. Tap this one.', 'T7')], { by: spec.by }); } catch (e) { if (!(e instanceof Abort)) console.error(e); }
     };
   });
+  askAloud(q, spec.host, spec.bubbleHtml, spec.segs, spec.by);
+  return done;
 }
 function glowAnswer(container, v) { $$('.choice', container).forEach(b => b.classList.toggle('glow', +b.dataset.v === v)); }
 /* total: the bill shows the prices; wrong once → the prices become coin stacks; wrong twice → the customer counts them out loud */
@@ -2206,7 +2392,7 @@ async function askTotal(cust) {
   };
   await askNumber({ kind: 'total', answer: o.total, lo: Math.max(1, o.total - 6), hi: o.total + 6, container: el.chTotal, host: el.customer, by: ch, cust,
     bubbleHtml: 'How much do I owe you?', segs: ['How much do I owe you?'],
-    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); anim($('.head', ch), [{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }], { duration: 300, fill: 'forwards' }); } say(['Hmm, let me check.'], { by: ch }); showCoins(); },
+    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); anim($('.head', ch), [{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }], { duration: 300, fill: 'forwards' }); } showCoins(); await say(['Hmm, let me check.'], { by: ch }); },
     hint2: async () => {
       if (ch) { settle(ch); C.mood(ch, 'neutral'); } showCoins();
       const lines = $$('.line[data-id]', el.bill), stacks = $$('.stack', el.tcoins);
@@ -2241,7 +2427,7 @@ async function askChange(cust) {
   U.show('v-change');
   await askNumber({ kind: 'change', answer: change, lo: 1, hi: Math.max(9, change + 4), container: el.chChange, host: el.customer, by: ch, cust,
     bubbleHtml: 'What’s my change?', segs: ['What’s my change?'],
-    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); anim($('.head', ch), [{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }], { duration: 300, fill: 'forwards' }); } say(['Hmm, let me count.'], { by: ch }); await countUp(o.total, o.pay, { speak: false }); },
+    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); anim($('.head', ch), [{ transform: 'rotate(0)' }, { transform: 'rotate(-9deg)' }], { duration: 300, fill: 'forwards' }); } await Promise.all([say(['Hmm, let me count.'], { by: ch }), countUp(o.total, o.pay, { speak: false })]); },
     hint2: async () => { if (ch) { settle(ch); C.mood(ch, 'neutral'); } await say([T('Good try! Let’s count together.', 'T2'), T('Count up from', 'D25'), N(o.total), T('to', 'D26'), N(o.pay), '.'], { by: ch }); if (my !== RUN) return; await countUp(o.total, o.pay, { speak: true, by: ch }); if (my !== RUN) return; glowAnswer(el.chChange, change); await say([T('Here it is. Tap this one.', 'T7')], { by: ch }); } });
   if (ch) { settle(ch); C.mood(ch, 'happy'); }
   $('#cq').textContent = change;
@@ -2260,7 +2446,7 @@ async function askShare(cust) {
   U.show('v-share');
   await askNumber({ kind: 'share', answer: each, lo: 1, hi: Math.max(6, each + 3), container: el.chShare, host: el.customer, by: ch, cust,
     bubbleHtml: `We’re friends! Let’s share the bill. Each friend pays…?`, segs: [T('We’re friends! Let’s share the bill.', 'D20'), T('Each friend pays', 'D21'), T('what?', 'OP6')],
-    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); } say(['Hmm, let me check.'], { by: ch }); await dealCoins(o.total, k); },
+    hint1: async () => { if (ch) { C.mood(ch, 'surprised'); } await Promise.all([say(['Hmm, let me check.'], { by: ch }), dealCoins(o.total, k)]); },
     hint2: async () => { if (ch) C.mood(ch, 'neutral'); await say([T('Good try! Let’s count together.', 'T2')], { by: ch }); if (my !== RUN) return; await dealCoins(o.total, k, { fast: true }); if (my !== RUN) return; const first = $$('.plates i', el.sharebox)[0]; const cs = $$('.coin', first); for (let i = 0; i < cs.length; i++) { cs[i].classList.add('lit'); await say([N(i + 1)], { by: ch }); if (my !== RUN) return; } await say([T('It’s', 'D22'), N(each), '!'], { by: ch }); glowAnswer(el.chShare, each); await say([T('Here it is. Tap this one.', 'T7')], { by: ch }); } });
   if (ch) C.mood(ch, 'happy');
   $('#sq').textContent = each;
@@ -2284,48 +2470,56 @@ async function roboDrive(toX, ms = 520) {
   const r = relRect(el.robo), dx = toX - r.x;
   el.robo.classList.toggle('flip', dx < 0);
   S.whirr(Math.max(0.3, ms / 1000));
-  await anim(el.bot, [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-4%) rotate(-2deg)' }, { transform: 'translateY(0) rotate(2deg)' }, { transform: 'translateY(-4%) rotate(-2deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: ms });
-  return anim(el.robo, [{ transform: 'translateX(0)' }, { transform: `translateX(${dx}px)` }], { duration: ms, easing: 'ease-in-out', fill: 'forwards' });
+  const bob = anim(el.bot, [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-4%) rotate(-2deg)' }, { transform: 'translateY(0) rotate(2deg)' }, { transform: 'translateY(-4%) rotate(-2deg)' }, { transform: 'translateY(0) rotate(0)' }], { duration: ms });   /* he bobs as he goes */
+  await Promise.all([bob, anim(el.robo, [{ transform: 'translateX(0)' }, { transform: `translateX(${dx}px)` }], { duration: ms, easing: 'ease-in-out', fill: 'forwards' })]);
 }
 async function roboSweep(radiusFrac, all) {
   el.robo.classList.add('sweeping');
   const targets = all ? $$('.crumb', el.crumbs) : crumbsNear(radiusFrac);
-  const sweeps = anim(el.broom, [{ transform: 'rotate(0)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(22deg)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: 640 });
+  const sweeps = anim(el.broom, [{ transform: 'rotate(0)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(22deg)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: all ? 640 : 400 });
   S.noise(0.5, { gain: 0.05, from: 2500, to: 900 });
   targets.forEach((c, i) => setTimeout(() => { anim(c, [{ opacity: 1 }, { opacity: 0, transform: 'translateX(20px)' }], { duration: 180 }).then(() => c.remove()); }, Math.min(500, i * 18) / Math.max(0.05, Toot.speed)));
   await sweeps; await wait(120);
   el.robo.classList.remove('sweeping');
 }
 async function roboClean() {
-  const my = RUN, A = guard(my), g = G;
-  const t = relRect(el.table);
-  if (G.served % 2 === 0) bubble(el.robo, 'Crumbs detected.', [T('Crumbs detected.', 'R9')], { left: true, by: roboChar }); else if (G.served === 3) bubble(el.robo, 'Poop patrol!', [T('Poop patrol!', 'R2')], { left: true, by: roboChar });
-  const drive = roboDrive(t.x + t.w * 1.02, 520);
-  await A(drive);
+  const my = RUN, A = guard(my), t0 = now();
+  const t = layoutRect(el.table), f = G.fallen || {};
+  /* 4: Robo rolls in, with a word on the way, and sweeps */
+  const line = G.served === 0 ? bubble(el.robo, 'Crumbs detected.', [T('Crumbs detected.', 'R9')], { left: true, by: roboChar }) : G.served === 3 ? bubble(el.robo, 'Poop patrol!', [T('Poop patrol!', 'R2')], { left: true, by: roboChar }) : Promise.resolve();
+  await A(Promise.all([roboDrive(t.x + t.w * 1.02, 520), line]));
   const radius = [0.34, 0.3, 0.26, 0.22, 0.17, 0.12][Math.min(5, G.served)];
   await A(roboSweep(radius));
-  if (G.served < 4 && G.tplates > 0) {
+  /* the table, then each chair, back on its feet with a clunk and a wobble */
+  if (f.table) { clunk(90, 0.22); await A(standBack(el.table, f.table, 380)); }
+  if (f.chair) { clunk(130, 0.1); await A(standBack(el.chair, f.chair, 240)); }
+  if (f.chairback) { clunk(150, 0.1); await A(standBack(el.chairback, f.chairback, 240)); }
+  G.fallen = null; [el.table, el.chair, el.chairback].forEach(settle);
+  /* the plates, off the floor and back on the counter */
+  if (G.tplates > 0) {
     const n = G.tplates; G.tplates = 0;
-    const head = relRect(roboChar);
-    await A(anim(el.tstack, [{ transform: 'translate(0,0)' }, { transform: `translate(${head.cx - relRect(el.tstack).cx}px,${head.y - relRect(el.tstack).cy - 6}px)` }], { duration: 260, fill: 'forwards' }));
+    settle(el.tstack); if (G.platesFloor) placeAt(el.tstack, G.platesFloor.x, G.platesFloor.y); G.platesFloor = null;
+    const head = relRect(roboChar), st = relRect(el.tstack);
+    await A(anim(el.tstack, [{ transform: 'translate(0,0)' }, { transform: `translate(${(head.cx - st.cx).toFixed(0)}px,${(head.y - st.cy - 6).toFixed(0)}px)` }], { duration: 160, fill: 'forwards' }));
     U.bubble(el.robo, null);
-    await A(roboDrive(relRect(el.dock).x + 6, 520));
+    await A(roboDrive(relRect(el.dock).x + 6, 360));
     settle(el.tstack); renderStack(el.tstack, 0); G.cplates += n; renderStack(el.cstack, G.cplates); S.tone(1800, 0.06, { type: 'triangle', gain: 0.08 });
-  } else { U.bubble(el.robo, null); await A(roboDrive(relRect(el.dock).x + 6, 520)); }
+  } else { U.bubble(el.robo, null); await A(roboDrive(relRect(el.dock).x + 6, 360)); }
   settle(el.robo); el.robo.classList.remove('flip');
-  if (G.served < 5 && Math.random() < 0.3) bubble(el.robo, 'All clean. Beep.', [T('All clean. Beep.', 'R10')], { left: true, by: roboChar });
+  /* the heat ticks up, and Robo's line for this stage is heard to the end */
   G.served++; G.heat = G.served; note('heat', { served: G.served });
   await A(escalate(G.served));
+  note('robo-done', { served: G.served, ms: Math.round(now() - t0) });
 }
 function popBolt() { el.bolt.style.display = 'block'; const r = relRect(roboChar); placeAt(el.bolt, r.cx + r.w * 0.3, r.y + r.h * 0.4); S.tone(300, 0.08, { type: 'square', gain: 0.1, slide: 120 }); const fx = -r.w * 0.9, fy = r.h * 0.7; return anim(el.bolt, [{ transform: 'translate(0,0) rotate(0)' }, { transform: `translate(${fx * 0.5}px,${-r.h * 0.4}px) rotate(200deg)`, offset: 0.4 }, { transform: `translate(${fx}px,${fy}px) rotate(540deg)` }], { duration: 700, easing: 'ease-in', fill: 'forwards' }); }
 async function escalate(n) {
   el.heatfill.style.width = Math.min(100, n / CUSTOMERS_PER_DAY * 100) + '%'; el.robo.style.setProperty('--heat', Math.min(1, n / CUSTOMERS_PER_DAY).toFixed(2)); AMB.level(n);
   const r = roboChar; if (!r) return;
-  if (n === 1) { C.blush(r, true); await wait(650); }   /* let the bar finish filling before the next question opens */
-  if (n === 2) { S.steam(); FX.burstAt(r, { kind: 'smoke', ax: 0.5, ay: 0.15, count: 4 }); bubble(el.robo, 'Beep boop.', [T('Beep boop.', 'R1')], { left: true, by: r }); await wait(500); }
+  if (n === 1) { C.blush(r, true); await wait(150); }   /* the bar finishes filling during the quiet before the next ding */
+  if (n === 2) { S.steam(); FX.burstAt(r, { kind: 'smoke', ax: 0.5, ay: 0.15, count: 4 }); await bubble(el.robo, 'Beep boop.', [T('Beep boop.', 'R1')], { left: true, by: r }); await wait(200); }
   if (n === 3) { el.robo.classList.add('red'); await anim($('.armR', r), [{ transform: 'rotate(0)' }, { transform: 'rotate(-120deg)' }, { transform: 'rotate(-60deg)' }, { transform: 'rotate(-120deg)' }, { transform: 'rotate(-60deg)' }, { transform: 'rotate(-120deg)' }, { transform: 'rotate(0)' }], { duration: 900 }); }
-  if (n === 4) { bubble(el.robo, 'I’m getting hot.', [T('I’m getting hot.', 'R3')], { left: true, by: r }); for (let i = 0; i < 3; i++) { S.steam(); FX.burstAt(r, { kind: 'smoke', ax: 0.12, ay: 0.38, count: 5, dir: [-160, -120] }); FX.burstAt(r, { kind: 'smoke', ax: 0.88, ay: 0.38, count: 5, dir: [-60, -20] }); await wait(220); } }
-  if (n === 5) { el.robo.classList.add('rattle'); S.ratchet(); await wait(300); bubble(el.robo, 'Oops.', [T('Oops.', 'R7')], { left: true, by: r }); await popBolt(); }
+  if (n === 4) { await Promise.all([bubble(el.robo, 'I’m getting hot.', [T('I’m getting hot.', 'R3')], { left: true, by: r }), (async () => { for (let i = 0; i < 3; i++) { S.steam(); FX.burstAt(r, { kind: 'smoke', ax: 0.12, ay: 0.38, count: 5, dir: [-160, -120] }); FX.burstAt(r, { kind: 'smoke', ax: 0.88, ay: 0.38, count: 5, dir: [-60, -20] }); await wait(220); } })()]); }
+  if (n === 5) { el.robo.classList.add('rattle'); S.ratchet(); await wait(300); await bubble(el.robo, 'Oops.', [T('Oops.', 'R7')], { left: true, by: r }); await popBolt(); }
 }
 function giggle(all) { const bases = all ? [700, 900, 1120] : [1000]; bases.forEach((b, k) => { for (let i = 0; i < 4; i++) S.tone(b * (1 + i * 0.06), 0.09, { type: 'triangle', gain: 0.07, delay: i * 0.11 + k * 0.035, slide: b * 1.25 }); }); }
 const PARTS = { head: [-40, -150, -230], armL: [-120, -70, -300], armR: [120, -90, 320], antenna: [50, -210, 400], body: [12, -34, 24] };
@@ -2389,18 +2583,18 @@ function makeCustomer(slot) {
 async function serveCustomer(i) {
   const my = RUN, A = guard(my), cust = G.customers[i]; G.cust = cust; G.slot = i; G.phase = 'play';
   U.show('v-rest'); fillSlots($('#slots3'), [], false); el.restText.textContent = '';
-  const arriving = arrive(cust);
   if (G.cleaning) { await A(G.cleaning); G.cleaning = null; }
-  await A(arriving);
-  /* 2–3: the order */
+  /* 1: ding-a-ling, a beat, and in they come */
+  await A(arrive(cust));
+  /* 2–3: the order, asked out loud before the menu can be tapped */
   await A(askOrder(cust));
-  /* 4: order up! the chef's payoff, the plate lands on the pass */
+  /* 4: order up! the chef's payoff runs under the line; the plate lands on the pass once the line is done and a beat has passed */
   fillSlots($('#slots2'), cust.order.items, true); U.show('v-carry');
   el.osign.classList.add('on'); el.hatch.classList.add('up', 'cooking');
-  bubble(el.hatch, 'Order up! Drag the plate to the table.', [T('Order up! Drag the plate to the table.', 'D4')], { left: true, by: chefChar });
   const chefGag = pickPayoff(CHEF_POOL, G.usedChef), t0 = now();
   const gp = gag(chefChar, chefGag).then(() => note('payoff', { kind: 'chef', name: chefGag, ms: Math.round(now() - t0) }));
-  await A(wait(300));
+  await A(bubble(el.hatch, 'Order up! Drag the plate to the table.', [T('Order up! Drag the plate to the table.', 'D4')], { left: true, by: chefChar }));
+  await A(wait(BEATS.orderUp));
   showPlate(cust.order.items, { x: relRect(el.hatch).cx, y: relRect(el.hatch).y + relRect(el.hatch).h * 0.6 }); el.plate.style.opacity = '0';
   const home = passSpot(); el.plate.style.opacity = '1'; await A(flyTo(el.plate, home.x, home.y, 380)); S.tone(1900, 0.06, { type: 'triangle', gain: 0.09 });
   el.plate.classList.add('ready'); el.hatch.classList.remove('cooking');
@@ -2415,20 +2609,22 @@ async function serveCustomer(i) {
   await A(pay(cust));
   /* 10: change, or the friends share */
   if (cust.order.pay) await A(askChange(cust)); else if (cust.order.share) await A(askShare(cust));
-  /* 11: ka-ching, toot, gone */
+  await A(wait(BEATS.speech));
+  /* 11: ka-ching, thank you, and the supersonic toot */
   U.show('v-rest'); fillSlots($('#slots3'), cust.order.items, true);
   el.tcoins.innerHTML = ''; el.cash.classList.remove('on');
   await A(leave(cust));
   if (cust.wrong && !cust.regular && i < CUSTOMERS_PER_DAY - 1) G.regulars.push({ who: cust.who, order: cust.order, shape: cust.shape, after: Math.min(i + 2, CUSTOMERS_PER_DAY - 1) });
-  /* 12: Robo sweeps and clears under the next arrival; the heat ticks up when he is done */
-  G.cleaning = roboClean().catch(e => { if (!(e instanceof Abort)) console.error(e); });
+  /* 12: Robo sweeps, stands everything back up, stacks the plates and heats up; then the diner sits quiet before the next ding */
+  await A(roboClean());
+  note('quiet', { ms: BEATS.quiet }); await A(wait(BEATS.quiet));
 }
 async function eat(cust) {
   const my = RUN, A = guard(my), ch = cust.el;
   U.show('v-rest'); fillSlots($('#slots3'), cust.order.items, true); el.restText.textContent = '';
-  say([T('Ooh, that smells good!', 'D30'), T('Nom nom nom.', 'D6')], { by: ch });
   el.hatch.classList.remove('cooking');
-  await A(wait(350));
+  await A(say([T('Ooh, that smells good!', 'D30')], { by: ch }));
+  const nom = say([T('Nom nom nom.', 'D6')], { by: ch });                 /* the chomping is the nom nom nom */
   const head = ch ? $('.head', ch) : null; const extra = 10 + G.served * 4;
   if (ch) C.mood(ch, 'happy');
   for (let i = 0; i < 4; i++) {
@@ -2439,28 +2635,31 @@ async function eat(cust) {
   }
   settle(el.food); el.plate.classList.add('dirty');
   G.tplates++; renderStack(el.tstack, G.tplates); placeStack(); hidePlate();
+  await A(nom);
+  await A(wait(BEATS.eat));
   if (ch) { const belly = $('.belly', ch); await A(anim(belly, [{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 400 })); }
-  say([pick([T('That was the best meal ever.', 'D34'), T('Yum! That was delicious! Can I have the cheque please?', 'D17')])], { by: ch });
-  await A(wait(250));
+  await A(say([pick([T('That was the best meal ever.', 'D34'), T('Yum! That was delicious! Can I have the cheque please?', 'D17')])], { by: ch }));
+  await A(wait(BEATS.speech));
 }
 async function pay(cust) {
   const my = RUN, A = guard(my), o = cust.order, ch = cust.el;
   const name = pickPayoff(PAY_POOL, G.usedPay), t0 = now();
-  const gp = gag(ch, name);
+  const gp = gag(ch, name); let line;
   if (o.pay) {
-    say([T('It’s', 'D22'), N(o.total), '!', T('Here is', 'D18'), ...DOLLARS(o.pay), '.'], { by: ch });
+    line = say([T('It’s', 'D22'), N(o.total), '!', T('Here is', 'D18'), ...DOLLARS(o.pay), '.'], { by: ch });
     el.cash.innerHTML = SVG.cash(o.pay); el.cash.classList.add('on'); const c = relRect(el.customer); placeAt(el.cash, c.cx + c.w * 0.5, c.cy);
     const p = tableSpot(0.8, 0.32); flyTo(el.cash, p.x, p.y, 520).then(() => S.tone(1500, 0.05, { type: 'triangle', gain: 0.07 }));
-  } else if (o.share) say([T('It’s', 'D22'), N(o.total), '!'], { by: ch });
-  else { say([T('It’s', 'D22'), N(o.total), '!', 'Here you go.'], { by: ch }); S.coins(); }
+  } else if (o.share) line = say([T('It’s', 'D22'), N(o.total), '!'], { by: ch });
+  else { line = say([T('It’s', 'D22'), N(o.total), '!', 'Here you go.'], { by: ch }); S.coins(); }
   await A(gp); note('payoff', { kind: 'pay', name, ms: Math.round(now() - t0) });
-  await A(wait(120));
+  await A(line);
+  await A(wait(BEATS.speech));
 }
 
 /* ---------- the day ---------- */
 function dayCfg(n) { return DAYS[clamp(n, 1, DAYS.length) - 1]; }
 function resetScene() {
-  buildRobo(); clearMess(); hidePlate(); settle(el.customer); el.customer.style.visibility = 'hidden'; U.bubble(el.customer, null); U.bubble(el.hatch, null);
+  buildRobo(); clearMess(); hidePlate(); settleFurniture(); settle(el.customer); el.customer.style.visibility = 'hidden'; U.bubble(el.customer, null); U.bubble(el.hatch, null);
   el.hatch.classList.remove('up', 'cooking'); el.osign.classList.remove('on'); el.heatfill.style.width = '0%'; el.wheel.style.display = 'none'; el.scene.classList.remove('quiet'); el.table.classList.remove('hot');
 }
 function startDay(n) {
@@ -2500,9 +2699,10 @@ async function opening(n) {
   else {
     note('intro', { kind: 'short' });
     const line = n === 4 ? [T('This time the customers pay you, and you work out the change.', 'PR6')] : n === 7 ? [T('This time some customers come as friends and share the bill.', 'PR7')] : [T('Six hungry customers are coming to the diner.', 'PR2')];
-    el.hatch.classList.add('up'); bubble(el.hatch, textOf(line), line, { left: true, by: chefChar });
-    setTimeout(() => { if (RUN === my) el.hatch.classList.remove('up'); }, 1800);
-    await A(wait(650));
+    el.hatch.classList.add('up');
+    await A(bubble(el.hatch, textOf(line), line, { left: true, by: chefChar }));
+    setTimeout(() => { if (RUN === my) el.hatch.classList.remove('up'); }, 600);
+    await A(wait(BEATS.speech));
   }
   G.phase = 'play';
 }
@@ -2511,7 +2711,7 @@ class Skip extends Error {}
 let skipIntro = () => {};
 async function intro() {
   const my = RUN; G.skipped = false; let skipped = false, skipRes; const skipP = new Promise(r => { skipRes = r; });
-  skipIntro = () => { if (!skipped) { skipped = true; if (G) G.skipped = true; V.stop(); skipRes(); note('intro-skip'); } };
+  skipIntro = () => { if (!skipped) { skipped = true; if (G) G.skipped = true; voiceStop(); skipRes(); note('intro-skip'); } };
   const w = ms => Promise.race([wait(ms), skipP]);
   const step = async (segs, fn, minMs = 1500) => {
     if (skipped) throw new Skip(); const t0 = now();
@@ -2524,7 +2724,7 @@ async function intro() {
   setCustomer(demo); el.hatch.classList.add('up'); C.look(demo.el, 0, 0.3);
   try {
     await step(['Welcome to the Toot Toot Diner! Our food is the tastiest in town.'], async () => { showPlate([FOODS[0]], tableSpot(0.46, 0.3)); await anim($('.armR', chefChar), [{ transform: 'rotate(0)' }, { transform: 'rotate(-150deg)' }, { transform: 'rotate(-120deg)' }, { transform: 'rotate(-150deg)' }, { transform: 'rotate(0)' }], { duration: 1100 }); }, 2200);
-    await step(['It also makes everybody go... TOOT!'], async w => { await w(1000); S.play('fart'); FX.burstAt(demo.el, { kind: 'puff', ax: 0.72, ay: 0.85, count: 12, dir: [-30, 60] }); C.mood(demo.el, 'silly'); await w(500); C.mood(demo.el, 'happy'); }, 1800);
+    await step(['It also makes everybody go... TOOT!'], async w => { await w(1000); toot(); FX.burstAt(demo.el, { kind: 'puff', ax: 0.72, ay: 0.85, count: 12, dir: [-30, 60] }); C.mood(demo.el, 'silly'); await w(500); C.mood(demo.el, 'happy'); }, 1800);
     await step(['This is Robo. Robo has two jobs.'], async w => { S.tone(880, 0.1, { type: 'square', gain: 0.06 }); S.tone(1100, 0.1, { type: 'square', gain: 0.06, delay: 0.14 }); await anim(el.robo, [{ transform: 'translateY(0)' }, { transform: 'translateY(-12%)' }, { transform: 'translateY(0)' }], { duration: 500 }); }, 1600);
     await step(['He sweeps every last crumb off the floor...'], async w => { addCrumbs(16, 0.9); el.plate.classList.add('dirty'); await w(200); const t = relRect(el.table); await roboDrive(t.x + t.w * 1.02, 500); await roboSweep(1, true); }, 2400);
     await step(['...and he clears the dirty plates off the tables.'], async w => { hidePlate(); G.tplates = 2; renderStack(el.tstack, 2); placeStack(); await w(200); const head = relRect(roboChar); await anim(el.tstack, [{ transform: 'translate(0,0)' }, { transform: `translate(${head.cx - relRect(el.tstack).cx}px,${head.y - relRect(el.tstack).cy - 6}px)` }], { duration: 260, fill: 'forwards' }); await roboDrive(relRect(el.dock).x + 6, 520); settle(el.tstack); renderStack(el.tstack, 0); G.tplates = 0; G.cplates = 2; renderStack(el.cstack, 2); settle(el.robo); el.robo.classList.remove('flip'); }, 2200);
@@ -2532,9 +2732,9 @@ async function intro() {
     await step(['And the harder Robo works, the hotter he gets.'], async w => { el.heatfill.style.transition = 'width 1.6s linear'; el.heatfill.style.width = '100%'; el.robo.classList.add('red'); C.blush(roboChar, true); for (let i = 0; i < 4; i++) { S.steam(); FX.burstAt(roboChar, { kind: 'smoke', ax: 0.12, ay: 0.38, count: 5, dir: [-160, -120] }); FX.burstAt(roboChar, { kind: 'smoke', ax: 0.88, ay: 0.38, count: 5, dir: [-60, -20] }); await w(320); } el.heatfill.style.transition = ''; }, 2000);
     await step(['And when Robo gets TOO hot...'], async () => { el.robo.classList.add('rattle'); S.ratchet(); }, 1200);
     await step([T('KA-BOOM!', 'R8')], async () => { await boom(true); }, 2600);
-    await step(['You’re the waiter today. Here comes someone now!'], async w => { S.play('fart'); FX.burstAt(demo.el, { kind: 'puff', ax: 0.72, ay: 0.85, count: 10 }); const r = relRect(el.customer); await anim(el.customer, [{ transform: 'translate(0,0)' }, { transform: `translate(${-(r.x + r.w + 40)}px,-30%) rotate(-25deg)` }], { duration: 600, easing: 'ease-in', fill: 'forwards' }); clearMess(); el.heatfill.style.width = '0%'; }, 1500);
+    await step(['You’re the waiter today. Here comes someone now!'], async w => { toot(); FX.burstAt(demo.el, { kind: 'puff', ax: 0.72, ay: 0.85, count: 10 }); const r = relRect(el.customer); await anim(el.customer, [{ transform: 'translate(0,0)' }, { transform: `translate(${-(r.x + r.w + 40)}px,-30%) rotate(-25deg)` }], { duration: 600, easing: 'ease-in', fill: 'forwards' }); clearMess(); el.heatfill.style.width = '0%'; }, 1500);
   } catch (e) { if (!(e instanceof Skip)) throw e; }
-  V.stop(); settle(roboChar); el.robo.classList.remove('rattle', 'red', 'flip', 'sweeping'); settle(el.robo); C.blush(roboChar, false); C.mood(roboChar, 'neutral'); el.robo.style.setProperty('--heat', 0); el.heatfill.style.transition = ''; el.heatfill.style.width = '0%';
+  voiceStop(); settle(roboChar); el.robo.classList.remove('rattle', 'red', 'flip', 'sweeping'); settle(el.robo); C.blush(roboChar, false); C.mood(roboChar, 'neutral'); el.robo.style.setProperty('--heat', 0); el.heatfill.style.transition = ''; el.heatfill.style.width = '0%';
   clearMess(); hidePlate(); settle(el.tstack); settle(el.customer); el.customer.style.visibility = 'hidden'; U.bubble(el.customer, null); el.hatch.classList.remove('up'); U.bubble(el.hatch, null); el.wheel.style.display = 'none'; C.mood(demo.el, 'neutral'); C.mood(chefChar, 'neutral');
   skipIntro = () => {};
 }
@@ -2599,7 +2799,8 @@ window.__diner = window.__game = {
   answer(v) { if (!G || !G.question) return false; const q = G.question; if (q.type === 'order') { const b = $(`.mitem[data-id="${v}"]`, el.menu); if (!b) return false; q.onTap(String(v), b); return true; } const b = $(`.choice[data-v="${v}"]`, el.panel); if (!b) return false; q.onTap(+v, b); return true; },
   carryNow() { landPlate(); }, get carry() { return G && G.carry; },
   cfg: CFG, days: DAYS, foods: FOODS, get progress() { return U.progress.data; }, get amb() { return AMB.st; }, get roboChar() { return roboChar; }, chefChar, say, textOf, idsOf, get sitting() { return sitting; }, set sitting(v) { sitting = v; },
-  get served() { return G ? G.served : 0; }, get heat() { return G ? G.heat : 0; }, get run() { return RUN; }
+  get served() { return G ? G.served : 0; }, get heat() { return G ? G.heat : 0; }, get run() { return RUN; },
+  BEATS, audio: FART, ambience: AMB, skipLine, get speaking() { return speaking(); }
 };
 
 /* ---------- boot ---------- */
